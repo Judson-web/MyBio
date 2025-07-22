@@ -2,19 +2,19 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Judson-web - Creator</title>
+  <title>Judson Saji - Creator</title>
   <meta name="description" content="ExPoet, ExMinimalist, ExThinker, NowCreator" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" href="https://firebasestorage.googleapis.com/v0/b/crnn-b7d8f.appspot.com/o/files%2FIMG_20250717_215454_617-modified.png?alt=media&token=bea1f0dd-abf1-4cfb-8a83-0d3b603d3fde" />
   
   <!-- Social Media Meta Tags -->
-  <meta property="og:title" content="Judson-web - Creator" />
+  <meta property="og:title" content="Judson Saji - Creator" />
   <meta property="og:description" content="ExPoet, ExMinimalist, ExThinker, NowCreator" />
   <meta property="og:image" content="https://firebasestorage.googleapis.com/v0/b/crnn-b7d8f.appspot.com/o/files%2FIMG_20250717_215454_617-modified.png?alt=media&token=bea1f0dd-abf1-4cfb-8a83-0d3b603d3fde" />
   <meta property="og:url" content="https://opmicky.netlify.app" />
   <meta property="og:type" content="website" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Judson-web - Creator" />
+  <meta name="twitter:title" content="Judson Saji - Creator" />
   <meta name="twitter:description" content="ExPoet, ExMinimalist, ExThinker, NowCreator" />
   <meta name="twitter:image" content="https://firebasestorage.googleapis.com/v0/b/crnn-b7d8f.appspot.com/o/files%2FIMG_20250717_215454_617-modified.png?alt=media&token=bea1f0dd-abf1-4cfb-8a83-0d3b603d3fde" />
 
@@ -27,12 +27,13 @@
   {
     "@context": "https://schema.org",
     "@type": "Person",
-    "name": "Judson-web",
+    "name": "Judson Saji",
     "url": "https://opmicky.netlify.app",
     "image": "https://firebasestorage.googleapis.com/v0/b/crnn-b7d8f.appspot.com/o/files%2FIMG_20250717_215454_617-modified.png?alt=media&token=bea1f0dd-abf1-4cfb-8a83-0d3b603d3fde",
     "sameAs": [
       "https://twitter.com/greyvrita",
-      "https://github.com/Judson-web"
+      "https://github.com/Judson-web",
+      "https://www.instagram.com/judson_saji"
     ],
     "jobTitle": "Creator",
     "description": "ExPoet, ExMinimalist, ExThinker, NowCreator"
@@ -542,18 +543,22 @@
 
     .cookie-banner {
       position: fixed;
-      left: 0; right: 0; bottom: -100%;
-      background: var(--header-bg);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+      left: 1rem; right: 1rem; bottom: -100%;
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       color: var(--text-color);
       padding: 1rem 1.5rem;
+      border-radius: 12px;
+      border: 1px solid var(--card-border);
       display: flex;
       flex-direction: column;
       gap: 0.75rem;
       text-align: center;
       z-index: 2000;
       transition: bottom 0.5s ease-in-out;
+      max-width: 500px;
+      margin: 0 auto 1rem;
     }
     .cookie-banner.show { bottom: 0; }
     .cookie-banner button {
@@ -586,7 +591,7 @@
 
   <!-- Header -->
   <header class="site-header">
-    <div class="header-logo">Judson-web</div>
+    <div class="header-logo">Judson Saji</div>
     <nav class="site-nav">
       <a data-modal="about" aria-label="About">About</a>
       <a data-modal="projects" aria-label="Projects">Projects</a>
@@ -603,9 +608,9 @@
   <!-- Main Content -->
   <div class="centerbox">
     <div class="card" id="profile-card">
-      <img class="profile-img" src="https://firebasestorage.googleapis.com/v0/b/crnn-b7d8f.appspot.com/o/files%2FIMG_20250717_215454_617-modified.png?alt=media&token=bea1f0dd-abf1-4cfb-8a83-0d3b603d3fde" alt="Judson-web" 
-      onerror="this.onerror=null;this.src='https://placehold.co/110x110/161822/ffffff?text=JW';"/>
-      <div class="profile-name">Judson-web</div>
+      <img class="profile-img" src="https://firebasestorage.googleapis.com/v0/b/crnn-b7d8f.appspot.com/o/files%2FIMG_20250717_215454_617-modified.png?alt=media&token=bea1f0dd-abf1-4cfb-8a83-0d3b603d3fde" alt="Judson Saji" 
+      onerror="this.onerror=null;this.src='https://placehold.co/110x110/161822/ffffff?text=JS';"/>
+      <div class="profile-name">Judson Saji</div>
       <div id="greeting" class="profile-greeting"></div>
       <div class="profile-tagline">ExPoet, ExMinimalist, ExThinker, NowCreator</div>
 
@@ -618,7 +623,7 @@
       <div class="btn-group">
         <a class="ambient-btn" href="https://twitter.com/greyvrita" target="_blank" aria-label="Twitter"><i data-feather="twitter"></i>Twitter</a>
         <a class="ambient-btn" href="https://github.com/Judson-web" target="_blank" aria-label="GitHub"><i data-feather="github"></i>GitHub</a>
-        <a class="ambient-btn" data-modal="blog" aria-label="Blog"><i data-feather="book-open"></i>Blog</a>
+        <a class="ambient-btn" href="https://www.instagram.com/judson_saji" target="_blank" aria-label="Instagram"><i data-feather="instagram"></i>Instagram</a>
         <a class="ambient-btn" data-modal="contact" aria-label="Email"><i data-feather="mail"></i>Email</a>
       </div>
     </div>
@@ -672,7 +677,7 @@
   <!-- Footer -->
   <footer>
     <img src="https://api.netlify.com/api/v1/badges/6854b05d-ab34-4c4f-b4f4-91f4306a58b4/deploy-status" alt="Netlify Status" />
-    <span>&copy; 2025 Judson-web.</span>
+    <span>&copy; 2025 Judson Saji.</span>
     <span>Press Ctrl+K to navigate.</span>
   </footer>
 
@@ -756,7 +761,7 @@
     const button = document.getElementById("cookie-btn");
     setTimeout(() => {
         if (!localStorage.getItem("cookieAccepted")) banner.classList.add("show");
-    }, 1000);
+    }, 2000);
     button.addEventListener("click", () => {
       localStorage.setItem("cookieAccepted", "true");
       banner.classList.remove("show");
@@ -1100,15 +1105,15 @@
             if (this.isInitialized) return;
             this.outputElement.innerHTML = '';
             const judsonAscii = `
-  _           _                     
- | |         | |                    
- | | ____   _| | ____  ____   ____  
- | |/ ___) /_  |/ _  )/ ___) / ___) 
- | | |    (  _ ( (/ /| |    | |     
- |_|_|     \\_)_)\\____)_|    |_|     
+  _           _                     _   _ 
+ | |         | |                   | | (_)
+ | | ____   _| | ____  ____   ____  | |  _ 
+ | |/ ___) /_  |/ _  )/ ___) / ___) | | | |
+ | | |    (  _ ( (/ /| |    | |     | | | |
+ |_|_|     \\_)_)\\____)_|    |_|     |_| |_|
 `;
             this.log('prompt', judsonAscii);
-            this.typeLog('response', "Contact Terminal v2.7. Type 'help' for commands.", () => {
+            this.typeLog('response', "Contact Terminal v2.8. Type 'help' for commands.", () => {
                 this.inputElement.disabled = false;
                 this.inputElement.focus();
             });
@@ -1196,6 +1201,14 @@
 
         async executeCommand(value) {
             const [command, ...args] = value.toLowerCase().split(' ');
+            const fullPrompt = args.join(' ');
+
+            const aiIdentityQuestions = ["your name", "who are you", "who made you"];
+            if (command === 'ask' && aiIdentityQuestions.some(q => fullPrompt.includes(q))) {
+                this.typeLog('response', "I am Judson, a helpful AI assistant integrated into this website by Judson Saji.");
+                return;
+            }
+
             const cliCommands = {
                 'help': () => {
                     const helpText = [
@@ -1225,10 +1238,10 @@
                     this.typeLog('response', new Date().toLocaleString());
                 },
                 'contact': () => {
-                    this.typeLog('response', 'Reach out via email: example@judson-web.com');
+                    this.typeLog('response', 'Email: judsonsajim824@gmail.com');
                 },
                 'social': () => {
-                    this.typeLog('response', 'Twitter: https://twitter.com/greyvrita\nGitHub:  https://github.com/Judson-web');
+                    this.typeLog('response', 'Twitter: https://twitter.com/greyvrita\nGitHub:  https://github.com/Judson-web\nInstagram: https://www.instagram.com/judson_saji');
                 },
                 'theme': () => {
                     toggleTheme();
@@ -1254,13 +1267,12 @@
                     });
                 },
                 'ask': async () => {
-                    const prompt = args.join(' ');
-                    if (!prompt) {
+                    if (!fullPrompt) {
                         this.typeLog('error', 'Usage: ask [your question]');
                         return;
                     }
                     const thinkingLine = this.startThinking();
-                    const response = await callGemini(prompt);
+                    const response = await callGemini(fullPrompt);
                     if (response) {
                         this.stopThinking(thinkingLine, response, 'response');
                     } else {
@@ -1310,7 +1322,7 @@
         const fontSize = 16;
         const columns = Math.floor(canvas.width / fontSize);
         const drops = Array(columns).fill(1);
-        const chars = 'Judson-webCreatorExPoetExMinimalistExThinker'.split('');
+        const chars = 'JudsonSajiCreatorExPoetExMinimalistExThinker'.split('');
 
         function drawMatrix() {
             ctx.fillStyle = 'rgba(0, 0, 0, 0.04)';
