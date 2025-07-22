@@ -75,8 +75,8 @@
       position: fixed;
       top: 0;
       left: 0;
-      width: 100vw;
-      height: 100vh;
+      width: 100%;
+      height: 100%;
       z-index: 0;
       pointer-events: none;
       transition: opacity 0.8s ease;
@@ -863,19 +863,17 @@
     
     commandPaletteOverlay.addEventListener('click', (e) => { if (e.target === commandPaletteOverlay) closeCommandPalette(); });
 
-    // --- CLI CONTACT FORM (v2.0) ---
+    // --- CLI CONTACT FORM (v2.1) ---
     const cli = {
-        // ... (DOM elements)
         container: document.getElementById('terminal-container'),
         output: document.getElementById('cli-output'),
         input: document.getElementById('cli-input'),
         prompt: document.getElementById('cli-prompt-text'),
-        
-        // ... (state)
         state: 'idle',
         history: [],
         historyIndex: -1,
         aliases: { 'neofetch': 'sysinfo' },
+        matrixInterval: null,
 
         init() {
             this.state = 'idle';
@@ -892,7 +890,7 @@
 |_|\\___|_|   \\__|
 `;
                 this.log('prompt', asciiArt);
-                this.log('response', "Contact Terminal v2.0. Type 'help' for commands.");
+                this.log('response', "Contact Terminal v2.1. Type 'help' for commands.");
             }, 0);
         },
 
@@ -921,16 +919,23 @@
             }
 
             const commands = {
-                'help': () => this.log('response', "Available commands: 'sysinfo', 'weather', 'date', 'ip', 'fetch', 'cowsay', 'matrix', 'history', 'clear', 'exit', 'socials', 'credits', 'banner', 'whoami', 'search', 'alias'"),
+                'help': () => {
+                    const commandList = ['sysinfo', 'weather', 'date', 'ip', 'fetch', 'cowsay', 'matrix', 'history', 'clear', 'exit', 'socials', 'credits', 'banner', 'whoami', 'search', 'alias', 'cmd'];
+                    const formatted = commandList.sort().reduce((acc, cmd, i) => {
+                        const padded = cmd.padEnd(15, ' ');
+                        return acc + (i % 4 === 0 ? '\n' : '') + padded;
+                    }, '');
+                    this.log('response', `Available Commands:${formatted}`);
+                },
                 'sysinfo': () => {
                     const uptimeSeconds = Math.floor((new Date() - pageLoadTime) / 1000);
                     const uptime = `${Math.floor(uptimeSeconds / 60)}m ${uptimeSeconds % 60}s`;
                     this.log('prompt', `
-  __ G r e y __    Host:     Grey Vrita
+  __ G r e y __    Host:     opmicky
  / _|___ _ __| |_   OS:       Portfolio v3.0
 | ( / _ \\ '__| __|  Theme:    ${localStorage.getItem('theme') || 'dark'}
 | |/  __/ |  | |_   Uptime:   ${uptime}
-|_|\\___|_|   \\__|  Terminal: v2.0
+|_|\\___|_|   \\__|  Terminal: v2.1
                     `);
                 },
                 'weather': async () => {
@@ -976,15 +981,21 @@
                 'matrix': () => {
                     this.log('success', 'Entering the matrix... Press ESC to quit.');
                     this.state = 'matrix';
-                    // ... matrix logic
+                    this.matrixInterval = setInterval(() => {
+                        if (this.state !== 'matrix') return clearInterval(this.matrixInterval);
+                        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*';
+                        let line = '';
+                        for (let i = 0; i < 50; i++) line += chars[Math.floor(Math.random() * chars.length)];
+                        this.log('success', line);
+                    }, 100);
                 },
                 'history': () => this.log('response', this.history.join('<br>')),
                 'clear': () => this.output.innerHTML = '',
                 'exit': () => closeModal(this.container.closest('.modal-overlay')),
                 'socials': () => {
                     this.log('response', 'Opening social links...');
-                    window.open('https://twitter.com');
-                    window.open('https://github.com');
+                    window.open('https://twitter.com/greyvrita');
+                    window.open('https://github.com/opmicky');
                 },
                 'credits': () => this.log('response', 'Built with love and code. Powered by Feather Icons, Tone.js, and various APIs.'),
                 'banner': () => this.log('prompt', `
@@ -994,7 +1005,7 @@
 | |/  __/ |  | |_ 
 |_|\\___|_|   \\__|
 `),
-                'whoami': () => this.log('response', 'Grey Vrita'),
+                'whoami': () => this.log('response', 'opmicky'),
                 'search': () => {
                     if (!args.length) return this.log('error', 'Usage: search [query]');
                     window.open(`https://google.com/search?q=${encodeURIComponent(args.join(' '))}`);
@@ -1006,6 +1017,12 @@
                     this.log('success', `Alias created: ${alias} -> ${value}`);
                 },
                 'sudo': () => this.log('error', 'Permission denied.'),
+                'cmd': () => {
+                    setTimeout(() => {
+                        closeModal(this.container.closest('.modal-overlay'));
+                        openCommandPalette();
+                    }, 50);
+                }
             };
 
             if (commands[command]) {
