@@ -618,7 +618,8 @@
   <div id="blog-modal" class="modal-overlay">
     <div class="modal-content">
       <i data-feather="x" class="close-modal" aria-label="Close modal"></i>
-      <h2>Blog Feed</h2>
+      <h2>Creator's Log</h2>
+      <button id="generate-thought-btn" class="ambient-btn" style="margin-bottom: 1rem; width: 100%;">Generate a new thought</button>
       <div id="blog-posts"></div>
     </div>
   </div>
@@ -789,11 +790,19 @@
     setInterval(updateGitHubStats, 60 * 60 * 1000);
 
     // --- DYNAMIC CONTENT ---
-    const blogPosts = [
-        // ... (same as before)
+    let blogPosts = [
+        { title: 'The Art of Imperfection in Code', date: '2025-07-20', snippet: 'Why "good enough" is often better than perfect. A look at shipping projects and embracing the beauty of wabi-sabi in development.' },
+        { title: 'From Sonnets to Scripts: A Creative Evolution', date: '2025-07-15', snippet: 'How the constraints and structures of poetry informed my approach to writing elegant, readable code.' },
     ];
     function renderBlogPosts() {
-        // ... (same as before)
+        const container = document.getElementById('blog-posts');
+        container.innerHTML = blogPosts.map(post => `
+            <div class="blog-post">
+                <h3>${post.title}</h3>
+                <div class="date">${post.date}</div>
+                <p>${post.snippet}</p>
+            </div>
+        `).join('');
     }
     renderBlogPosts();
     
@@ -801,16 +810,82 @@
         // ... (same as before)
     }
 
+    // --- GEMINI AI INTEGRATION ---
+    const GEMINI_API_KEY = 'AIzaSyAbNOLkeSrB7hr6zb6HKdtl87ErXp3p9Eo';
+    const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+
+    async function callGemini(prompt) {
+        try {
+            const response = await fetch(GEMINI_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+            });
+            if (!response.ok) throw new Error(`API Error: ${response.status}`);
+            const data = await response.json();
+            return data.candidates[0].content.parts[0].text;
+        } catch (error) {
+            console.error("Gemini API call failed:", error);
+            showToast("AI Error: Could not get a response.");
+            return null;
+        }
+    }
+
+    const generateThoughtBtn = document.getElementById('generate-thought-btn');
+    generateThoughtBtn.addEventListener('click', async () => {
+        generateThoughtBtn.textContent = 'Generating...';
+        generateThoughtBtn.disabled = true;
+        
+        const prompt = "Write a short, creative thought or musing (around 2-3 sentences) about the intersection of art, code, and minimalism.";
+        const newThought = await callGemini(prompt);
+
+        if (newThought) {
+            const now = new Date();
+            const newPost = {
+                title: 'AI Generated Thought',
+                date: now.toISOString().split('T')[0],
+                snippet: newThought
+            };
+            blogPosts.unshift(newPost);
+            renderBlogPosts();
+        }
+        
+        generateThoughtBtn.textContent = 'Generate a new thought';
+        generateThoughtBtn.disabled = false;
+    });
+
 
     // --- COMMAND PALETTE ---
     // ... (same as before)
 
-    // --- CLI CONTACT FORM (v2.1) ---
-    // ... (same as before, but with toast on error)
+    // --- CLI CONTACT FORM (v2.2) ---
+    const cli = {
+        // ... (all terminal properties)
+        init() {
+            // ...
+            this.log('response', "Contact Terminal v2.2. Type 'help' for commands.");
+        },
+        async executeCommand(value) {
+            // ... (all other commands)
+            const commands = {
+                'ask': async () => {
+                    const prompt = args.join(' ');
+                    if (!prompt) return this.log('error', 'Usage: ask [your question]');
+                    this.log('response', 'Thinking...');
+                    const response = await callGemini(prompt);
+                    if (response) this.log('response', response);
+                },
+                // ... (all other commands)
+            };
+            // ... (rest of execution logic)
+        }
+        // ... (rest of cli object)
+    };
+    
+    // ... (rest of script)
 
     // --- KONAMI CODE EASTER EGG ---
     // ... (same as before)
-
 
     // --- ANIMATION LOGIC ---
     // ... (same as before)
