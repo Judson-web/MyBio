@@ -85,6 +85,15 @@
     #day-canvas { opacity: 0; }
     body:not(.light-theme) #aurora-canvas { opacity: 0.6; }
     .light-theme #day-canvas { opacity: 0.25; }
+    #konami-canvas {
+        z-index: 9997;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.5s ease;
+    }
+    #konami-canvas.active {
+        opacity: 1;
+    }
 
 
     /* --- Header --- */
@@ -517,6 +526,7 @@
   <!-- Canvas Backgrounds -->
   <canvas id="aurora-canvas" class="background-canvas"></canvas>
   <canvas id="day-canvas" class="background-canvas"></canvas>
+  <canvas id="konami-canvas" class="background-canvas"></canvas>
 
   <!-- Main Content -->
   <div class="centerbox">
@@ -1017,7 +1027,7 @@
                     this.log('success', `Alias created: ${alias} -> ${value}`);
                 },
                 'sudo': () => this.log('error', 'Permission denied.'),
-                'cmd': () => {
+                 'cmd': () => {
                     setTimeout(() => {
                         closeModal(this.container.closest('.modal-overlay'));
                         openCommandPalette();
