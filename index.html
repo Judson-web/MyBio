@@ -685,11 +685,9 @@
     const pageLoadTime = new Date();
     feather.replace();
 
-    // [FIXED] Declare mouse object to track cursor coordinates
     const mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
 
     const playSound = (note, type = 'sine', duration = '8n') => {
-        // Ensure Tone.js is ready before playing a sound
         if (typeof Tone === 'undefined' || Tone.context.state !== 'running') return;
         const synth = new Tone.Synth({
             oscillator: { type },
@@ -697,7 +695,6 @@
         }).toDestination();
         synth.triggerAttackRelease(note, duration);
     };
-    // Initialize audio context on first user interaction
     document.body.addEventListener('click', () => {
         if (typeof Tone !== 'undefined' && Tone.context.state !== 'running') {
             Tone.start();
@@ -726,7 +723,6 @@
         }
         if (theme === 'light') {
             document.body.classList.add('light-theme');
-            // Functions for animations will be defined later
             if (typeof initOrbs === 'function') {
                 initOrbs();
                 animateDay();
@@ -841,7 +837,6 @@
         const timeoutId = setTimeout(() => controller.abort(), 10000);
 
         try {
-            // [FIXED] Changed location to a larger city for better API reliability.
             const response = await fetch('https://wttr.in/Kochi?format=j1', {
                 signal: controller.signal
             });
@@ -864,7 +859,6 @@
             weatherWidget.innerHTML = `<i data-feather="${icon}"></i> ${temp}°C`;
         } catch (error) {
             clearTimeout(timeoutId);
-            // [FIXED] Improved error logging
             console.error("Failed to fetch weather:", error.message);
             weatherWidget.innerHTML = `<i data-feather="cloud-off"></i> N/A`;
             if (error.name !== 'AbortError') {
@@ -1082,16 +1076,172 @@
         cli.inputElement.addEventListener('keydown', (e) => cli.handleInput(e));
     }
     
-    // --- KONAMI CODE EASTER EGG (Placeholder) ---
-    // ... Full implementation would go here ...
+    // --- [FIXED] KONAMI CODE EASTER EGG ---
+    const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+    let konamiIndex = 0;
+    let konamiTimeout;
+    document.addEventListener('keydown', e => {
+        if (e.key === konamiCode[konamiIndex]) {
+            konamiIndex++;
+            if (konamiIndex === konamiCode.length) {
+                activateKonami();
+                konamiIndex = 0;
+            }
+            clearTimeout(konamiTimeout);
+            konamiTimeout = setTimeout(() => konamiIndex = 0, 2000);
+        } else {
+            konamiIndex = 0;
+        }
+    });
 
-    // --- ANIMATION LOGIC (Placeholders, requires full definition) ---
-    function initAurora() { console.log("Aurora animation started."); }
-    function animateAurora() { activeAnimationId = requestAnimationFrame(animateAurora); }
-    function initOrbs() { console.log("Day animation started."); }
-    function animateDay() { activeAnimationId = requestAnimationFrame(animateDay); }
+    function activateKonami() {
+        const canvas = document.getElementById('konami-canvas');
+        if (!canvas) return;
+        canvas.classList.add('active');
+        showToast("Konami Code Activated!");
+        playSound('C5', 'sawtooth');
+        
+        const ctx = canvas.getContext('2d');
+        const fontSize = 16;
+        const columns = Math.floor(canvas.width / fontSize);
+        const drops = Array(columns).fill(1);
+        const chars = 'Judson-webCreatorExPoetExMinimalistExThinker'.split('');
 
-    // --- [NEW] CANVAS RESIZING FUNCTION ---
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.04)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#0F0';
+            ctx.font = `${fontSize}px Fira Code`;
+
+            for (let i = 0; i < drops.length; i++) {
+                const text = chars[Math.floor(Math.random() * chars.length)];
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+        const matrixInterval = setInterval(drawMatrix, 33);
+
+        setTimeout(() => {
+            clearInterval(matrixInterval);
+            canvas.classList.remove('active');
+        }, 10000);
+    }
+
+
+    // --- [FIXED] ANIMATION LOGIC ---
+    let auroraLines = [];
+    let orbs = [];
+
+    // --- Dark Theme: Aurora Animation ---
+    function initAurora() {
+        const canvas = document.getElementById('aurora-canvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        auroraLines = [];
+        for (let i = 0; i < 50; i++) {
+            auroraLines.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                length: Math.random() * canvas.height * 0.4 + canvas.height * 0.1,
+                speed: Math.random() * 0.4 + 0.1,
+                width: Math.random() * 2 + 0.5,
+                hue: Math.random() * 60 + 150 // Green/cyan/blue tones
+            });
+        }
+    }
+
+    function animateAurora() {
+        const canvas = document.getElementById('aurora-canvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        auroraLines.forEach(line => {
+            ctx.beginPath();
+            const gradient = ctx.createLinearGradient(line.x, line.y, line.x, line.y - line.length);
+            gradient.addColorStop(0, `hsla(${line.hue}, 100%, 50%, 0)`);
+            gradient.addColorStop(0.5, `hsla(${line.hue}, 100%, 50%, 0.3)`);
+            gradient.addColorStop(1, `hsla(${line.hue}, 100%, 50%, 0)`);
+            
+            ctx.strokeStyle = gradient;
+            ctx.lineWidth = line.width;
+            ctx.moveTo(line.x, line.y);
+            ctx.lineTo(line.x, line.y - line.length);
+            ctx.stroke();
+
+            line.y += line.speed;
+            line.x += (Math.random() - 0.5) * 2;
+            line.hue += 0.2;
+
+            if (line.y - line.length > canvas.height) {
+                line.y = 0;
+                line.x = Math.random() * canvas.width;
+            }
+        });
+
+        activeAnimationId = requestAnimationFrame(animateAurora);
+    }
+
+    // --- Light Theme: Orb Animation ---
+    function initOrbs() {
+        const canvas = document.getElementById('day-canvas');
+        if (!canvas) return;
+        orbs = [];
+        for (let i = 0; i < 20; i++) {
+            orbs.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                vx: (Math.random() - 0.5) * 0.5,
+                vy: (Math.random() - 0.5) * 0.5,
+                radius: Math.random() * 20 + 10,
+                hue: Math.random() * 60 // Orange/yellow tones
+            });
+        }
+    }
+
+    function animateDay() {
+        const canvas = document.getElementById('day-canvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        orbs.forEach(orb => {
+            const gradient = ctx.createRadialGradient(orb.x, orb.y, 0, orb.x, orb.y, orb.radius);
+            gradient.addColorStop(0, `hsla(${orb.hue}, 80%, 70%, 0.8)`);
+            gradient.addColorStop(1, `hsla(${orb.hue}, 80%, 70%, 0)`);
+            
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(orb.x, orb.y, orb.radius, 0, Math.PI * 2);
+            ctx.fill();
+
+            orb.x += orb.vx;
+            orb.y += orb.vy;
+
+            // Mouse interaction
+            const dx = mouse.x - orb.x;
+            const dy = mouse.y - orb.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < 200) {
+                orb.vx += dx / dist * 0.05;
+                orb.vy += dy / dist * 0.05;
+            }
+            orb.vx *= 0.99; // friction
+            orb.vy *= 0.99;
+
+            if (orb.x < -orb.radius) orb.x = canvas.width + orb.radius;
+            if (orb.x > canvas.width + orb.radius) orb.x = -orb.radius;
+            if (orb.y < -orb.radius) orb.y = canvas.height + orb.radius;
+            if (orb.y > canvas.height + orb.radius) orb.y = -orb.radius;
+        });
+
+        activeAnimationId = requestAnimationFrame(animateDay);
+    }
+
+    // --- CANVAS RESIZING FUNCTION ---
     function resizeAllCanvases() {
         const canvases = document.querySelectorAll('.background-canvas');
         canvases.forEach(canvas => {
@@ -1116,7 +1266,6 @@
     // Event Listeners
     window.addEventListener("resize", () => {
       resizeAllCanvases();
-      // Re-apply theme to re-initialize animations with new dimensions
       applyTheme(localStorage.getItem('theme') || 'dark');
     });
 
@@ -1125,7 +1274,6 @@
         mouse.y = e.clientY;
     });
     
-    // Run initialization after the DOM is fully loaded
     document.addEventListener('DOMContentLoaded', initializePage);
 
   </script>
