@@ -771,15 +771,73 @@
 
     // --- STATUS WIDGET & GREETING ---
     function updateTime() {
-        // ... (same as before)
+        const timeWidget = document.getElementById('time-widget');
+        const greetingEl = document.getElementById('greeting');
+        const now = new Date();
+        const timeOptions = { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: true };
+        const timeString = new Intl.DateTimeFormat('en-US', timeOptions).format(now);
+        timeWidget.innerHTML = `<i data-feather="clock"></i> ${timeString}`;
+
+        const hourOptions = { timeZone: 'Asia/Kolkata', hour: 'numeric', hour12: false };
+        const hour = parseInt(new Intl.DateTimeFormat('en-US', hourOptions).format(now));
+        
+        let greeting = "Welcome.";
+        if (hour >= 5 && hour < 12) greeting = "Good morning.";
+        else if (hour >= 12 && hour < 17) greeting = "Good afternoon.";
+        else if (hour >= 17 && hour < 22) greeting = "Good evening.";
+        else greeting = "Burning the midnight oil?";
+        
+        greetingEl.textContent = greeting;
+
+        feather.replace();
     }
 
     async function updateWeather() {
-        // ... (same as before, but with toast on error)
+        const weatherWidget = document.getElementById('weather-widget');
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+        try {
+            const response = await fetch('https://wttr.in/Kanthalad?format=j1', {
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+
+            if (!response.ok) throw new Error('Weather data not available');
+            const data = await response.json();
+            const temp = data.current_condition[0].temp_C;
+            const weatherDesc = data.current_condition[0].weatherDesc[0].value.toLowerCase();
+            
+            let icon = 'sun';
+            if (weatherDesc.includes('rain') || weatherDesc.includes('drizzle')) icon = 'cloud-rain';
+            else if (weatherDesc.includes('cloudy') || weatherDesc.includes('overcast')) icon = 'cloud';
+            else if (weatherDesc.includes('thunder') || weatherDesc.includes('storm')) icon = 'cloud-lightning';
+            else if (weatherDesc.includes('snow') || weatherDesc.includes('sleet')) icon = 'cloud-snow';
+            else if (weatherDesc.includes('mist') || weatherDesc.includes('fog')) icon = 'wind';
+
+            weatherWidget.innerHTML = `<i data-feather="${icon}"></i> ${temp}°C`;
+        } catch (error) {
+            clearTimeout(timeoutId);
+            console.error("Failed to fetch weather:", error);
+            weatherWidget.innerHTML = `<i data-feather="cloud-off"></i> N/A`;
+            showToast('API Error: Could not fetch weather data.');
+        }
+        feather.replace();
     }
     
     async function updateGitHubStats() {
-        // ... (same as before, but with toast on error)
+        const widget = document.getElementById('github-widget');
+        try {
+            const response = await fetch('https://api.github.com/users/Judson-web');
+            if (!response.ok) throw new Error('GitHub API error');
+            const data = await response.json();
+            widget.innerHTML = `<i data-feather="github"></i> ${data.followers} / ${data.public_repos}`;
+            feather.replace();
+        } catch (e) {
+            console.error("Failed to fetch GitHub stats:", e);
+            widget.innerHTML = `<i data-feather="github"></i> N/A`;
+            showToast('API Error: Could not fetch GitHub stats.');
+        }
     }
 
     updateTime();
@@ -807,8 +865,29 @@
     renderBlogPosts();
     
     async function renderProjects() {
-        // ... (same as before)
+        const container = document.getElementById('projects-list');
+        container.innerHTML = '<p>Fetching projects...</p>';
+        try {
+            const response = await fetch('https://api.github.com/users/Judson-web/repos?sort=updated&direction=desc');
+            if (!response.ok) throw new Error('Could not fetch projects');
+            const repos = await response.json();
+            container.innerHTML = repos.slice(0, 5).map(repo => `
+                <div class="project-card">
+                    <h3><a href="${repo.html_url}" target="_blank">${repo.name}</a></h3>
+                    <p>${repo.description || 'No description available.'}</p>
+                    <div class="stats">
+                        <span><i data-feather="star"></i> ${repo.stargazers_count}</span>
+                        <span><i data-feather="git-branch"></i> ${repo.forks_count}</span>
+                    </div>
+                </div>
+            `).join('');
+            feather.replace();
+        } catch (e) {
+            container.innerHTML = '<p>Could not load projects at this time.</p>';
+            showToast('API Error: Could not fetch GitHub projects.');
+        }
     }
+
 
     // --- GEMINI AI INTEGRATION ---
     const GEMINI_API_KEY = 'AIzaSyAbNOLkeSrB7hr6zb6HKdtl87ErXp3p9Eo';
