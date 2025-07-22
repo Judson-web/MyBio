@@ -45,8 +45,8 @@
       --bg-color: #0a0a0f;
       --text-color: #e0e0e0;
       --dim-text-color: #a0a0a0;
-      --card-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0));
-      --card-border: rgba(255, 255, 255, 0.1);
+      --card-bg: rgba(255, 255, 255, 0.05);
+      --card-border: rgba(255, 255, 255, 0.15);
       --card-shadow: rgba(0, 0, 0, 0.37);
       --header-bg: rgba(10, 10, 15, 0.5);
       --glow-color-1: #38e7ff;
@@ -59,8 +59,8 @@
       --bg-color: #f4f5f7;
       --text-color: #1a1a1a;
       --dim-text-color: #5a5a5a;
-      --card-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.5));
-      --card-border: rgba(0, 0, 0, 0.08);
+      --card-bg: rgba(255, 255, 255, 0.6);
+      --card-border: rgba(0, 0, 0, 0.1);
       --card-shadow: rgba(99, 99, 99, 0.1) 0px 4px 12px 0px;
       --header-bg: rgba(255, 255, 255, 0.7);
       --glow-color-1: #007BFF;
@@ -117,8 +117,8 @@
     }
     #aurora-canvas { opacity: 0; }
     #day-canvas { opacity: 0; }
-    body:not(.light-theme) #aurora-canvas { opacity: 0.4; }
-    .light-theme #day-canvas { opacity: 0.5; }
+    body:not(.light-theme) #aurora-canvas { opacity: 0.7; }
+    .light-theme #day-canvas { opacity: 0.8; }
     #konami-canvas {
         z-index: 9997;
         opacity: 0;
@@ -193,8 +193,8 @@
 
     .card {
       background: var(--card-bg);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
       border-radius: 20px;
       border:1px solid var(--card-border);
       box-shadow: var(--card-shadow);
@@ -333,8 +333,8 @@
     }
     .modal-content {
         background: var(--card-bg);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
         border-radius: 16px;
         border: 1px solid var(--card-border);
         box-shadow: 0 8px 32px 0 var(--card-shadow);
@@ -730,14 +730,14 @@
         }
         if (theme === 'light') {
             document.body.classList.add('light-theme');
-            if (typeof initOrbs === 'function') {
-                initOrbs();
+            if (typeof initBubbles === 'function') {
+                initBubbles();
                 animateDay();
             }
         } else {
             document.body.classList.remove('light-theme');
-            if (typeof initAurora === 'function') {
-                initAurora();
+            if (typeof initStarfield === 'function') {
+                initStarfield();
                 animateAurora();
             }
         }
@@ -935,11 +935,11 @@
 
 
     // --- GEMINI AI INTEGRATION ---
-    const GEMINI_API_KEY = 'AIzaSyAbNOLkeSrB7hr6zb6HKdtl87ErXp3p9Eo'; // IMPORTANT: Replace with your actual key or use a backend proxy.
+    const GEMINI_API_KEY = 'AIzaSyAbNOLkeSrB7hr6zb6HKdtl87ErXp3p9Eo';
     const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
 
     async function callGemini(prompt) {
-        if (GEMINI_API_KEY === 'AIzaSyAbNOLkeSrB7hr6zb6HKdtl87ErXp3p9Eo') {
+        if (GEMINI_API_KEY === 'YOUR_API_KEY_HERE') {
             return "Gemini API key not configured. Please add your key to the script.";
         }
         try {
@@ -1108,7 +1108,7 @@
  |_|_|     \\_)_)\\____)_|    |_|     
 `;
             this.log('prompt', judsonAscii);
-            this.typeLog('response', "Contact Terminal v2.6. Type 'help' for commands.", () => {
+            this.typeLog('response', "Contact Terminal v2.7. Type 'help' for commands.", () => {
                 this.inputElement.disabled = false;
                 this.inputElement.focus();
             });
@@ -1166,10 +1166,7 @@
         stopThinking(line, message, type) {
             clearInterval(this.thinkingInterval);
             this.thinkingInterval = null;
-            line.textContent = message;
-            line.className = `cli-line cli-${type}`;
-            this.inputElement.disabled = false;
-            this.inputElement.focus();
+            this.typeLog(type, message);
         },
 
         handleInput(e) {
@@ -1210,6 +1207,7 @@
                         '  contact   - Display contact information',
                         '  social    - Show social media links',
                         '  theme     - Toggle between light/dark mode',
+                        '  ip        - Show your public IP address',
                         '  ask       - Ask the AI a question (e.g., ask what is js)',
                         '  cmd       - Open the command palette',
                         '  exit      - Close the terminal'
@@ -1235,6 +1233,17 @@
                 'theme': () => {
                     toggleTheme();
                     this.typeLog('success', `Theme toggled to ${localStorage.getItem('theme') || 'dark'} mode.`);
+                },
+                'ip': async () => {
+                    const thinkingLine = this.startThinking();
+                    try {
+                        const response = await fetch('https://api.ipify.org?format=json');
+                        if (!response.ok) throw new Error('IP API failed');
+                        const data = await response.json();
+                        this.stopThinking(thinkingLine, `Your IP address is: ${data.ip}`, 'success');
+                    } catch (e) {
+                        this.stopThinking(thinkingLine, 'Could not fetch IP address.', 'error');
+                    }
                 },
                 'cmd': () => {
                     this.typeLog('response', 'Opening command palette...', () => openCommandPalette());
@@ -1328,23 +1337,35 @@
 
 
     // --- ANIMATION LOGIC ---
-    let auroraLines = [];
-    let orbs = [];
+    let stars = [];
+    let bubbles = [];
 
-    // --- Dark Theme: Aurora Animation ---
-    function initAurora() {
+    // --- Dark Theme: Starfield Animation ---
+    function initStarfield() {
         const canvas = document.getElementById('aurora-canvas');
         if (!canvas) return;
-        const ctx = canvas.getContext('2d');
-        auroraLines = [];
-        for (let i = 0; i < 50; i++) {
-            auroraLines.push({
+        stars = [];
+        for (let i = 0; i < 300; i++) {
+            stars.push({
                 x: Math.random() * canvas.width,
                 y: Math.random() * canvas.height,
-                length: Math.random() * canvas.height * 0.4 + canvas.height * 0.1,
-                speed: Math.random() * 0.4 + 0.1,
-                width: Math.random() * 2 + 0.5,
-                hue: Math.random() * 60 + 150 // Green/cyan/blue tones
+                radius: Math.random() * 1.5,
+                vx: (Math.random() - 0.5) / 4,
+                vy: (Math.random() - 0.5) / 4,
+                alpha: Math.random() * 0.5 + 0.5
+            });
+        }
+        // Add some shooting stars
+        for (let i = 0; i < 3; i++) {
+             stars.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                radius: Math.random() * 2 + 1,
+                vx: Math.random() * 10 + 5,
+                vy: Math.random() * 10 + 5,
+                alpha: 1,
+                isShooting: true,
+                life: 100
             });
         }
     }
@@ -1355,45 +1376,44 @@
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        auroraLines.forEach(line => {
+        ctx.fillStyle = 'white';
+        stars.forEach(star => {
+            ctx.globalAlpha = star.alpha;
             ctx.beginPath();
-            const gradient = ctx.createLinearGradient(line.x, line.y, line.x, line.y - line.length);
-            gradient.addColorStop(0, `hsla(${line.hue}, 100%, 50%, 0)`);
-            gradient.addColorStop(0.5, `hsla(${line.hue}, 100%, 50%, 0.3)`);
-            gradient.addColorStop(1, `hsla(${line.hue}, 100%, 50%, 0)`);
+            ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+            ctx.fill();
+
+            star.x += star.vx;
+            star.y += star.vy;
             
-            ctx.strokeStyle = gradient;
-            ctx.lineWidth = line.width;
-            ctx.moveTo(line.x, line.y);
-            ctx.lineTo(line.x, line.y - line.length);
-            ctx.stroke();
-
-            line.y += line.speed;
-            line.x += (Math.random() - 0.5) * 2;
-            line.hue += 0.2;
-
-            if (line.y - line.length > canvas.height) {
-                line.y = 0;
-                line.x = Math.random() * canvas.width;
+            if(star.isShooting) {
+                star.life--;
+                if(star.life <= 0) {
+                    star.x = Math.random() * canvas.width;
+                    star.y = -20;
+                    star.life = 100;
+                }
+            } else {
+                 if (star.x < 0 || star.x > canvas.width) star.vx = -star.vx;
+                 if (star.y < 0 || star.y > canvas.height) star.vy = -star.vy;
             }
         });
-
+        ctx.globalAlpha = 1;
         activeAnimationId = requestAnimationFrame(animateAurora);
     }
 
-    // --- Light Theme: Orb Animation ---
-    function initOrbs() {
+    // --- Light Theme: Bubbles Animation ---
+    function initBubbles() {
         const canvas = document.getElementById('day-canvas');
         if (!canvas) return;
-        orbs = [];
+        bubbles = [];
         const colors = [getComputedStyle(document.documentElement).getPropertyValue('--glow-color-1'), getComputedStyle(document.documentElement).getPropertyValue('--glow-color-2')];
-        for (let i = 0; i < 20; i++) {
-            orbs.push({
+        for (let i = 0; i < 25; i++) {
+            bubbles.push({
                 x: Math.random() * canvas.width,
-                y: Math.random() * canvas.height,
-                vx: (Math.random() - 0.5) * 0.5,
-                vy: (Math.random() - 0.5) * 0.5,
-                radius: Math.random() * 30 + 15,
+                y: canvas.height + Math.random() * 100,
+                radius: Math.random() * 20 + 10,
+                speed: Math.random() * 1 + 0.5,
                 color: colors[i % 2]
             });
         }
@@ -1405,34 +1425,21 @@
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        orbs.forEach(orb => {
-            const gradient = ctx.createRadialGradient(orb.x, orb.y, 0, orb.x, orb.y, orb.radius);
-            gradient.addColorStop(0, `${orb.color}80`); // 50% opacity
-            gradient.addColorStop(1, `${orb.color}00`); // 0% opacity
-            
-            ctx.fillStyle = gradient;
+        bubbles.forEach(bubble => {
             ctx.beginPath();
-            ctx.arc(orb.x, orb.y, orb.radius, 0, Math.PI * 2);
+            ctx.arc(bubble.x, bubble.y, bubble.radius, 0, Math.PI * 2);
+            ctx.fillStyle = `${bubble.color}33`; // 20% opacity
             ctx.fill();
+            ctx.strokeStyle = `${bubble.color}80`; // 50% opacity
+            ctx.stroke();
 
-            orb.x += orb.vx;
-            orb.y += orb.vy;
+            bubble.y -= bubble.speed;
+            bubble.x += Math.sin(bubble.y / 50) * 0.5;
 
-            // Mouse interaction
-            const dx = mouse.x - orb.x;
-            const dy = mouse.y - orb.y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-            if (dist < 200) {
-                orb.vx += dx / dist * 0.05;
-                orb.vy += dy / dist * 0.05;
+            if (bubble.y < -bubble.radius) {
+                bubble.y = canvas.height + bubble.radius;
+                bubble.x = Math.random() * canvas.width;
             }
-            orb.vx *= 0.99; // friction
-            orb.vy *= 0.99;
-
-            if (orb.x < -orb.radius) orb.x = canvas.width + orb.radius;
-            if (orb.x > canvas.width + orb.radius) orb.x = -orb.radius;
-            if (orb.y < -orb.radius) orb.y = canvas.height + orb.radius;
-            if (orb.y > canvas.height + orb.radius) orb.y = -orb.radius;
         });
 
         activeAnimationId = requestAnimationFrame(animateDay);
