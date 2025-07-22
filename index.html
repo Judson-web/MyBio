@@ -938,7 +938,9 @@
 
         if (responseText) {
             try {
-                const thought = JSON.parse(responseText);
+                // Clean the response to ensure it's valid JSON
+                const jsonString = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
+                const thought = JSON.parse(jsonString);
                 const now = new Date();
                 const newPost = {
                     title: thought.title || 'AI Generated Thought',
