@@ -1093,9 +1093,11 @@
         history: [],
         historyIndex: -1,
         isInitialized: false,
+        isTyping: false,
+        thinkingInterval: null,
 
         init() {
-            if (this.isInitialized || !this.outputElement) return;
+            if (this.isInitialized) return;
             this.outputElement.innerHTML = '';
             const judsonAscii = `
   _           _                     
@@ -1106,7 +1108,10 @@
  |_|_|     \\_)_)\\____)_|    |_|     
 `;
             this.log('prompt', judsonAscii);
-            this.log('response', "Contact Terminal v2.5. Type 'help' for commands.");
+            this.typeLog('response', "Contact Terminal v2.6. Type 'help' for commands.", () => {
+                this.inputElement.disabled = false;
+                this.inputElement.focus();
+            });
             this.isInitialized = true;
         },
 
@@ -1118,8 +1123,57 @@
             this.outputElement.appendChild(line);
             this.outputElement.scrollTop = this.outputElement.scrollHeight;
         },
+        
+        typeLog(type, message, callback) {
+            this.isTyping = true;
+            this.inputElement.disabled = true;
+            const line = document.createElement('div');
+            line.className = `cli-line cli-${type}`;
+            this.outputElement.appendChild(line);
+
+            let i = 0;
+            const typingInterval = setInterval(() => {
+                if (i < message.length) {
+                    line.textContent += message.charAt(i);
+                    playSound('C6', 'triangle', '64n');
+                    this.outputElement.scrollTop = this.outputElement.scrollHeight;
+                    i++;
+                } else {
+                    clearInterval(typingInterval);
+                    this.isTyping = false;
+                    this.inputElement.disabled = false;
+                    this.inputElement.focus();
+                    if (callback) callback();
+                }
+            }, 25);
+        },
+        
+        startThinking() {
+            this.inputElement.disabled = true;
+            const line = document.createElement('div');
+            line.className = 'cli-line cli-response';
+            this.outputElement.appendChild(line);
+            
+            const spinnerChars = ['|', '/', '-', '\\'];
+            let i = 0;
+            this.thinkingInterval = setInterval(() => {
+                line.textContent = `[${spinnerChars[i % spinnerChars.length]}] Thinking...`;
+                i++;
+            }, 100);
+            return line;
+        },
+
+        stopThinking(line, message, type) {
+            clearInterval(this.thinkingInterval);
+            this.thinkingInterval = null;
+            line.textContent = message;
+            line.className = `cli-line cli-${type}`;
+            this.inputElement.disabled = false;
+            this.inputElement.focus();
+        },
 
         handleInput(e) {
+            if (this.isTyping) return;
             if (e.key === 'Enter' && this.inputElement.value.trim() !== '') {
                 const value = this.inputElement.value.trim();
                 this.log('prompt', `> ${value}`);
@@ -1147,64 +1201,65 @@
             const [command, ...args] = value.toLowerCase().split(' ');
             const cliCommands = {
                 'help': () => {
-                    this.log('success', 'Available commands:');
-                    this.log('response', '  help      - Show this help message');
-                    this.log('response', '  clear     - Clear the terminal screen');
-                    this.log('response', '  whoami    - Display user information');
-                    this.log('response', '  date      - Show the current date and time');
-                    this.log('response', '  contact   - Display contact information');
-                    this.log('response', '  social    - Show social media links');
-                    this.log('response', '  theme     - Toggle between light/dark mode');
-                    this.log('response', '  ask       - Ask the AI a question (e.g., ask what is js)');
-                    this.log('response', '  cmd       - Open the command palette');
-                    this.log('response', '  exit      - Close the terminal');
+                    const helpText = [
+                        'Available commands:',
+                        '  help      - Show this help message',
+                        '  clear     - Clear the terminal screen',
+                        '  whoami    - Display user information',
+                        '  date      - Show the current date and time',
+                        '  contact   - Display contact information',
+                        '  social    - Show social media links',
+                        '  theme     - Toggle between light/dark mode',
+                        '  ask       - Ask the AI a question (e.g., ask what is js)',
+                        '  cmd       - Open the command palette',
+                        '  exit      - Close the terminal'
+                    ].join('\n');
+                    this.typeLog('success', helpText);
                 },
                 'clear': () => {
+                    this.isInitialized = false;
                     this.init();
                 },
                 'whoami': () => {
-                    this.log('response', 'You are a curious visitor on my digital domain.');
+                    this.typeLog('response', 'You are a curious visitor on my digital domain.');
                 },
                 'date': () => {
-                    this.log('response', new Date().toLocaleString());
+                    this.typeLog('response', new Date().toLocaleString());
                 },
                 'contact': () => {
-                    this.log('success', 'Email:');
-                    this.log('response', '  example@judson-web.com');
+                    this.typeLog('response', 'Reach out via email: example@judson-web.com');
                 },
                 'social': () => {
-                    this.log('success', 'Social Links:');
-                    this.log('response', '  Twitter: https://twitter.com/greyvrita');
-                    this.log('response', '  GitHub:  https://github.com/Judson-web');
+                    this.typeLog('response', 'Twitter: https://twitter.com/greyvrita\nGitHub:  https://github.com/Judson-web');
                 },
                 'theme': () => {
                     toggleTheme();
-                    this.log('success', `Theme toggled to ${localStorage.getItem('theme') || 'dark'} mode.`);
+                    this.typeLog('success', `Theme toggled to ${localStorage.getItem('theme') || 'dark'} mode.`);
                 },
                 'cmd': () => {
-                    this.log('response', 'Opening command palette...');
-                    openCommandPalette();
+                    this.typeLog('response', 'Opening command palette...', () => openCommandPalette());
                 },
                 'exit': () => {
-                    this.log('response', 'Closing terminal...');
-                    setTimeout(() => closeModal(this.outputElement.closest('.modal-overlay')), 500);
+                    this.typeLog('response', 'Closing terminal...', () => {
+                        setTimeout(() => closeModal(this.outputElement.closest('.modal-overlay')), 500);
+                    });
                 },
                 'ask': async () => {
                     const prompt = args.join(' ');
                     if (!prompt) {
-                        this.log('error', 'Usage: ask [your question]');
+                        this.typeLog('error', 'Usage: ask [your question]');
                         return;
                     }
-                    this.log('response', 'Thinking...');
+                    const thinkingLine = this.startThinking();
                     const response = await callGemini(prompt);
                     if (response) {
-                        this.log('response', response);
+                        this.stopThinking(thinkingLine, response, 'response');
                     } else {
-                        this.log('error', 'The AI is currently offline or the API key is missing.');
+                        this.stopThinking(thinkingLine, 'The AI is currently offline or the API key is missing.', 'error');
                     }
                 },
                 'default': () => {
-                    this.log('error', `Command not found: ${command}. Type 'help' for a list of commands.`);
+                    this.typeLog('error', `Command not found: ${command}. Type 'help' for a list of commands.`);
                     playSound('C2', 'sawtooth', '16n');
                 }
             };
