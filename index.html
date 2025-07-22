@@ -43,26 +43,30 @@
     /* --- THEME VARIABLES --- */
     :root {
       --bg-color: #0a0a0f;
-      --text-color: #fff;
-      --dim-text-color: #bbb;
-      --card-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
-      --card-border: rgba(255, 255, 255, 0.18);
+      --text-color: #e0e0e0;
+      --dim-text-color: #a0a0a0;
+      --card-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0));
+      --card-border: rgba(255, 255, 255, 0.1);
       --card-shadow: rgba(0, 0, 0, 0.37);
       --header-bg: rgba(10, 10, 15, 0.5);
       --glow-color-1: #38e7ff;
       --glow-color-2: #ff73fa;
+      --success-color: #50fa7b;
+      --error-color: #ff5555;
     }
 
     .light-theme {
-      --bg-color: #ffffff;
-      --text-color: #000000;
-      --dim-text-color: #4a4a4a;
-      --card-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.3));
+      --bg-color: #f4f5f7;
+      --text-color: #1a1a1a;
+      --dim-text-color: #5a5a5a;
+      --card-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.5));
       --card-border: rgba(0, 0, 0, 0.08);
-      --card-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
-      --header-bg: rgba(255, 255, 255, 0.75);
-      --glow-color-1: #ff6b00;
-      --glow-color-2: #7b2ff7;
+      --card-shadow: rgba(99, 99, 99, 0.1) 0px 4px 12px 0px;
+      --header-bg: rgba(255, 255, 255, 0.7);
+      --glow-color-1: #007BFF;
+      --glow-color-2: #e83e8c;
+      --success-color: #28a745;
+      --error-color: #dc3545;
     }
 
     /* --- GENERAL STYLES --- */
@@ -107,14 +111,14 @@
       left: 0;
       width: 100%;
       height: 100%;
-      z-index: 0;
+      z-index: -1;
       pointer-events: none;
       transition: opacity 0.8s ease;
     }
     #aurora-canvas { opacity: 0; }
     #day-canvas { opacity: 0; }
-    body:not(.light-theme) #aurora-canvas { opacity: 0.6; }
-    .light-theme #day-canvas { opacity: 0.25; }
+    body:not(.light-theme) #aurora-canvas { opacity: 0.4; }
+    .light-theme #day-canvas { opacity: 0.5; }
     #konami-canvas {
         z-index: 9997;
         opacity: 0;
@@ -456,9 +460,12 @@
         --terminal-text: var(--text-color);
         --terminal-prompt: var(--glow-color-1);
         --terminal-response: #aaa;
-        --terminal-error: #ff5555;
-        --terminal-success: #50fa7b;
+        --terminal-error: var(--error-color);
+        --terminal-success: var(--success-color);
         --terminal-filename: var(--glow-color-2);
+    }
+    .light-theme .terminal {
+        --terminal-response: #495057;
     }
 
     #cli-output {
@@ -928,10 +935,13 @@
 
 
     // --- GEMINI AI INTEGRATION ---
-    const GEMINI_API_KEY = 'AIzaSyAbNOLkeSrB7hr6zb6HKdtl87ErXp3p9Eo'; // Note: Exposing API keys client-side is risky. Use a backend proxy for production.
+    const GEMINI_API_KEY = 'YOUR_API_KEY_HERE'; // IMPORTANT: Replace with your actual key or use a backend proxy.
     const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
 
     async function callGemini(prompt) {
+        if (GEMINI_API_KEY === 'YOUR_API_KEY_HERE') {
+            return "Gemini API key not configured. Please add your key to the script.";
+        }
         try {
             const response = await fetch(GEMINI_URL, {
                 method: 'POST',
@@ -980,7 +990,7 @@
         });
     }
 
-    // --- [NEW] COMMAND PALETTE LOGIC ---
+    // --- COMMAND PALETTE LOGIC ---
     const commandPaletteOverlay = document.getElementById('command-palette-overlay');
     const commandInput = document.getElementById('command-input');
     const commandList = document.getElementById('command-list');
@@ -1096,7 +1106,7 @@
  |_|_|     \\_)_)\\____)_|    |_|     
 `;
             this.log('prompt', judsonAscii);
-            this.log('response', "Contact Terminal v2.4. Type 'help' for commands.");
+            this.log('response', "Contact Terminal v2.5. Type 'help' for commands.");
             this.isInitialized = true;
         },
 
@@ -1134,10 +1144,20 @@
         },
 
         async executeCommand(value) {
-            const [command, ...args] = value.split(' ');
-            const commands = {
+            const [command, ...args] = value.toLowerCase().split(' ');
+            const cliCommands = {
                 'help': () => {
-                    this.log('response', 'Available commands: help, clear, whoami, date, contact, ask [question], cmd');
+                    this.log('success', 'Available commands:');
+                    this.log('response', '  help      - Show this help message');
+                    this.log('response', '  clear     - Clear the terminal screen');
+                    this.log('response', '  whoami    - Display user information');
+                    this.log('response', '  date      - Show the current date and time');
+                    this.log('response', '  contact   - Display contact information');
+                    this.log('response', '  social    - Show social media links');
+                    this.log('response', '  theme     - Toggle between light/dark mode');
+                    this.log('response', '  ask       - Ask the AI a question (e.g., ask what is js)');
+                    this.log('response', '  cmd       - Open the command palette');
+                    this.log('response', '  exit      - Close the terminal');
                 },
                 'clear': () => {
                     this.init();
@@ -1149,11 +1169,25 @@
                     this.log('response', new Date().toLocaleString());
                 },
                 'contact': () => {
-                    this.log('response', 'Reach out via email: example@judson-web.com');
+                    this.log('success', 'Email:');
+                    this.log('response', '  example@judson-web.com');
+                },
+                'social': () => {
+                    this.log('success', 'Social Links:');
+                    this.log('response', '  Twitter: https://twitter.com/greyvrita');
+                    this.log('response', '  GitHub:  https://github.com/Judson-web');
+                },
+                'theme': () => {
+                    toggleTheme();
+                    this.log('success', `Theme toggled to ${localStorage.getItem('theme') || 'dark'} mode.`);
                 },
                 'cmd': () => {
                     this.log('response', 'Opening command palette...');
                     openCommandPalette();
+                },
+                'exit': () => {
+                    this.log('response', 'Closing terminal...');
+                    setTimeout(() => closeModal(this.outputElement.closest('.modal-overlay')), 500);
                 },
                 'ask': async () => {
                     const prompt = args.join(' ');
@@ -1166,15 +1200,17 @@
                     if (response) {
                         this.log('response', response);
                     } else {
-                        this.log('error', 'The AI is currently offline.');
+                        this.log('error', 'The AI is currently offline or the API key is missing.');
                     }
                 },
                 'default': () => {
                     this.log('error', `Command not found: ${command}. Type 'help' for a list of commands.`);
+                    playSound('C2', 'sawtooth', '16n');
                 }
             };
-            const action = commands[command] || commands['default'];
+            const action = cliCommands[command] || cliCommands['default'];
             action();
+            if(action !== cliCommands.default) playSound('C4', 'square', '16n');
         }
     };
     if (cli.inputElement) {
@@ -1295,14 +1331,15 @@
         const canvas = document.getElementById('day-canvas');
         if (!canvas) return;
         orbs = [];
+        const colors = [getComputedStyle(document.documentElement).getPropertyValue('--glow-color-1'), getComputedStyle(document.documentElement).getPropertyValue('--glow-color-2')];
         for (let i = 0; i < 20; i++) {
             orbs.push({
                 x: Math.random() * canvas.width,
                 y: Math.random() * canvas.height,
                 vx: (Math.random() - 0.5) * 0.5,
                 vy: (Math.random() - 0.5) * 0.5,
-                radius: Math.random() * 20 + 10,
-                hue: Math.random() * 60 // Orange/yellow tones
+                radius: Math.random() * 30 + 15,
+                color: colors[i % 2]
             });
         }
     }
@@ -1315,8 +1352,8 @@
 
         orbs.forEach(orb => {
             const gradient = ctx.createRadialGradient(orb.x, orb.y, 0, orb.x, orb.y, orb.radius);
-            gradient.addColorStop(0, `hsla(${orb.hue}, 80%, 70%, 0.8)`);
-            gradient.addColorStop(1, `hsla(${orb.hue}, 80%, 70%, 0)`);
+            gradient.addColorStop(0, `${orb.color}80`); // 50% opacity
+            gradient.addColorStop(1, `${orb.color}00`); // 0% opacity
             
             ctx.fillStyle = gradient;
             ctx.beginPath();
@@ -1366,6 +1403,11 @@
         setInterval(updateTime, 60000);
         setInterval(updateWeather, 30 * 60 * 1000);
         setInterval(updateGitHubStats, 60 * 60 * 1000);
+        
+        // Add hover sounds
+        document.querySelectorAll('a, button').forEach(el => {
+            el.addEventListener('mouseenter', () => playSound('A5', 'sine', '32n'));
+        });
     }
 
     // Event Listeners
