@@ -356,8 +356,8 @@
         background: rgba(127,127,127,0.5);
     }
     
-    /* --- Dynamic Blog Post Styling --- */
-    .blog-post {
+    /* --- Dynamic Content Styling --- */
+    .blog-post, .project-card {
         padding: 1rem;
         border: 1px solid rgba(127,127,127,0.2);
         border-radius: 12px;
@@ -365,7 +365,7 @@
         background: rgba(0,0,0,0.05);
         text-align: left;
     }
-    .blog-post h3 {
+    .blog-post h3, .project-card h3 {
         margin: 0 0 0.25rem 0;
         color: var(--glow-color-1);
     }
@@ -374,13 +374,23 @@
         color: #888;
         margin-bottom: 0.5rem;
     }
-    .blog-post p {
+    .blog-post p, .project-card p {
         color: var(--dim-text-color);
     }
-    .light-theme .blog-post p {
+    .light-theme .blog-post p, .light-theme .project-card p {
         color: var(--text-color);
     }
-
+    .project-card a {
+        color: var(--glow-color-2);
+        text-decoration: none;
+    }
+    .project-card .stats {
+        display: flex;
+        gap: 1rem;
+        font-size: 0.9rem;
+        margin-top: 1rem;
+        color: var(--dim-text-color);
+    }
 
     /* --- Command Palette --- */
     #command-palette-overlay { z-index: 2500; }
@@ -525,6 +535,7 @@
     <div class="header-logo">opmicky</div>
     <nav class="site-nav">
       <a data-modal="about" aria-label="About">About</a>
+      <a data-modal="projects" aria-label="Projects">Projects</a>
       <a data-modal="blog" aria-label="Blog">Blog</a>
       <a data-modal="contact" aria-label="Contact">Contact</a>
     </nav>
@@ -566,6 +577,13 @@
       <h2>About Me</h2>
       <p>I'm a creator driven by the fusion of technology and art. My background isn't linear; it's a path woven through poetry, the discipline of minimalism, and a deep-seated love for analytical thought. Today, these threads combine in my work as a creative developer.</p>
       <p>My focus is on generative art, interactive design, and building digital experiences that feel both intelligent and human. This space is my digital sketchbook and a reflection of my ongoing projects. I'm currently exploring how to tell better stories with code. Welcome.</p>
+    </div>
+  </div>
+   <div id="projects-modal" class="modal-overlay">
+    <div class="modal-content">
+      <i data-feather="x" class="close-modal" aria-label="Close modal"></i>
+      <h2>GitHub Projects</h2>
+      <div id="projects-list"></div>
     </div>
   </div>
   <div id="blog-modal" class="modal-overlay">
@@ -693,6 +711,9 @@
             document.getElementById('cli-input').focus();
             cli.init();
         }
+        if (modalId === 'projects') {
+            renderProjects();
+        }
     };
     const closeModal = (modal) => {
         modal.classList.remove('active');
@@ -788,7 +809,7 @@
     setInterval(updateWeather, 30 * 60 * 1000);
     setInterval(updateGitHubStats, 60 * 60 * 1000);
 
-    // --- DYNAMIC BLOG ---
+    // --- DYNAMIC CONTENT ---
     const blogPosts = [
         { title: 'The Art of Imperfection in Code', date: '2025-07-20', snippet: 'Why "good enough" is often better than perfect. A look at shipping projects and embracing the beauty of wabi-sabi in development.' },
         { title: 'From Sonnets to Scripts: A Creative Evolution', date: '2025-07-15', snippet: 'How the constraints and structures of poetry informed my approach to writing elegant, readable code.' },
@@ -805,6 +826,30 @@
         `).join('');
     }
     renderBlogPosts();
+    
+    async function renderProjects() {
+        const container = document.getElementById('projects-list');
+        container.innerHTML = '<p>Fetching projects...</p>';
+        try {
+            const response = await fetch('https://api.github.com/users/opmicky/repos?sort=updated&direction=desc');
+            if (!response.ok) throw new Error('Could not fetch projects');
+            const repos = await response.json();
+            container.innerHTML = repos.slice(0, 5).map(repo => `
+                <div class="project-card">
+                    <h3><a href="${repo.html_url}" target="_blank">${repo.name}</a></h3>
+                    <p>${repo.description || 'No description available.'}</p>
+                    <div class="stats">
+                        <span><i data-feather="star"></i> ${repo.stargazers_count}</span>
+                        <span><i data-feather="git-branch"></i> ${repo.forks_count}</span>
+                    </div>
+                </div>
+            `).join('');
+            feather.replace();
+        } catch (e) {
+            container.innerHTML = '<p>Could not load projects at this time.</p>';
+        }
+    }
+
 
     // --- COMMAND PALETTE ---
     const commandPaletteOverlay = document.getElementById('command-palette-overlay');
