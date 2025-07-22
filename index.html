@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Judson-web - Creator</title>
+  <meta name="description" content="ExPoet, ExMinimalist, ExThinker, NowCreator" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="https://firebasestorage.googleapis.com/v0/b/crnn-b7d8f.appspot.com/o/files%2FIMG_20250717_215454_617-modified.png?alt=media&token=bea1f0dd-abf1-4cfb-8a83-0d3b603d3fde" />
+  
+  <!-- Social Media Meta Tags -->
+  <meta property="og:title" content="Judson-web - Creator" />
+  <meta property="og:description" content="ExPoet, ExMinimalist, ExThinker, NowCreator" />
+  <meta property="og:image" content="https://firebasestorage.googleapis.com/v0/b/crnn-b7d8f.appspot.com/o/files%2FIMG_20250717_215454_617-modified.png?alt=media&token=bea1f0dd-abf1-4cfb-8a83-0d3b603d3fde" />
+  <meta property="og:url" content="https://opmicky.netlify.app" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Judson-web - Creator" />
+  <meta name="twitter:description" content="ExPoet, ExMinimalist, ExThinker, NowCreator" />
+  <meta name="twitter:image" content="https://firebasestorage.googleapis.com/v0/b/crnn-b7d8f.appspot.com/o/files%2FIMG_20250717_215454_617-modified.png?alt=media&token=bea1f0dd-abf1-4cfb-8a83-0d3b603d3fde" />
+
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fira+Code:wght@400&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/feather-icons"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+  
+  <!-- SEO Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": "Judson-web",
+    "url": "https://opmicky.netlify.app",
+    "image": "https://firebasestorage.googleapis.com/v0/b/crnn-b7d8f.appspot.com/o/files%2FIMG_20250717_215454_617-modified.png?alt=media&token=bea1f0dd-abf1-4cfb-8a83-0d3b603d3fde",
+    "sameAs": [
+      "https://twitter.com/greyvrita",
+      "https://github.com/Judson-web"
+    ],
+    "jobTitle": "Creator",
+    "description": "ExPoet, ExMinimalist, ExThinker, NowCreator"
+  }
+  </script>
+
+  <style>
+    /* --- THEME VARIABLES --- */
+    :root {
+      --bg-color: #0a0a0f;
+      --text-color: #fff;
+      --dim-text-color: #bbb;
+      --card-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
+      --card-border: rgba(255, 255, 255, 0.18);
+      --card-shadow: rgba(0, 0, 0, 0.37);
+      --header-bg: rgba(10, 10, 15, 0.5);
+      --glow-color-1: #38e7ff;
+      --glow-color-2: #ff73fa;
+    }
+
+    .light-theme {
+      --bg-color: #ffffff;
+      --text-color: #000000;
+      --dim-text-color: #4a4a4a;
+      --card-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.3));
+      --card-border: rgba(0, 0, 0, 0.08);
+      --card-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+      --header-bg: rgba(255, 255, 255, 0.75);
+      --glow-color-1: #ff6b00;
+      --glow-color-2: #7b2ff7;
+    }
+
+    /* --- GENERAL STYLES --- */
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: "DM Sans", sans-serif;
+      background: var(--bg-color);
+      color: var(--text-color);
+      overflow-x: hidden;
+      transition: background 0.4s ease, color 0.4s ease;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .spin {
+      animation: spin 1.5s linear infinite;
+    }
+
+    /* --- PRELOADER --- */
+    #preloader {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100vw; height: 100vh;
+        background: var(--bg-color);
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: opacity 0.5s ease;
+    }
+    #preloader.loaded {
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    /* --- Canvas Backgrounds --- */
+    .background-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+      transition: opacity 0.8s ease;
+    }
+    #aurora-canvas { opacity: 0; }
+    #day-canvas { opacity: 0; }
+    body:not(.light-theme) #aurora-canvas { opacity: 0.6; }
+    .light-theme #day-canvas { opacity: 0.25; }
+    #konami-canvas {
+        z-index: 9997;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.5s ease;
+    }
+    #konami-canvas.active {
+        opacity: 1;
+    }
+
+
+    /* --- Header --- */
+    .site-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: var(--header-bg);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--card-border);
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 1000;
+      transition: background 0.4s ease, border-color 0.4s ease;
+    }
+
+    .header-logo {
+      font-size: 1.3rem;
+      font-weight: 700;
+      background: linear-gradient(90deg, var(--glow-color-1), var(--glow-color-2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      transition: text-shadow 0.3s ease;
+    }
+    .header-logo:hover {
+        text-shadow: 0 0 8px var(--glow-color-1);
+    }
+
+    .site-nav a {
+      color: var(--dim-text-color);
+      text-decoration: none;
+      margin-left: 0.5rem;
+      font-weight: 500;
+      padding: 0.5rem 0.75rem;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .site-nav a:hover {
+      background: rgba(127, 127, 127, 0.1);
+      color: var(--text-color);
+    }
+
+    /* --- Main Content --- */
+    .centerbox {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      padding: 8rem 1.5rem 4rem;
+      box-sizing: border-box;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      perspective: 1000px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-radius: 20px;
+      border:1px solid var(--card-border);
+      box-shadow: var(--card-shadow);
+      padding: 2.5rem 1.5rem 2rem;
+      max-width: 420px;
+      width: 100%;
+      box-sizing: border-box;
+      transition: transform 0.1s ease-out, background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+    }
+
+    .profile-img {
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      border: 3px solid rgba(127, 127, 127, 0.2);
+      box-shadow: 0 0 24px rgba(0, 0, 0, 0.5);
+      transition: transform 0.3s ease;
+    }
+    .profile-img:hover {
+        transform: scale(1.05);
+    }
+
+    .profile-name {
+      font-size: 2rem;
+      font-weight: 700;
+      margin: 1.25rem 0 0.25rem;
+    }
+    
+    .profile-greeting {
+        font-size: 1rem;
+        color: var(--dim-text-color);
+        margin-bottom: 0.5rem;
+        min-height: 1.2em;
+    }
+
+    .profile-tagline {
+      font-size: 1.1rem;
+      color: var(--dim-text-color);
+      margin-bottom: 1.5rem;
+    }
+
+    /* --- Status Widget --- */
+    .status-widget {
+        background: rgba(0,0,0,0.05);
+        border-radius: 12px;
+        padding: 0.6rem 1rem;
+        margin: 0 auto 1.5rem;
+        font-size: 0.9rem;
+        color: var(--dim-text-color);
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+    }
+    .status-widget i {
+        width: 18px;
+        height: 18px;
+    }
+
+    /* --- Buttons --- */
+    .btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .ambient-btn {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.9rem 1.25rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 12px;
+      background: rgba(127, 127, 127, 0.1);
+      border: 1px solid rgba(127, 127, 127, 0.2);
+      color: var(--text-color);
+      text-decoration: none;
+      backdrop-filter: blur(12px);
+      transition: all 0.3s ease;
+      overflow: hidden;
+    }
+
+    .ambient-btn:hover {
+      background: rgba(127, 127, 127, 0.2);
+      border-color: var(--glow-color-1);
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1), 0 0 20px var(--glow-color-1);
+      transform: translateY(-3px);
+    }
+    
+    .ambient-btn:nth-child(2):hover {
+       border-color: var(--glow-color-2);
+       box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1), 0 0 20px var(--glow-color-2);
+    }
+
+    .ambient-btn svg {
+      margin-right: 10px;
+      stroke: var(--text-color);
+      width: 22px;
+      height: 22px;
+      transition: transform 0.3s ease;
+    }
+    
+    .ambient-btn:hover svg {
+        transform: scale(1.1);
+    }
+
+    /* --- Modal Sections --- */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.7);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        z-index: 1500;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        box-sizing: border-box;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.4s ease, visibility 0.4s ease;
+    }
+    .light-theme .modal-overlay {
+        background: rgba(255,255,255,0.1);
+    }
+    .modal-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+    .modal-content {
+        background: var(--card-bg);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-radius: 16px;
+        border: 1px solid var(--card-border);
+        box-shadow: 0 8px 32px 0 var(--card-shadow);
+        padding: 2rem 1.5rem;
+        width: 100%;
+        max-width: 600px;
+        max-height: 90vh;
+        overflow-y: auto;
+        transform: scale(0.9);
+        transition: transform 0.4s ease, background 0.4s ease, border-color 0.4s ease;
+        position: relative;
+    }
+    .modal-overlay.active .modal-content {
+        transform: scale(1);
+    }
+    .modal-content h2 {
+        margin-top: 0;
+        font-size: 1.8rem;
+        background: linear-gradient(90deg, var(--glow-color-1), var(--glow-color-2));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    .modal-content p {
+        color: var(--dim-text-color);
+        line-height: 1.6;
+    }
+    .close-modal {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        cursor: pointer;
+        color: var(--dim-text-color);
+        transition: color 0.3s, transform 0.3s;
+    }
+    .close-modal:hover {
+        color: var(--text-color);
+        transform: rotate(90deg);
+    }
+    
+    /* --- Custom Scrollbar --- */
+    .modal-content::-webkit-scrollbar {
+        width: 8px;
+    }
+    .modal-content::-webkit-scrollbar-track {
+        background: rgba(127,127,127,0.1);
+        border-radius: 4px;
+    }
+    .modal-content::-webkit-scrollbar-thumb {
+        background: rgba(127,127,127,0.3);
+        border-radius: 4px;
+    }
+    .modal-content::-webkit-scrollbar-thumb:hover {
+        background: rgba(127,127,127,0.5);
+    }
+    
+    /* --- Dynamic Content Styling --- */
+    .blog-post, .project-card {
+        padding: 1rem;
+        border: 1px solid rgba(127,127,127,0.2);
+        border-radius: 12px;
+        margin-bottom: 1rem;
+        background: rgba(0,0,0,0.05);
+        text-align: left;
+    }
+    .blog-post h3, .project-card h3 {
+        margin: 0 0 0.25rem 0;
+        color: var(--glow-color-1);
+    }
+    .blog-post .date {
+        font-size: 0.8rem;
+        color: #888;
+        margin-bottom: 0.5rem;
+    }
+    .blog-post p, .project-card p {
+        color: var(--dim-text-color);
+    }
+    .light-theme .blog-post p, .light-theme .project-card p {
+        color: var(--text-color);
+    }
+    .project-card a {
+        color: var(--glow-color-2);
+        text-decoration: none;
+    }
+    .project-card .stats {
+        display: flex;
+        gap: 1rem;
+        font-size: 0.9rem;
+        margin-top: 1rem;
+        color: var(--dim-text-color);
+    }
+
+    /* --- Command Palette --- */
+    #command-palette-overlay { z-index: 2500; }
+    .command-palette {
+        width: 100%;
+        max-width: 550px;
+        max-height: 50vh;
+        display: flex;
+        flex-direction: column;
+    }
+    .command-palette input {
+        width: 100%;
+        padding: 1rem;
+        font-size: 1.1rem;
+        background: rgba(127,127,127,0.1);
+        border: 1px solid var(--card-border);
+        color: var(--text-color);
+        border-radius: 12px 12px 0 0;
+        outline: none;
+    }
+    .command-list { list-style: none; padding: 0; margin: 0; overflow-y: auto; border-radius: 0 0 12px 12px; }
+    .command-item {
+        padding: 0.75rem 1rem; cursor: pointer; display: flex; align-items: center; gap: 10px;
+        border-top: 1px solid var(--card-border);
+    }
+    .command-item:hover, .command-item.selected { background: rgba(127, 127, 127, 0.2); }
+    .light-theme .command-item:hover, .light-theme .command-item.selected { background: rgba(0,0,0,0.1); }
+    .command-item i { color: var(--dim-text-color); }
+
+    /* --- CLI Contact Form --- */
+    .terminal {
+        --terminal-bg: rgba(0,0,0,0.1);
+        --terminal-text: var(--text-color);
+        --terminal-prompt: var(--glow-color-1);
+        --terminal-response: #aaa;
+        --terminal-error: #ff5555;
+        --terminal-success: #50fa7b;
+        --terminal-filename: var(--glow-color-2);
+    }
+
+    #cli-output {
+        height: 250px;
+        overflow-y: auto;
+        padding: 10px;
+        font-family: 'Fira Code', monospace;
+        font-size: 0.9rem;
+        border: 1px solid var(--card-border);
+        border-radius: 8px;
+        background: var(--terminal-bg);
+        color: var(--terminal-text);
+        transition: background 0.3s, color 0.3s;
+    }
+
+    #cli-output .cli-line { margin-bottom: 5px; white-space: pre-wrap; word-break: break-all; }
+    #cli-output .cli-prompt { color: var(--terminal-prompt); }
+    #cli-output .cli-response { color: var(--terminal-response); }
+    #cli-output .cli-error { color: var(--terminal-error); }
+    #cli-output .cli-success { color: var(--terminal-success); }
+    #cli-output .cli-filename { color: var(--terminal-filename); }
+    
+    .cli-input-container { display: flex; margin-top: 10px; align-items: center; }
+    .cli-prompt-text { font-family: 'Fira Code', monospace; color: var(--terminal-prompt); margin-right: 5px; white-space: pre; }
+    #cli-input {
+        flex-grow: 1;
+        background: transparent;
+        border: none;
+        color: var(--text-color);
+        font-family: 'Fira Code', monospace;
+        outline: none;
+    }
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+    .blinking-cursor {
+        background: var(--terminal-prompt);
+        width: 8px;
+        height: 1.2em;
+        animation: blink 1s step-end infinite;
+    }
+
+    /* --- Footer & Misc --- */
+    footer {
+      position: relative;
+      z-index: 1;
+      margin-top: auto;
+      padding: 1.5rem;
+      font-size: 0.9rem;
+      text-align: center;
+      color: #888;
+      background: rgba(0,0,0,0.05);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      align-items: center;
+    }
+    
+    #toast {
+        position: fixed;
+        bottom: -100px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #333;
+        color: #fff;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        transition: bottom 0.5s ease;
+        z-index: 3000;
+    }
+    #toast.show {
+        bottom: 2rem;
+    }
+
+    .cookie-banner {
+      position: fixed;
+      left: 0; right: 0; bottom: -100%;
+      background: var(--header-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      color: var(--text-color);
+      padding: 1rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      text-align: center;
+      z-index: 2000;
+      transition: bottom 0.5s ease-in-out;
+    }
+    .cookie-banner.show { bottom: 0; }
+    .cookie-banner button {
+      background: linear-gradient(90deg, var(--glow-color-1), var(--glow-color-2));
+      border: none; padding: 0.6rem 1.1rem; color: #fff; font-weight: bold;
+      border-radius: 8px; cursor: pointer;
+      box-shadow: 0 2px 8px rgba(127,127,127, 0.4);
+      transition: all 0.3s;
+    }
+    .light-theme .cookie-banner button { color: #000; }
+    .cookie-banner button:hover { transform: scale(1.05); }
+
+    @media (min-width: 640px) {
+        .cookie-banner {
+            flex-direction: row;
+            justify-content: space-between;
+            text-align: left;
+        }
+        footer {
+            flex-direction: row;
+            justify-content: space-between;
+        }
+    }
+
+  </style>
+</head>
+<body>
+
+  <div id="preloader"><i data-feather="loader" class="spin"></i></div>
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="header-logo">Judson-web</div>
+    <nav class="site-nav">
+      <a data-modal="about" aria-label="About">About</a>
+      <a data-modal="projects" aria-label="Projects">Projects</a>
+      <a data-modal="blog" aria-label="Blog">Blog</a>
+      <a data-modal="contact" aria-label="Contact">Contact</a>
+    </nav>
+  </header>
+
+  <!-- Canvas Backgrounds -->
+  <canvas id="aurora-canvas" class="background-canvas"></canvas>
+  <canvas id="day-canvas" class="background-canvas"></canvas>
+  <canvas id="konami-canvas" class="background-canvas"></canvas>
+
+  <!-- Main Content -->
+  <div class="centerbox">
+    <div class="card" id="profile-card">
+      <img class="profile-img" src="https://firebasestorage.googleapis.com/v0/b/crnn-b7d8f.appspot.com/o/files%2FIMG_20250717_215454_617-modified.png?alt=media&token=bea1f0dd-abf1-4cfb-8a83-0d3b603d3fde" alt="Judson-web" 
+      onerror="this.onerror=null;this.src='https://placehold.co/110x110/161822/ffffff?text=JW';"/>
+      <div class="profile-name">Judson-web</div>
+      <div id="greeting" class="profile-greeting"></div>
+      <div class="profile-tagline">ExPoet, ExMinimalist, ExThinker, NowCreator</div>
+
+      <div class="status-widget">
+        <span id="time-widget"><i data-feather="clock"></i> --:-- --</span>
+        <span id="weather-widget"><i data-feather="loader" class="spin"></i></span>
+        <span id="github-widget"><i data-feather="github"></i> --</span>
+      </div>
+
+      <div class="btn-group">
+        <a class="ambient-btn" href="https://twitter.com/greyvrita" target="_blank" aria-label="Twitter"><i data-feather="twitter"></i>Twitter</a>
+        <a class="ambient-btn" href="https://github.com/Judson-web" target="_blank" aria-label="GitHub"><i data-feather="github"></i>GitHub</a>
+        <a class="ambient-btn" data-modal="blog" aria-label="Blog"><i data-feather="book-open"></i>Blog</a>
+        <a class="ambient-btn" data-modal="contact" aria-label="Email"><i data-feather="mail"></i>Email</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Sections -->
+  <div id="about-modal" class="modal-overlay">
+    <div class="modal-content">
+      <i data-feather="x" class="close-modal" aria-label="Close modal"></i>
+      <h2>About Me</h2>
+      <p>I'm a creator driven by the fusion of technology and art. My background isn't linear; it's a path woven through poetry, the discipline of minimalism, and a deep-seated love for analytical thought. Today, these threads combine in my work as a creative developer.</p>
+      <p>My focus is on generative art, interactive design, and building digital experiences that feel both intelligent and human. This space is my digital sketchbook and a reflection of my ongoing projects. I'm currently exploring how to tell better stories with code. Welcome.</p>
+    </div>
+  </div>
+   <div id="projects-modal" class="modal-overlay">
+    <div class="modal-content">
+      <i data-feather="x" class="close-modal" aria-label="Close modal"></i>
+      <h2>GitHub Projects</h2>
+      <div id="projects-list"></div>
+    </div>
+  </div>
+  <div id="blog-modal" class="modal-overlay">
+    <div class="modal-content">
+      <i data-feather="x" class="close-modal" aria-label="Close modal"></i>
+      <h2>Creator's Log</h2>
+      <button id="generate-thought-btn" class="ambient-btn" style="margin-bottom: 1rem; width: 100%;">Generate a new thought</button>
+      <div id="blog-posts"></div>
+    </div>
+  </div>
+  <div id="contact-modal" class="modal-overlay">
+    <div class="modal-content terminal" id="terminal-container">
+        <i data-feather="x" class="close-modal" aria-label="Close modal"></i>
+        <h2>Contact Terminal</h2>
+        <div id="cli-output"></div>
+        <div class="cli-input-container">
+            <span id="cli-prompt-text">></span>
+            <input type="text" id="cli-input" autofocus autocomplete="off">
+            <div class="blinking-cursor"></div>
+        </div>
+    </div>
+  </div>
+
+  <!-- Command Palette -->
+  <div id="command-palette-overlay" class="modal-overlay">
+      <div class="command-palette">
+          <input type="text" id="command-input" placeholder="Type a command or search...">
+          <ul id="command-list" class="command-list"></ul>
+      </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <img src="https://api.netlify.com/api/v1/badges/6854b05d-ab34-4c4f-b4f4-91f4306a58b4/deploy-status" alt="Netlify Status" />
+    <span>&copy; 2025 Judson-web.</span>
+    <span>Press Ctrl+K to navigate.</span>
+  </footer>
+
+  <div id="toast" class="toast"></div>
+
+  <!-- Cookie Consent -->
+  <div class="cookie-banner" id="cookie-banner">
+    <span>
+      This site uses cookies for performance and experience. 
+      <a href="#" style="color:#9df; text-decoration:underline;">Learn more</a>
+    </span>
+    <button id="cookie-btn">Accept</button>
+  </div>
+
+  <script>
+    // --- INITIAL SETUP & HELPERS ---
+    const pageLoadTime = new Date();
+    feather.replace();
+
+    // [FIXED] Declare mouse object to track cursor coordinates
+    const mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+
+    const playSound = (note, type = 'sine', duration = '8n') => {
+        // Ensure Tone.js is ready before playing a sound
+        if (typeof Tone === 'undefined' || Tone.context.state !== 'running') return;
+        const synth = new Tone.Synth({
+            oscillator: { type },
+            envelope: { attack: 0.005, decay: 0.1, sustain: 0.3, release: 1 }
+        }).toDestination();
+        synth.triggerAttackRelease(note, duration);
+    };
+    // Initialize audio context on first user interaction
+    document.body.addEventListener('click', () => {
+        if (typeof Tone !== 'undefined' && Tone.context.state !== 'running') {
+            Tone.start();
+        }
+    }, { once: true });
+    
+    const showToast = (message) => {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3000);
+    };
+
+
+    // --- PRELOADER ---
+    window.addEventListener('load', () => {
+        document.getElementById('preloader').classList.add('loaded');
+    });
+
+
+    // --- THEME & ANIMATION MANAGEMENT ---
+    let activeAnimationId;
+    const applyTheme = (theme) => {
+        if (activeAnimationId) {
+            cancelAnimationFrame(activeAnimationId);
+        }
+        if (theme === 'light') {
+            document.body.classList.add('light-theme');
+            // Functions for animations will be defined later
+            if (typeof initOrbs === 'function') {
+                initOrbs();
+                animateDay();
+            }
+        } else {
+            document.body.classList.remove('light-theme');
+            if (typeof initAurora === 'function') {
+                initAurora();
+                animateAurora();
+            }
+        }
+        localStorage.setItem('theme', theme);
+    };
+    const toggleTheme = () => {
+        const currentTheme = localStorage.getItem('theme') || 'dark';
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        applyTheme(newTheme);
+        playSound(newTheme === 'light' ? 'C5' : 'G4', 'triangle');
+    };
+    
+
+    // --- COOKIE BANNER ---
+    const banner = document.getElementById("cookie-banner");
+    const button = document.getElementById("cookie-btn");
+    setTimeout(() => {
+        if (!localStorage.getItem("cookieAccepted")) banner.classList.add("show");
+    }, 1000);
+    button.addEventListener("click", () => {
+      localStorage.setItem("cookieAccepted", "true");
+      banner.classList.remove("show");
+    });
+
+    // --- 3D TILT EFFECT ---
+    const card = document.getElementById('profile-card');
+    if (card) {
+        card.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const { width, height } = rect;
+            const rotateX = (y / height - 0.5) * -15;
+            const rotateY = (x / width - 0.5) * 15;
+            card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+        });
+        card.addEventListener('mouseleave', () => {
+            card.style.transform = 'rotateX(0deg) rotateY(0deg)';
+        });
+    }
+
+    // --- MODAL LOGIC ---
+    const openModal = (modalId) => {
+        const modal = document.getElementById(`${modalId}-modal`);
+        if (!modal) return;
+        modal.classList.add('active');
+        playSound('C4', 'triangle');
+        if(modalId === 'contact') {
+            document.getElementById('cli-input').focus();
+            cli.init();
+        }
+        if (modalId === 'projects') {
+            renderProjects();
+        }
+    };
+    const closeModal = (modal) => {
+        if (!modal) return;
+        modal.classList.remove('active');
+        playSound('C3', 'triangle', '16n');
+    };
+
+    document.querySelectorAll('[data-modal]').forEach(el => {
+        el.addEventListener('click', () => openModal(el.getAttribute('data-modal')));
+    });
+    document.querySelectorAll('.close-modal').forEach(el => {
+        el.addEventListener('click', () => closeModal(el.closest('.modal-overlay')));
+    });
+    document.querySelectorAll('.modal-overlay').forEach(el => {
+        el.addEventListener('click', (e) => {
+            if (e.target === el) closeModal(el);
+        });
+    });
+
+    // --- STATUS WIDGET & GREETING ---
+    function updateTime() {
+        const timeWidget = document.getElementById('time-widget');
+        const greetingEl = document.getElementById('greeting');
+        if (!timeWidget || !greetingEl) return;
+
+        const now = new Date();
+        const timeOptions = { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: true };
+        const timeString = new Intl.DateTimeFormat('en-US', timeOptions).format(now);
+        timeWidget.innerHTML = `<i data-feather="clock"></i> ${timeString}`;
+
+        const hourOptions = { timeZone: 'Asia/Kolkata', hour: 'numeric', hour12: false };
+        const hour = parseInt(new Intl.DateTimeFormat('en-US', hourOptions).format(now));
+        
+        let greeting = "Welcome.";
+        if (hour >= 5 && hour < 12) greeting = "Good morning.";
+        else if (hour >= 12 && hour < 17) greeting = "Good afternoon.";
+        else if (hour >= 17 && hour < 22) greeting = "Good evening.";
+        else greeting = "Burning the midnight oil?";
+        
+        greetingEl.textContent = greeting;
+
+        feather.replace();
+    }
+
+    async function updateWeather() {
+        const weatherWidget = document.getElementById('weather-widget');
+        if (!weatherWidget) return;
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+        try {
+            // [FIXED] Changed location to a larger city for better API reliability.
+            const response = await fetch('https://wttr.in/Kochi?format=j1', {
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+
+            if (!response.ok) {
+                throw new Error(`Weather API returned status ${response.status}`);
+            }
+            const data = await response.json();
+            const temp = data.current_condition[0].temp_C;
+            const weatherDesc = data.current_condition[0].weatherDesc[0].value.toLowerCase();
+            
+            let icon = 'sun';
+            if (weatherDesc.includes('rain') || weatherDesc.includes('drizzle')) icon = 'cloud-rain';
+            else if (weatherDesc.includes('cloudy') || weatherDesc.includes('overcast')) icon = 'cloud';
+            else if (weatherDesc.includes('thunder') || weatherDesc.includes('storm')) icon = 'cloud-lightning';
+            else if (weatherDesc.includes('snow') || weatherDesc.includes('sleet')) icon = 'cloud-snow';
+            else if (weatherDesc.includes('mist') || weatherDesc.includes('fog')) icon = 'wind';
+
+            weatherWidget.innerHTML = `<i data-feather="${icon}"></i> ${temp}°C`;
+        } catch (error) {
+            clearTimeout(timeoutId);
+            // [FIXED] Improved error logging
+            console.error("Failed to fetch weather:", error.message);
+            weatherWidget.innerHTML = `<i data-feather="cloud-off"></i> N/A`;
+            if (error.name !== 'AbortError') {
+                showToast('API Error: Could not fetch weather data.');
+            }
+        }
+        feather.replace();
+    }
+    
+    async function updateGitHubStats() {
+        const widget = document.getElementById('github-widget');
+        if (!widget) return;
+        try {
+            const response = await fetch('https://api.github.com/users/Judson-web');
+            if (!response.ok) throw new Error('GitHub API error');
+            const data = await response.json();
+            widget.innerHTML = `<i data-feather="github"></i> ${data.followers} / ${data.public_repos}`;
+            feather.replace();
+        } catch (e) {
+            console.error("Failed to fetch GitHub stats:", e);
+            widget.innerHTML = `<i data-feather="github"></i> N/A`;
+            showToast('API Error: Could not fetch GitHub stats.');
+        }
+    }
+
+    // --- DYNAMIC CONTENT ---
+    let blogPosts = [
+        { title: 'The Art of Imperfection in Code', date: '2025-07-20', snippet: 'Why "good enough" is often better than perfect. A look at shipping projects and embracing the beauty of wabi-sabi in development.' },
+        { title: 'From Sonnets to Scripts: A Creative Evolution', date: '2025-07-15', snippet: 'How the constraints and structures of poetry informed my approach to writing elegant, readable code.' },
+    ];
+    function renderBlogPosts() {
+        const container = document.getElementById('blog-posts');
+        if (!container) return;
+        container.innerHTML = blogPosts.map(post => `
+            <div class="blog-post">
+                <h3>${post.title}</h3>
+                <div class="date">${post.date}</div>
+                <p>${post.snippet}</p>
+            </div>
+        `).join('');
+    }
+    
+    async function renderProjects() {
+        const container = document.getElementById('projects-list');
+        if (!container) return;
+        container.innerHTML = '<p>Fetching projects...</p>';
+        try {
+            const response = await fetch('https://api.github.com/users/Judson-web/repos?sort=updated&direction=desc');
+            if (!response.ok) throw new Error('Could not fetch projects');
+            const repos = await response.json();
+            container.innerHTML = repos.slice(0, 5).map(repo => `
+                <div class="project-card">
+                    <h3><a href="${repo.html_url}" target="_blank">${repo.name}</a></h3>
+                    <p>${repo.description || 'No description available.'}</p>
+                    <div class="stats">
+                        <span><i data-feather="star"></i> ${repo.stargazers_count}</span>
+                        <span><i data-feather="git-branch"></i> ${repo.forks_count}</span>
+                    </div>
+                </div>
+            `).join('');
+            feather.replace();
+        } catch (e) {
+            container.innerHTML = '<p>Could not load projects at this time.</p>';
+            showToast('API Error: Could not fetch GitHub projects.');
+        }
+    }
+
+
+    // --- GEMINI AI INTEGRATION ---
+    const GEMINI_API_KEY = 'AIzaSyAbNOLkeSrB7hr6zb6HKdtl87ErXp3p9Eo'; // Note: Exposing API keys client-side is risky. Use a backend proxy for production.
+    const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+
+    async function callGemini(prompt) {
+        try {
+            const response = await fetch(GEMINI_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+            });
+            if (!response.ok) throw new Error(`API Error: ${response.status}`);
+            const data = await response.json();
+            return data.candidates[0].content.parts[0].text;
+        } catch (error) {
+            console.error("Gemini API call failed:", error);
+            showToast("AI Error: Could not get a response.");
+            return null;
+        }
+    }
+
+    const generateThoughtBtn = document.getElementById('generate-thought-btn');
+    if (generateThoughtBtn) {
+        generateThoughtBtn.addEventListener('click', async () => {
+            generateThoughtBtn.textContent = 'Generating...';
+            generateThoughtBtn.disabled = true;
+            
+            const prompt = "Generate a short, creative blog post about the intersection of art, code, and minimalism. The response should be in JSON format with two keys: 'title' (a creative, short title) and 'snippet' (a 2-3 sentence thought).";
+            const responseText = await callGemini(prompt);
+
+            if (responseText) {
+                try {
+                    const jsonString = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
+                    const thought = JSON.parse(jsonString);
+                    const now = new Date();
+                    const newPost = {
+                        title: thought.title || 'AI Generated Thought',
+                        date: now.toISOString().split('T')[0],
+                        snippet: thought.snippet || 'No content generated.'
+                    };
+                    blogPosts.unshift(newPost);
+                    renderBlogPosts();
+                } catch (e) {
+                    console.error("Failed to parse AI response:", e);
+                    showToast("AI Error: Could not parse response.");
+                }
+            }
+            
+            generateThoughtBtn.textContent = 'Generate a new thought';
+            generateThoughtBtn.disabled = false;
+        });
+    }
+
+    // --- COMMAND PALETTE LOGIC (Placeholder) ---
+    // ... Full implementation would go here ...
+
+
+    // --- CLI CONTACT FORM [FIXED] ---
+    const cli = {
+        outputElement: document.getElementById('cli-output'),
+        inputElement: document.getElementById('cli-input'),
+        history: [],
+        historyIndex: -1,
+        isInitialized: false,
+
+        init() {
+            if (this.isInitialized || !this.outputElement) return;
+            this.outputElement.innerHTML = '';
+            this.log('response', "Contact Terminal v2.3. Type 'help' for commands.");
+            this.isInitialized = true;
+        },
+
+        log(type, message) {
+            if (!this.outputElement) return;
+            const line = document.createElement('div');
+            line.className = `cli-line cli-${type}`;
+            line.textContent = message;
+            this.outputElement.appendChild(line);
+            this.outputElement.scrollTop = this.outputElement.scrollHeight;
+        },
+
+        handleInput(e) {
+            if (e.key === 'Enter' && this.inputElement.value.trim() !== '') {
+                const value = this.inputElement.value.trim();
+                this.log('prompt', `> ${value}`);
+                this.history.unshift(value);
+                this.historyIndex = -1;
+                this.executeCommand(value);
+                this.inputElement.value = '';
+            } else if (e.key === 'ArrowUp') {
+                if (this.historyIndex < this.history.length - 1) {
+                    this.historyIndex++;
+                    this.inputElement.value = this.history[this.historyIndex];
+                }
+            } else if (e.key === 'ArrowDown') {
+                if (this.historyIndex > 0) {
+                    this.historyIndex--;
+                    this.inputElement.value = this.history[this.historyIndex];
+                } else {
+                    this.historyIndex = -1;
+                    this.inputElement.value = '';
+                }
+            }
+        },
+
+        async executeCommand(value) {
+            const [command, ...args] = value.split(' ');
+            const commands = {
+                'help': () => {
+                    this.log('response', 'Available commands: help, clear, whoami, date, contact, ask [question]');
+                },
+                'clear': () => {
+                    this.outputElement.innerHTML = '';
+                },
+                'whoami': () => {
+                    this.log('response', 'You are a curious visitor on my digital domain.');
+                },
+                'date': () => {
+                    this.log('response', new Date().toLocaleString());
+                },
+                'contact': () => {
+                    this.log('response', 'Reach out via email: example@judson-web.com');
+                },
+                'ask': async () => {
+                    const prompt = args.join(' ');
+                    if (!prompt) {
+                        this.log('error', 'Usage: ask [your question]');
+                        return;
+                    }
+                    this.log('response', 'Thinking...');
+                    const response = await callGemini(prompt);
+                    if (response) {
+                        this.log('response', response);
+                    } else {
+                        this.log('error', 'The AI is currently offline.');
+                    }
+                },
+                'default': () => {
+                    this.log('error', `Command not found: ${command}. Type 'help' for a list of commands.`);
+                }
+            };
+            const action = commands[command] || commands['default'];
+            action();
+        }
+    };
+    if (cli.inputElement) {
+        cli.inputElement.addEventListener('keydown', (e) => cli.handleInput(e));
+    }
+    
+    // --- KONAMI CODE EASTER EGG (Placeholder) ---
+    // ... Full implementation would go here ...
+
+    // --- ANIMATION LOGIC (Placeholders, requires full definition) ---
+    function initAurora() { console.log("Aurora animation started."); }
+    function animateAurora() { activeAnimationId = requestAnimationFrame(animateAurora); }
+    function initOrbs() { console.log("Day animation started."); }
+    function animateDay() { activeAnimationId = requestAnimationFrame(animateDay); }
+
+    // --- [NEW] CANVAS RESIZING FUNCTION ---
+    function resizeAllCanvases() {
+        const canvases = document.querySelectorAll('.background-canvas');
+        canvases.forEach(canvas => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    }
+    
+    // --- INITIALIZATION ---
+    function initializePage() {
+        resizeAllCanvases();
+        applyTheme(localStorage.getItem('theme') || 'dark');
+        updateTime();
+        updateWeather();
+        updateGitHubStats();
+        renderBlogPosts();
+        setInterval(updateTime, 60000);
+        setInterval(updateWeather, 30 * 60 * 1000);
+        setInterval(updateGitHubStats, 60 * 60 * 1000);
+    }
+
+    // Event Listeners
+    window.addEventListener("resize", () => {
+      resizeAllCanvases();
+      // Re-apply theme to re-initialize animations with new dimensions
+      applyTheme(localStorage.getItem('theme') || 'dark');
+    });
+
+    window.addEventListener('mousemove', (e) => {
+        mouse.x = e.clientX;
+        mouse.y = e.clientY;
+    });
+    
+    // Run initialization after the DOM is fully loaded
+    document.addEventListener('DOMContentLoaded', initializePage);
+
+  </script>
+</body>
+</html>
+
