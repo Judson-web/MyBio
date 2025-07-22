@@ -656,7 +656,7 @@
 
   <!-- Command Palette -->
   <div id="command-palette-overlay" class="modal-overlay">
-      <div class="command-palette">
+      <div class="modal-content command-palette">
           <input type="text" id="command-input" placeholder="Type a command or search...">
           <ul id="command-list" class="command-list"></ul>
       </div>
@@ -980,11 +980,103 @@
         });
     }
 
-    // --- COMMAND PALETTE LOGIC (Placeholder) ---
-    // ... Full implementation would go here ...
+    // --- [NEW] COMMAND PALETTE LOGIC ---
+    const commandPaletteOverlay = document.getElementById('command-palette-overlay');
+    const commandInput = document.getElementById('command-input');
+    const commandList = document.getElementById('command-list');
+    let selectedCommandIndex = 0;
+
+    const commands = [
+        { name: 'Toggle Theme', icon: 'moon', action: () => { toggleTheme(); closeCommandPalette(); } },
+        { name: 'Open About', icon: 'user', action: () => { openModal('about'); closeCommandPalette(); } },
+        { name: 'Open Projects', icon: 'briefcase', action: () => { openModal('projects'); closeCommandPalette(); } },
+        { name: 'Open Blog', icon: 'book-open', action: () => { openModal('blog'); closeCommandPalette(); } },
+        { name: 'Open Contact', icon: 'mail', action: () => { openModal('contact'); closeCommandPalette(); } },
+        { name: 'View on GitHub', icon: 'github', action: () => { window.open('https://github.com/Judson-web', '_blank'); closeCommandPalette(); } },
+    ];
+
+    function openCommandPalette() {
+        commandPaletteOverlay.classList.add('active');
+        renderCommands(commands);
+        commandInput.focus();
+        playSound('A4', 'pluck');
+    }
+
+    function closeCommandPalette() {
+        commandPaletteOverlay.classList.remove('active');
+        commandInput.value = '';
+    }
+
+    function renderCommands(items) {
+        commandList.innerHTML = items.map(item => `
+            <li class="command-item" data-action="${item.name}">
+                <i data-feather="${item.icon}"></i>
+                <span>${item.name}</span>
+            </li>
+        `).join('');
+        feather.replace();
+        updateSelectedCommand();
+    }
+
+    function updateSelectedCommand() {
+        document.querySelectorAll('.command-item').forEach((item, index) => {
+            if (index === selectedCommandIndex) {
+                item.classList.add('selected');
+                item.scrollIntoView({ block: 'nearest' });
+            } else {
+                item.classList.remove('selected');
+            }
+        });
+    }
+
+    commandInput.addEventListener('input', () => {
+        const query = commandInput.value.toLowerCase();
+        const filtered = commands.filter(c => c.name.toLowerCase().includes(query));
+        selectedCommandIndex = 0;
+        renderCommands(filtered);
+    });
+
+    commandInput.addEventListener('keydown', (e) => {
+        const items = commandList.querySelectorAll('.command-item');
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            selectedCommandIndex = (selectedCommandIndex + 1) % items.length;
+            updateSelectedCommand();
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            selectedCommandIndex = (selectedCommandIndex - 1 + items.length) % items.length;
+            updateSelectedCommand();
+        } else if (e.key === 'Enter') {
+            const selectedItem = items[selectedCommandIndex];
+            if (selectedItem) {
+                const actionName = selectedItem.dataset.action;
+                const command = commands.find(c => c.name === actionName);
+                if (command) command.action();
+            }
+        } else if (e.key === 'Escape') {
+            closeCommandPalette();
+        }
+    });
+
+    commandList.addEventListener('click', (e) => {
+        const item = e.target.closest('.command-item');
+        if (item) {
+            const actionName = item.dataset.action;
+            const command = commands.find(c => c.name === actionName);
+            if (command) command.action();
+        }
+    });
+
+    // Global keyboard shortcut for command palette
+    document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.key === 'k') {
+            e.preventDefault();
+            openCommandPalette();
+        }
+    });
 
 
-    // --- CLI CONTACT FORM [FIXED] ---
+    // --- CLI CONTACT FORM [UPDATED] ---
     const cli = {
         outputElement: document.getElementById('cli-output'),
         inputElement: document.getElementById('cli-input'),
@@ -995,7 +1087,16 @@
         init() {
             if (this.isInitialized || !this.outputElement) return;
             this.outputElement.innerHTML = '';
-            this.log('response', "Contact Terminal v2.3. Type 'help' for commands.");
+            const judsonAscii = `
+  _           _                     
+ | |         | |                    
+ | | ____   _| | ____  ____   ____  
+ | |/ ___) /_  |/ _  )/ ___) / ___) 
+ | | |    (  _ ( (/ /| |    | |     
+ |_|_|     \\_)_)\\____)_|    |_|     
+`;
+            this.log('prompt', judsonAscii);
+            this.log('response', "Contact Terminal v2.4. Type 'help' for commands.");
             this.isInitialized = true;
         },
 
@@ -1036,10 +1137,10 @@
             const [command, ...args] = value.split(' ');
             const commands = {
                 'help': () => {
-                    this.log('response', 'Available commands: help, clear, whoami, date, contact, ask [question]');
+                    this.log('response', 'Available commands: help, clear, whoami, date, contact, ask [question], cmd');
                 },
                 'clear': () => {
-                    this.outputElement.innerHTML = '';
+                    this.init();
                 },
                 'whoami': () => {
                     this.log('response', 'You are a curious visitor on my digital domain.');
@@ -1049,6 +1150,10 @@
                 },
                 'contact': () => {
                     this.log('response', 'Reach out via email: example@judson-web.com');
+                },
+                'cmd': () => {
+                    this.log('response', 'Opening command palette...');
+                    openCommandPalette();
                 },
                 'ask': async () => {
                     const prompt = args.join(' ');
@@ -1076,7 +1181,7 @@
         cli.inputElement.addEventListener('keydown', (e) => cli.handleInput(e));
     }
     
-    // --- [FIXED] KONAMI CODE EASTER EGG ---
+    // --- KONAMI CODE EASTER EGG ---
     const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
     let konamiIndex = 0;
     let konamiTimeout;
@@ -1131,7 +1236,7 @@
     }
 
 
-    // --- [FIXED] ANIMATION LOGIC ---
+    // --- ANIMATION LOGIC ---
     let auroraLines = [];
     let orbs = [];
 
