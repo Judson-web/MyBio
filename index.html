@@ -338,7 +338,7 @@
         box-sizing: border-box;
         opacity: 0;
         visibility: hidden;
-        transition: opacity 0.4s ease, visibility 0.4s ease;
+        transition: opacity 0.3s ease, visibility 0.3s ease; /* Adjusted transition for fade */
     }
     .light-theme .modal-overlay {
         background: rgba(255,255,255,0.1);
@@ -359,8 +359,8 @@
         max-width: 600px;
         max-height: 90vh;
         overflow-y: auto;
-        transform: scale(0.9);
-        transition: transform 0.4s ease, background 0.4s ease, border-color 0.4s ease;
+        transform: scale(0.95); /* Start slightly smaller for subtle zoom */
+        transition: transform 0.3s ease, background 0.4s ease, border-color 0.4s ease; /* Adjusted transition */
         position: relative;
     }
     .modal-overlay.active .modal-content {
@@ -475,6 +475,94 @@
         margin: 0;
         font-size: 1rem;
         color: var(--text-color);
+    }
+
+    /* Ex-Timeline specific styles */
+    .timeline {
+        position: relative;
+        padding: 20px 0;
+        margin: 20px 0;
+    }
+    .timeline::before {
+        content: '';
+        position: absolute;
+        width: 2px;
+        background: var(--card-border);
+        top: 0;
+        bottom: 0;
+        left: 50%;
+        margin-left: -1px;
+    }
+    .timeline-item {
+        margin-bottom: 20px;
+        position: relative;
+        width: 50%;
+        padding: 10px 40px;
+        box-sizing: border-box;
+    }
+    .timeline-item:nth-child(odd) {
+        left: 0;
+        text-align: right;
+    }
+    .timeline-item:nth-child(even) {
+        left: 50%;
+        text-align: left;
+    }
+    .timeline-item-content {
+        background: rgba(0,0,0,0.1);
+        border: 1px solid var(--card-border);
+        border-radius: 12px;
+        padding: 15px;
+        position: relative;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .timeline-item-content:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    }
+    .timeline-item-content h3 {
+        margin-top: 0;
+        color: var(--glow-color-1);
+    }
+    .timeline-item-content .date {
+        font-size: 0.85rem;
+        color: #888;
+        margin-bottom: 5px;
+    }
+    .timeline-item-content p {
+        font-size: 0.95rem;
+        color: var(--dim-text-color);
+    }
+    .timeline-item::after {
+        content: '';
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        right: -8px;
+        background: var(--glow-color-2);
+        border: 2px solid var(--card-border);
+        top: 15px;
+        border-radius: 50%;
+        z-index: 1;
+    }
+    .timeline-item:nth-child(even)::after {
+        left: -8px;
+    }
+    @media (max-width: 600px) {
+        .timeline::before {
+            left: 10px;
+        }
+        .timeline-item {
+            width: 100%;
+            padding-left: 40px;
+            padding-right: 10px;
+            left: 0 !important;
+            text-align: left !important;
+        }
+        .timeline-item::after {
+            left: 2px !important;
+            right: auto;
+        }
     }
 
 
@@ -647,7 +735,8 @@
       <a data-modal="about" aria-label="About">About</a>
       <a data-modal="projects" aria-label="Projects">Projects</a>
       <a data-modal="blog" aria-label="Blog">Blog</a>
-      <a data-modal="tools" aria-label="My Tools">My Tools</a> <!-- NEW: My Tools link -->
+      <a data-modal="tools" aria-label="My Tools">My Tools</a>
+      <a data-modal="timeline" aria-label="Ex-Timeline">Ex-Timeline</a> <!-- NEW: Ex-Timeline link -->
       <a data-modal="contact" aria-label="Contact">Contact</a>
     </nav>
   </header>
@@ -705,13 +794,23 @@
       <div id="blog-posts"></div>
     </div>
   </div>
-  <div id="tools-modal" class="modal-overlay"> <!-- NEW: My Tools Modal -->
+  <div id="tools-modal" class="modal-overlay">
     <div class="modal-content">
       <i data-feather="x" class="close-modal" aria-label="Close modal"></i>
       <h2>My Tools & Stack</h2>
       <p>Here are some of the technologies and tools I frequently use in my creative and development work:</p>
       <div id="tools-list" class="tools-grid">
         <!-- Tools will be rendered here by JavaScript -->
+      </div>
+    </div>
+  </div>
+  <div id="timeline-modal" class="modal-overlay"> <!-- NEW: Ex-Timeline Modal -->
+    <div class="modal-content">
+      <i data-feather="x" class="close-modal" aria-label="Close modal"></i>
+      <h2>The Ex-Timeline: My Creative Evolution</h2>
+      <p>A journey through the phases that have shaped my approach to creation.</p>
+      <div id="ex-timeline-content" class="timeline">
+        <!-- Timeline items will be rendered here by JavaScript -->
       </div>
     </div>
   </div>
@@ -738,8 +837,9 @@
 
   <!-- Footer -->
   <footer>
-    <!-- IMPORTANT: Replace the placeholder ID with your actual Netlify Site ID -->
-    <img src="https://api.netlify.com/api/v1/badges/d4f9d6b1-9b2a-4f1b-8461-9e7912345678/deploy-status" alt="Netlify Status" />
+    <!-- IMPORTANT: Replace 'YOUR_NETLIFY_SITE_ID_HERE' with your actual Netlify Site ID -->
+    <!-- You can find this in your Netlify dashboard under Site settings > General > Site information > API ID -->
+    <img src="https://api.netlify.com/api/v1/badges/YOUR_NETLIFY_SITE_ID_HERE/deploy-status" alt="Netlify Status" />
     <span>&copy; 2025 Judson Saji.</span>
     <span>Press Ctrl+K to navigate.</span>
   </footer>
@@ -890,8 +990,11 @@
         if (modalId === 'projects') {
             renderProjects();
         }
-        if (modalId === 'tools') { // NEW: Render tools when tools modal opens
+        if (modalId === 'tools') {
             renderTools();
+        }
+        if (modalId === 'timeline') { // NEW: Render timeline when timeline modal opens
+            renderExTimeline();
         }
     };
     const closeModal = (modal) => {
@@ -1084,6 +1187,28 @@
         feather.replace(); // Ensure new icons are rendered
     }
 
+    // NEW: Ex-Timeline Data and Render Function
+    const exTimelineData = [
+        { year: 'Early Days', title: 'ExPoet', description: 'My initial foray into creative expression, exploring rhythm, metaphor, and the power of concise language through poetry. This phase honed my ability to convey complex ideas efficiently.', icon: 'feather' },
+        { year: 'Mid-Journey', title: 'ExMinimalist', description: 'A period focused on stripping away the unnecessary, seeking elegance and efficiency in all aspects. This philosophy deeply influenced my approach to clean code and user-centric design.', icon: 'maximize' },
+        { year: 'Transition', title: 'ExThinker', description: 'A phase of deep introspection and philosophical inquiry, questioning assumptions and exploring complex systems. This cultivated my analytical problem-solving skills, crucial for development.', icon: 'brain' }, /* using brain as a placeholder */
+        { year: 'Present', title: 'NowCreator', description: 'The culmination of my journey, where poetry, minimalism, and analytical thought converge into building interactive digital experiences and generative art. This is where ideas become reality.', icon: 'code' }
+    ];
+
+    function renderExTimeline() {
+        const container = document.getElementById('ex-timeline-content');
+        if (!container) return;
+        container.innerHTML = exTimelineData.map(item => `
+            <div class="timeline-item">
+                <div class="timeline-item-content">
+                    <h3>${item.title} (${item.year})</h3>
+                    <p>${item.description}</p>
+                </div>
+            </div>
+        `).join('');
+        feather.replace(); // Ensure new icons are rendered
+    }
+
 
     // --- GEMINI AI INTEGRATION (NOW USING NETLIFY FUNCTIONS) ---
 
@@ -1147,7 +1272,8 @@
         { name: 'Open About', icon: 'user', action: () => { openModal('about'); closeCommandPalette(); } },
         { name: 'Open Projects', icon: 'briefcase', action: () => { openModal('projects'); closeCommandPalette(); } },
         { name: 'Open Blog', icon: 'book-open', action: () => { openModal('blog'); closeCommandPalette(); } },
-        { name: 'Open My Tools', icon: 'tool', action: () => { openModal('tools'); closeCommandPalette(); } }, <!-- NEW: Command for My Tools -->
+        { name: 'Open My Tools', icon: 'tool', action: () => { openModal('tools'); closeCommandPalette(); } },
+        { name: 'Open Ex-Timeline', icon: 'clock', action: () => { openModal('timeline'); closeCommandPalette(); } }, <!-- NEW: Command for Ex-Timeline -->
         { name: 'Open Contact', icon: 'mail', action: () => { openModal('contact'); closeCommandPalette(); } },
         { name: 'View on GitHub', icon: 'github', action: () => { window.open('https://github.com/Judson-web', '_blank'); closeCommandPalette(); } },
     ];
@@ -1243,18 +1369,17 @@
     });
 
 
-    // --- CLI CONTACT FORM (REVISED FOR MEMORY RETENTION & NEW COMMANDS) ---
+    // --- CLI CONTACT FORM ---
     const cli = {
-        outputElement: null, // Initialized in setupUI
-        inputElement: null,  // Initialized in setupUI
-        history: [], // Command history
+        outputElement: null,
+        inputElement: null,
+        history: [],
         historyIndex: -1,
         isTyping: false,
         thinkingInterval: null,
-        chatHistory: [], // AI conversation history (persists across modal opens)
-        aiQueryCount: 0, // Track number of AI queries
+        chatHistory: [],
+        aiQueryCount: 0,
 
-        // New function to set up UI elements and event listeners once
         setupUI() {
             this.outputElement = document.getElementById('cli-output');
             this.inputElement = document.getElementById('cli-input');
@@ -1264,10 +1389,9 @@
             }
         },
 
-        // New function to show the initial welcome message (can be called multiple times)
         showWelcome() {
             if (!this.outputElement) return;
-            this.outputElement.innerHTML = ''; // Clear existing content
+            this.outputElement.innerHTML = '';
             const judsonAscii = `
 _           _                     _   _
 | |         | |                   | | (_)
@@ -1816,7 +1940,7 @@ _           _                     _   _
         mouseVelocityX = e.clientX - lastMouseX;
         mouseVelocityY = e.clientY - lastMouseY;
         lastMouseX = e.clientX;
-        lastMouseY = e.clientY; // Fixed: Changed e.y to e.clientY for consistency
+        lastMouseY = e.clientY;
     });
     
     // Ensure cli.setupUI() runs before initializePage()
