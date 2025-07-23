@@ -706,16 +706,30 @@
     const mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
 
     const playSound = (note, type = 'sine', duration = '8n') => {
-        if (typeof Tone === 'undefined' || Tone.context.state !== 'running') return;
-        const synth = new Tone.Synth({
-            oscillator: { type },
-            envelope: { attack: 0.005, decay: 0.1, sustain: 0.3, release: 1 }
-        }).toDestination();
-        synth.triggerAttackRelease(note, duration);
+        if (typeof Tone === 'undefined') return; // Ensure Tone.js is loaded
+        // Attempt to resume AudioContext if it's suspended (common on mobile/tab switches)
+        if (Tone.context.state !== 'running' && Tone.context.state !== 'closed') {
+            Tone.context.resume().then(() => {
+                console.log("AudioContext resumed successfully.");
+                const synth = new Tone.Synth({
+                    oscillator: { type },
+                    envelope: { attack: 0.005, decay: 0.1, sustain: 0.3, release: 1 }
+                }).toDestination();
+                synth.triggerAttackRelease(note, duration);
+            }).catch(e => console.error("Failed to resume AudioContext:", e));
+        } else if (Tone.context.state === 'running') {
+            const synth = new Tone.Synth({
+                oscillator: { type },
+                envelope: { attack: 0.005, decay: 0.1, sustain: 0.3, release: 1 }
+            }).toDestination();
+            synth.triggerAttackRelease(note, duration);
+        }
     };
+
+    // Ensure Tone.start() is called after a user gesture
     document.body.addEventListener('click', () => {
         if (typeof Tone !== 'undefined' && Tone.context.state !== 'running') {
-            Tone.start();
+            Tone.start().then(() => console.log("Tone.js started successfully on user gesture.")).catch(e => console.error("Failed to start Tone.js:", e));
         }
     }, { once: true });
     
@@ -811,7 +825,7 @@
         if(modalId === 'contact') {
             const cliInput = document.getElementById('cli-input');
             if (cliInput) cliInput.focus();
-            cli.init();
+            // IMPORTANT: Removed cli.init() from here to prevent chat history reset
         }
         if (modalId === 'projects') {
             renderProjects();
@@ -960,12 +974,7 @@
 
     // --- GEMINI AI INTEGRATION (NOW USING NETLIFY FUNCTIONS) ---
 
-    // REMOVE OR COMMENT OUT THE OLD INSECURE API KEY FETCHING LOGIC
-    // let chatHistory = []; // This chatHistory is now managed within the cli object for the 'ask' command
-    // let cachedApiKey = null;
-    // const apiKeyUrl = 'https://firebasestorage.googleapis.com/v0/b/crnn-b7d8f.appspot.com/o/files%2Fgeminiapikey.txt?alt=media&token=3dbe7f3e-32e9-40eb-acec-7dec6445e675';
-    // async function getApiKey() { /* ... */ }
-    // async function callGemini(prompt) { /* ... */ }
+    // REMOVED: Old insecure API key fetching logic and direct Gemini API calls.
 
     const generateThoughtBtn = document.getElementById('generate-thought-btn');
     if (generateThoughtBtn) {
@@ -973,8 +982,6 @@
             generateThoughtBtn.textContent = 'Generating...';
             generateThoughtBtn.disabled = true;
 
-            // The prompt for the AI. This will be sent to your Netlify Function.
-            // The Netlify Function `generate-thought.js` is configured to return JSON directly.
             const prompt = "Generate a short, creative blog post about the intersection of art, code, and minimalism. The response should be in JSON format with two keys: 'title' (a creative, short title) and 'snippet' (a 2-3 sentence thought).";
 
             try {
@@ -992,9 +999,7 @@
                     throw new Error(errorData.message || `Netlify Function error! Status: ${response.status}`);
                 }
 
-                // Parse the JSON response from your Netlify Function
-                // The function is designed to return { title: "...", snippet: "..." } directly
-                const thought = await response.json(); // Expects { title: "...", snippet: "..." }
+                const thought = await response.json();
 
                 if (thought && thought.title && thought.snippet) {
                     const now = new Date();
@@ -1003,8 +1008,8 @@
                         date: now.toISOString().split('T')[0],
                         snippet: thought.snippet
                     };
-                    blogPosts.unshift(newPost); // Add to your existing blogPosts array
-                    renderBlogPosts(); // Re-render the blog posts list
+                    blogPosts.unshift(newPost);
+                    renderBlogPosts();
                 } else {
                     console.error("Unexpected response structure from Netlify Function:", thought);
                     showToast("AI Error: Generated content was not in the expected format.");
@@ -1021,7 +1026,7 @@
     }
 
 
-    // --- COMMAND PALETTE LOGIC (Keep as is) ---
+    // --- COMMAND PALETTE LOGIC ---
     const commandPaletteOverlay = document.getElementById('command-palette-overlay');
     const commandInput = document.getElementById('command-input');
     const commandList = document.getElementById('command-list');
@@ -1127,21 +1132,30 @@
     });
 
 
-    // --- CLI CONTACT FORM [UPDATED TO USE NETLIFY FUNCTION FOR 'ask'] ---
+    // --- CLI CONTACT FORM (REVISED FOR MEMORY RETENTION) ---
     const cli = {
-        outputElement: document.getElementById('cli-output'),
-        inputElement: document.getElementById('cli-input'),
-        history: [],
+        outputElement: null, // Initialized in setupUI
+        inputElement: null,  // Initialized in setupUI
+        history: [], // Command history
         historyIndex: -1,
-        isInitialized: false,
         isTyping: false,
         thinkingInterval: null,
-        chatHistory: [], // Keep chat history for the 'ask' command within the CLI
+        chatHistory: [], // AI conversation history (persists across modal opens)
 
-        init() {
-            if (this.isInitialized) return;
-            if (!this.outputElement || !this.inputElement) return; // Ensure elements exist
-            this.outputElement.innerHTML = '';
+        // New function to set up UI elements and event listeners once
+        setupUI() {
+            this.outputElement = document.getElementById('cli-output');
+            this.inputElement = document.getElementById('cli-input');
+
+            if (this.inputElement) {
+                this.inputElement.addEventListener('keydown', (e) => this.handleInput(e));
+            }
+        },
+
+        // New function to show the initial welcome message (can be called multiple times)
+        showWelcome() {
+            if (!this.outputElement) return;
+            this.outputElement.innerHTML = ''; // Clear existing content
             const judsonAscii = `
 _           _                     _   _
 | |         | |                   | | (_)
@@ -1152,10 +1166,9 @@ _           _                     _   _
 `;
             this.log('prompt', judsonAscii);
             this.typeLog('response', "Contact Terminal v2.8. Type 'help' for commands.", () => {
-                this.inputElement.disabled = false;
-                this.inputElement.focus();
+                if (this.inputElement) this.inputElement.disabled = false;
+                if (this.inputElement) this.inputElement.focus();
             });
-            this.isInitialized = true;
         },
 
         log(type, message) {
@@ -1254,7 +1267,7 @@ _           _                     _   _
                     const helpText = [
                         'Available commands:',
                         '  help      - Show this help message',
-                        '  clear     - Clear the terminal screen',
+                        '  clear     - Clear the terminal screen (resets AI memory)',
                         '  whoami    - Display user information',
                         '  date      - Show the current date and time',
                         '  contact   - Display contact information',
@@ -1268,9 +1281,8 @@ _           _                     _   _
                     this.typeLog('success', helpText);
                 },
                 'clear': () => {
-                    this.isInitialized = false;
-                    this.chatHistory = []; // Clear AI memory for CLI
-                    this.init();
+                    this.chatHistory = []; // ONLY clear AI memory here
+                    this.showWelcome(); // Re-display welcome message
                 },
                 'whoami': () => {
                     this.typeLog('response', 'You are a curious visitor on my digital domain.');
@@ -1322,7 +1334,7 @@ _           _                     _   _
                         // Send the current chat history along with the new prompt to the Netlify Function
                         this.chatHistory.push({ role: "user", parts: [{ text: fullPrompt }] });
 
-                        const response = await fetch('/.netlify/functions/ask-gemini', { // <-- Calls your new ask-gemini.js function
+                        const response = await fetch('/.netlify/functions/ask-gemini', { // <-- Calls your ask-gemini.js function
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ prompt: fullPrompt, history: this.chatHistory }), // Pass history
@@ -1356,10 +1368,12 @@ _           _                     _   _
             if(action !== cliCommands.default) playSound('C4', 'square', '16n');
         }
     };
-    if (cli.inputElement) {
-        cli.inputElement.addEventListener('keydown', (e) => cli.handleInput(e));
-    }
     
+    // Initial setup for CLI UI elements and event listeners (run once)
+    document.addEventListener('DOMContentLoaded', () => {
+        cli.setupUI();
+    });
+
     // --- KONAMI CODE EASTER EGG ---
     const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
     let konamiIndex = 0;
@@ -1549,6 +1563,8 @@ _           _                     _   _
         updateWeather();
         updateGitHubStats();
         renderBlogPosts();
+        // Call cli.showWelcome() here after setupUI has run
+        cli.showWelcome(); 
         setInterval(updateTime, 60000);
         setInterval(updateWeather, 30 * 60 * 1000);
         setInterval(updateGitHubStats, 60 * 60 * 1000);
@@ -1570,7 +1586,11 @@ _           _                     _   _
         mouse.y = e.clientY;
     });
     
-    document.addEventListener('DOMContentLoaded', initializePage);
+    // Ensure cli.setupUI() runs before initializePage()
+    document.addEventListener('DOMContentLoaded', () => {
+        cli.setupUI(); // Setup UI elements and listeners first
+        initializePage(); // Then run the rest of the page initialization
+    });
 
   </script>
 </body>
