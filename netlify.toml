@@ -1,9 +1,20 @@
-# In your project's root directory: netlify.toml
-[build]
-  publish = "." # This means Netlify will deploy files from the root of your repo
-  functions = "netlify/functions" # This is where your serverless functions will live
+# netlify.toml
 
-# Optional: You can specify Node.js version for your functions if needed
+# [build] section defines the build settings for your site.
+[build]
+  # 'publish' specifies the directory that contains your deploy-ready HTML files and assets.
+  # Since your index.html is in the root of your repository, we set this to "."
+  publish = "."
+
+  # 'functions' specifies the directory where your Netlify Functions are located.
+  # We'll put our Gemini API proxy functions in 'netlify/functions/'.
+  functions = "netlify/functions"
+
+# Optional: [functions] section allows you to specify settings for your serverless functions.
+# This is useful if you need a specific Node.js version or bundler.
+# Netlify usually defaults to a recent stable Node.js version and 'esbuild' for bundling,
+# but you can explicitly set it if you encounter issues or have specific requirements.
 # [functions]
-#   node_bundler = "esbuild" # Default and recommended
-#   node_version = "18" # Or "20", align with what you use locally if possible
+#   node_bundler = "esbuild" # Recommended and default bundler for Node.js functions
+#   node_version = "18"      # Specify Node.js version, e.g., "18" or "20"
+
