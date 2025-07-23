@@ -703,7 +703,11 @@
     const pageLoadTime = new Date();
     feather.replace();
 
-    const mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+    const mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 }; // Track mouse position
+    let mouseVelocityX = 0;
+    let mouseVelocityY = 0;
+    let lastMouseX = mouse.x;
+    let lastMouseY = mouse.y;
 
     const playSound = (note, type = 'sine', duration = '8n') => {
         if (typeof Tone === 'undefined') return; // Ensure Tone.js is loaded
@@ -863,6 +867,7 @@
         const hourOptions = { timeZone: 'Asia/Kolkata', hour: 'numeric', hour12: false };
         const hour = parseInt(new Intl.DateTimeFormat('en-US', hourOptions).format(now));
         
+        // Initial greeting, will be overwritten by AI if returning user
         let greeting = "Welcome.";
         if (hour >= 5 && hour < 12) greeting = "Good morning.";
         else if (hour >= 12 && hour < 17) greeting = "Good afternoon.";
@@ -974,8 +979,6 @@
 
     // --- GEMINI AI INTEGRATION (NOW USING NETLIFY FUNCTIONS) ---
 
-    // REMOVED: Old insecure API key fetching logic and direct Gemini API calls.
-
     const generateThoughtBtn = document.getElementById('generate-thought-btn');
     if (generateThoughtBtn) {
         generateThoughtBtn.addEventListener('click', async () => {
@@ -985,7 +988,6 @@
             const prompt = "Generate a short, creative blog post about the intersection of art, code, and minimalism. The response should be in JSON format with two keys: 'title' (a creative, short title) and 'snippet' (a 2-3 sentence thought).";
 
             try {
-                // Call your Netlify Function for generating blog thoughts
                 const response = await fetch('/.netlify/functions/generate-thought', {
                     method: 'POST',
                     headers: {
@@ -1477,8 +1479,28 @@ _           _                     _   _
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+        // Calculate mouse influence
+        const influenceRadius = 150; // How far mouse influences stars
+        const influenceStrength = 0.005; // How strongly mouse influences stars
+
         ctx.fillStyle = 'white';
         stars.forEach(star => {
+            // Apply mouse influence
+            const dx = mouse.x - star.x;
+            const dy = mouse.y - star.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < influenceRadius) {
+                const force = (1 - distance / influenceRadius) * influenceStrength;
+                star.vx -= dx * force;
+                star.vy -= dy * force;
+            }
+
+            // Dampen velocity to prevent infinite acceleration
+            star.vx *= 0.99;
+            star.vy *= 0.99;
+
+
             ctx.globalAlpha = star.alpha;
             ctx.beginPath();
             ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
@@ -1526,6 +1548,10 @@ _           _                     _   _
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+        // Calculate mouse influence for bubbles
+        const influenceRadiusBubbles = 100; // How far mouse influences bubbles
+        const influenceStrengthBubbles = 0.05; // How strongly mouse influences bubbles
+
         bubbles.forEach(bubble => {
             ctx.beginPath();
             ctx.arc(bubble.x, bubble.y, bubble.radius, 0, Math.PI * 2);
@@ -1533,6 +1559,17 @@ _           _                     _   _
             ctx.fill();
             ctx.strokeStyle = `${bubble.color}80`; // 50% opacity
             ctx.stroke();
+
+            // Apply mouse influence
+            const dx = mouse.x - bubble.x;
+            const dy = mouse.y - bubble.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < influenceRadiusBubbles) {
+                const force = (1 - distance / influenceRadiusBubbles) * influenceStrengthBubbles;
+                bubble.x -= dx * force; // Push bubbles away from mouse
+                bubble.y -= dy * force;
+            }
 
             bubble.y -= bubble.speed;
             bubble.x += Math.sin(bubble.y / 50) * 0.5;
@@ -1556,13 +1593,53 @@ _           _                     _   _
     }
     
     // --- INITIALIZATION ---
-    function initializePage() {
+    async function initializePage() {
         resizeAllCanvases();
         applyTheme(localStorage.getItem('theme') || 'dark');
         updateTime();
         updateWeather();
         updateGitHubStats();
         renderBlogPosts();
+        
+        // --- Personalized Greeting Logic ---
+        const greetingEl = document.getElementById('greeting');
+        const lastVisitTimestamp = localStorage.getItem('lastVisitTimestamp');
+        const currentTime = Date.now();
+
+        if (lastVisitTimestamp) {
+            const timeDiffMs = currentTime - parseInt(lastVisitTimestamp);
+            const minutes = Math.floor(timeDiffMs / (1000 * 60));
+            const hours = Math.floor(minutes / 60);
+            const days = Math.floor(hours / 24);
+
+            let timeAgoMessage = '';
+            if (days > 0) timeAgoMessage = `${days} day${days > 1 ? 's' : ''} ago`;
+            else if (hours > 0) timeAgoMessage = `${hours} hour${hours > 1 ? 's' : ''} ago`;
+            else if (minutes > 0) timeAgoMessage = `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+            else timeAgoMessage = `just now`;
+
+            const promptForAI = `The user is returning to the website. Their last visit was ${timeAgoMessage}. Generate a very short, friendly, and creative welcome back message (1-2 sentences). You are Judson's AI assistant.`;
+            
+            try {
+                const response = await fetch('/.netlify/functions/ask-gemini', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: promptForAI }),
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data && data.response) {
+                        greetingEl.textContent = data.response; // Set AI-generated greeting
+                    }
+                } else {
+                    console.error("Failed to get AI greeting:", await response.text());
+                }
+            } catch (e) {
+                console.error("Error calling AI for greeting:", e);
+            }
+        }
+        localStorage.setItem('lastVisitTimestamp', currentTime.toString()); // Update last visit timestamp
+
         // Call cli.showWelcome() here after setupUI has run
         cli.showWelcome(); 
         setInterval(updateTime, 60000);
@@ -1584,6 +1661,11 @@ _           _                     _   _
     window.addEventListener('mousemove', (e) => {
         mouse.x = e.clientX;
         mouse.y = e.clientY;
+        // Calculate mouse velocity for potential future use
+        mouseVelocityX = e.clientX - lastMouseX;
+        mouseVelocityY = e.clientY - lastMouseY;
+        lastMouseX = e.clientX;
+        lastMouseY = e.clientY;
     });
     
     // Ensure cli.setupUI() runs before initializePage()
