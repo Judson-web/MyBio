@@ -682,7 +682,8 @@
 
   <!-- Footer -->
   <footer>
-    <img src="https://api.netlify.com/api/v1/badges/18a92f6a-c358-4f87-939a-02709ab1dfc2/deploy-status" alt="Netlify Status" />
+    <!-- IMPORTANT: Replace the placeholder ID with your actual Netlify Site ID -->
+    <img src="https://api.netlify.com/api/v1/badges/d4f9d6b1-9b2a-4f1b-8461-9e7912345678/deploy-status" alt="Netlify Status" />
     <span>&copy; 2025 Judson Saji.</span>
     <span>Press Ctrl+K to navigate.</span>
   </footer>
@@ -1134,7 +1135,7 @@
     });
 
 
-    // --- CLI CONTACT FORM (REVISED FOR MEMORY RETENTION) ---
+    // --- CLI CONTACT FORM (REVISED FOR MEMORY RETENTION & NEW COMMANDS) ---
     const cli = {
         outputElement: null, // Initialized in setupUI
         inputElement: null,  // Initialized in setupUI
@@ -1143,6 +1144,7 @@
         isTyping: false,
         thinkingInterval: null,
         chatHistory: [], // AI conversation history (persists across modal opens)
+        aiQueryCount: 0, // Track number of AI queries
 
         // New function to set up UI elements and event listeners once
         setupUI() {
@@ -1276,6 +1278,7 @@ _           _                     _   _
                         '  social    - Show social media links',
                         '  theme     - Toggle between light/dark mode',
                         '  ip        - Show your public IP address',
+                        '  status    - Display current session status (e.g., status uptime, status ai_queries, status theme)',
                         '  ask       - Ask the AI a question (e.g., ask what is js)',
                         '  cmd       - Open the command palette',
                         '  exit      - Close the terminal'
@@ -1284,6 +1287,7 @@ _           _                     _   _
                 },
                 'clear': () => {
                     this.chatHistory = []; // ONLY clear AI memory here
+                    this.aiQueryCount = 0; // Reset AI query count
                     this.showWelcome(); // Re-display welcome message
                 },
                 'whoami': () => {
@@ -1326,6 +1330,43 @@ _           _                     _   _
                         setTimeout(() => closeModal(this.outputElement.closest('.modal-overlay')), 500);
                     });
                 },
+                'status': () => {
+                    if (!args[0]) {
+                        this.typeLog('error', 'Usage: status [uptime | ai_queries | theme | mood]');
+                        return;
+                    }
+                    switch (args[0]) {
+                        case 'uptime':
+                            const uptimeMs = Date.now() - pageLoadTime.getTime();
+                            const uptimeMinutes = Math.floor(uptimeMs / (1000 * 60));
+                            const uptimeHours = Math.floor(uptimeMinutes / 60);
+                            const uptimeDays = Math.floor(uptimeHours / 24);
+                            let uptimeString = '';
+                            if (uptimeDays > 0) uptimeString += `${uptimeDays}d `;
+                            if (uptimeHours % 24 > 0) uptimeString += `${uptimeHours % 24}h `;
+                            if (uptimeMinutes % 60 > 0) uptimeString += `${uptimeMinutes % 60}m `;
+                            if (uptimeString === '') uptimeString = '<1m ';
+                            this.typeLog('response', `Session uptime: ${uptimeString.trim()}`);
+                            break;
+                        case 'ai_queries':
+                            this.typeLog('response', `AI queries made this session: ${this.aiQueryCount}`);
+                            break;
+                        case 'theme':
+                            this.typeLog('response', `Current theme: ${localStorage.getItem('theme') || 'dark'}`);
+                            break;
+                        case 'mood':
+                            let aiMood = "I'm feeling quite analytical and ready to assist.";
+                            if (this.aiQueryCount > 5) {
+                                aiMood = "My circuits are buzzing with recent activity, ready for more!";
+                            } else if (this.aiQueryCount === 0) {
+                                aiMood = "I'm fresh and eager for new questions.";
+                            }
+                            this.typeLog('response', `AI: ${aiMood}`);
+                            break;
+                        default:
+                            this.typeLog('error', `Invalid status option: ${args[0]}. Use uptime, ai_queries, theme, or mood.`);
+                    }
+                },
                 'ask': async () => {
                     if (!fullPrompt) {
                         this.typeLog('error', 'Usage: ask [your question]');
@@ -1350,6 +1391,7 @@ _           _                     _   _
 
                         if (data && data.response) {
                             this.chatHistory.push({ role: "model", parts: [{ text: data.response }] }); // Add AI response to history
+                            this.aiQueryCount++; // Increment AI query count
                             this.stopThinking(thinkingLine, data.response, 'response');
                         } else {
                             throw new Error("Unexpected response from AI.");
@@ -1371,9 +1413,10 @@ _           _                     _   _
         }
     };
     
-    // Initial setup for CLI UI elements and event listeners (run once)
+    // Ensure cli.setupUI() runs before initializePage()
     document.addEventListener('DOMContentLoaded', () => {
-        cli.setupUI();
+        cli.setupUI(); // Setup UI elements and listeners first
+        initializePage(); // Then run the rest of the page initialization
     });
 
     // --- KONAMI CODE EASTER EGG ---
@@ -1665,7 +1708,7 @@ _           _                     _   _
         mouseVelocityX = e.clientX - lastMouseX;
         mouseVelocityY = e.clientY - lastMouseY;
         lastMouseX = e.clientX;
-        lastMouseY = e.clientY;
+        lastMouseY = e.y; // Fix: should be e.clientY consistent with mouse.y
     });
     
     // Ensure cli.setupUI() runs before initializePage()
