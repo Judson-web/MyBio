@@ -260,6 +260,7 @@
     .status-widget i {
         width: 18px;
         height: 18px;
+        transition: transform 0.3s ease-out; /* For subtle bounce */
     }
 
     /* --- Buttons --- */
@@ -283,21 +284,29 @@
       color: var(--text-color);
       text-decoration: none;
       backdrop-filter: blur(12px);
-      transition: all 0.3s ease;
+      transition: all 0.3s ease, box-shadow 0.3s ease; /* Added box-shadow to transition */
       overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Initial subtle shadow */
     }
 
+    /* Enhanced hover effects */
     .ambient-btn:hover {
       background: rgba(127, 127, 127, 0.2);
       border-color: var(--glow-color-1);
-      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1), 0 0 20px var(--glow-color-1);
-      transform: translateY(-3px);
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2), 0 0 20px var(--glow-color-1); /* Stronger shadow */
+      transform: translateY(-3px) scale(1.01); /* Slight lift and scale */
     }
     
     .ambient-btn:nth-child(2):hover {
        border-color: var(--glow-color-2);
-       box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1), 0 0 20px var(--glow-color-2);
+       box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2), 0 0 20px var(--glow-color-2);
     }
+    /* For buttons inside modals, like generate-thought-btn */
+    .modal-content .ambient-btn:hover {
+        border-color: var(--glow-color-1); /* Consistent glow for all AI buttons */
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2), 0 0 20px var(--glow-color-1);
+    }
+
 
     .ambient-btn svg {
       margin-right: 10px;
@@ -432,6 +441,42 @@
         margin-top: 1rem;
         color: var(--dim-text-color);
     }
+
+    /* My Tools specific styles */
+    .tools-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+    .tool-item {
+        background: rgba(0,0,0,0.1);
+        border: 1px solid var(--card-border);
+        border-radius: 12px;
+        padding: 1rem;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .tool-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    }
+    .tool-item i {
+        width: 36px;
+        height: 36px;
+        stroke: var(--glow-color-1);
+        margin-bottom: 0.5rem;
+    }
+    .tool-item h4 {
+        margin: 0;
+        font-size: 1rem;
+        color: var(--text-color);
+    }
+
 
     /* --- Command Palette --- */
     #command-palette-overlay { z-index: 2500; }
@@ -602,6 +647,7 @@
       <a data-modal="about" aria-label="About">About</a>
       <a data-modal="projects" aria-label="Projects">Projects</a>
       <a data-modal="blog" aria-label="Blog">Blog</a>
+      <a data-modal="tools" aria-label="My Tools">My Tools</a> <!-- NEW: My Tools link -->
       <a data-modal="contact" aria-label="Contact">Contact</a>
     </nav>
   </header>
@@ -657,6 +703,16 @@
       <h2>Creator's Log</h2>
       <button id="generate-thought-btn" class="ambient-btn" style="margin-bottom: 1rem; width: 100%;">Generate a new thought</button>
       <div id="blog-posts"></div>
+    </div>
+  </div>
+  <div id="tools-modal" class="modal-overlay"> <!-- NEW: My Tools Modal -->
+    <div class="modal-content">
+      <i data-feather="x" class="close-modal" aria-label="Close modal"></i>
+      <h2>My Tools & Stack</h2>
+      <p>Here are some of the technologies and tools I frequently use in my creative and development work:</p>
+      <div id="tools-list" class="tools-grid">
+        <!-- Tools will be rendered here by JavaScript -->
+      </div>
     </div>
   </div>
   <div id="contact-modal" class="modal-overlay">
@@ -830,10 +886,12 @@
         if(modalId === 'contact') {
             const cliInput = document.getElementById('cli-input');
             if (cliInput) cliInput.focus();
-            // IMPORTANT: Removed cli.init() from here to prevent chat history reset
         }
         if (modalId === 'projects') {
             renderProjects();
+        }
+        if (modalId === 'tools') { // NEW: Render tools when tools modal opens
+            renderTools();
         }
     };
     const closeModal = (modal) => {
@@ -864,6 +922,14 @@
         const timeOptions = { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: true };
         const timeString = new Intl.DateTimeFormat('en-US', timeOptions).format(now);
         timeWidget.innerHTML = `<i data-feather="clock"></i> ${timeString}`;
+        feather.replace(); // Re-render icon after update
+        // Optional: Add a subtle bounce animation to the icon on update
+        const clockIcon = timeWidget.querySelector('i[data-feather="clock"]');
+        if (clockIcon) {
+            clockIcon.style.transform = 'scale(1.1)';
+            setTimeout(() => clockIcon.style.transform = 'scale(1)', 300);
+        }
+
 
         const hourOptions = { timeZone: 'Asia/Kolkata', hour: 'numeric', hour12: false };
         const hour = parseInt(new Intl.DateTimeFormat('en-US', hourOptions).format(now));
@@ -908,6 +974,14 @@
             else if (weatherDesc.includes('mist') || weatherDesc.includes('fog')) icon = 'wind';
 
             weatherWidget.innerHTML = `<i data-feather="${icon}"></i> ${temp}°C`;
+            feather.replace(); // Re-render icon after update
+            // Optional: Add a subtle bounce animation to the icon on update
+            const weatherIcon = weatherWidget.querySelector('i[data-feather]');
+            if (weatherIcon) {
+                weatherIcon.style.transform = 'scale(1.1)';
+                setTimeout(() => weatherIcon.style.transform = 'scale(1)', 300);
+            }
+
         } catch (error) {
             clearTimeout(timeoutId);
             console.error("Failed to fetch weather:", error.message);
@@ -927,7 +1001,14 @@
             if (!response.ok) throw new Error('GitHub API error');
             const data = await response.json();
             widget.innerHTML = `<i data-feather="github"></i> ${data.followers} / ${data.public_repos}`;
-            feather.replace();
+            feather.replace(); // Re-render icon after update
+            // Optional: Add a subtle bounce animation to the icon on update
+            const githubIcon = widget.querySelector('i[data-feather="github"]');
+            if (githubIcon) {
+                githubIcon.style.transform = 'scale(1.1)';
+                setTimeout(() => githubIcon.style.transform = 'scale(1)', 300);
+            }
+
         } catch (e) {
             console.error("Failed to fetch GitHub stats:", e);
             widget.innerHTML = `<i data-feather="github"></i> N/A`;
@@ -975,6 +1056,32 @@
             container.innerHTML = '<p>Could not load projects at this time.</p>';
             showToast('API Error: Could not fetch GitHub projects.');
         }
+    }
+
+    // NEW: My Tools Data and Render Function
+    const myTools = [
+        { name: 'JavaScript', icon: 'code' },
+        { name: 'HTML/CSS', icon: 'code' },
+        { name: 'React', icon: 'aperture' }, /* Using aperture as a placeholder, no direct react icon in feather */
+        { name: 'Node.js', icon: 'server' },
+        { name: 'Python', icon: 'terminal' },
+        { name: 'Git/GitHub', icon: 'git-branch' },
+        { name: 'Netlify', icon: 'cloud' }, /* Using cloud as a placeholder */
+        { name: 'VS Code', icon: 'monitor' },
+        { name: 'Generative AI', icon: 'cpu' },
+        { name: 'Web Audio API', icon: 'music' }
+    ];
+
+    function renderTools() {
+        const container = document.getElementById('tools-list');
+        if (!container) return;
+        container.innerHTML = myTools.map(tool => `
+            <div class="tool-item">
+                <i data-feather="${tool.icon}"></i>
+                <h4>${tool.name}</h4>
+            </div>
+        `).join('');
+        feather.replace(); // Ensure new icons are rendered
     }
 
 
@@ -1040,6 +1147,7 @@
         { name: 'Open About', icon: 'user', action: () => { openModal('about'); closeCommandPalette(); } },
         { name: 'Open Projects', icon: 'briefcase', action: () => { openModal('projects'); closeCommandPalette(); } },
         { name: 'Open Blog', icon: 'book-open', action: () => { openModal('blog'); closeCommandPalette(); } },
+        { name: 'Open My Tools', icon: 'tool', action: () => { openModal('tools'); closeCommandPalette(); } }, <!-- NEW: Command for My Tools -->
         { name: 'Open Contact', icon: 'mail', action: () => { openModal('contact'); closeCommandPalette(); } },
         { name: 'View on GitHub', icon: 'github', action: () => { window.open('https://github.com/Judson-web', '_blank'); closeCommandPalette(); } },
     ];
@@ -1278,7 +1386,7 @@ _           _                     _   _
                         '  social    - Show social media links',
                         '  theme     - Toggle between light/dark mode',
                         '  ip        - Show your public IP address',
-                        '  status    - Display current session status (e.g., status uptime, status ai_queries, status theme)',
+                        '  status    - Display current session status (e.g., status uptime, status ai_queries, status theme, status mood)',
                         '  ask       - Ask the AI a question (e.g., ask what is js)',
                         '  cmd       - Open the command palette',
                         '  exit      - Close the terminal'
@@ -1708,7 +1816,7 @@ _           _                     _   _
         mouseVelocityX = e.clientX - lastMouseX;
         mouseVelocityY = e.clientY - lastMouseY;
         lastMouseX = e.clientX;
-        lastMouseY = e.y; // Fix: should be e.clientY consistent with mouse.y
+        lastMouseY = e.clientY; // Fixed: Changed e.y to e.clientY for consistency
     });
     
     // Ensure cli.setupUI() runs before initializePage()
