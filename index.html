@@ -493,6 +493,39 @@
         margin-top: 1rem;
         color: var(--dim-text-color);
     }
+    /* New styles for AI summary button */
+    .project-card .ai-summary-btn {
+        background: rgba(127, 127, 127, 0.1);
+        border: 1px solid rgba(127, 127, 127, 0.2);
+        color: var(--dim-text-color);
+        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 8px;
+        cursor: pointer;
+        margin-top: 0.75rem;
+        transition: all 0.2s ease;
+        display: inline-flex; /* Use flex to align icon and text */
+        align-items: center;
+        gap: 5px;
+    }
+    .project-card .ai-summary-btn:hover {
+        background: rgba(127, 127, 127, 0.2);
+        color: var(--text-color);
+        border-color: var(--glow-color-1);
+        transform: translateY(-2px);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .project-card .ai-summary-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    .project-card .ai-summary-btn i {
+        width: 16px;
+        height: 16px;
+        stroke: currentColor; /* Inherit color from parent */
+        margin-right: 0; /* Remove default margin */
+    }
+
 
     /* My Tools specific styles */
     .tools-grid {
@@ -813,7 +846,7 @@
         <span id="github-widget"><i data-feather="github"></i> --</span>
       </div>
 
-      <!-- NEW: Now Playing Widget -->
+      <!-- Now Playing Widget -->
       <div id="now-playing-widget">
         <img class="album-art" src="https://placehold.co/64x64/333333/ffffff?text=Loading..." alt="Album Art" />
         <div class="track-info">
@@ -1180,7 +1213,7 @@
         }
     }
 
-    // NEW: Function to update Now Playing widget
+    // Function to update Now Playing widget
     async function updateNowPlaying() {
         const nowPlayingWidget = document.getElementById('now-playing-widget');
         if (!nowPlayingWidget) return;
@@ -1261,9 +1294,53 @@
                         <span><i data-feather="star"></i> ${repo.stargazers_count}</span>
                         <span><i data-feather="git-branch"></i> ${repo.forks_count}</span>
                     </div>
+                    <button class="ai-summary-btn" data-project-name="${repo.name}" data-project-description="${repo.description || 'No description provided.'}">
+                        <i data-feather="terminal"></i> AI Summary
+                    </button>
                 </div>
             `).join('');
             feather.replace();
+
+            // Add event listeners to the new AI summary buttons
+            document.querySelectorAll('.ai-summary-btn').forEach(button => {
+                button.addEventListener('click', async (e) => {
+                    const btn = e.currentTarget;
+                    const projectName = btn.dataset.projectName;
+                    const projectDescription = btn.dataset.projectDescription;
+                    btn.disabled = true;
+                    btn.innerHTML = '<i data-feather="loader" class="spin"></i> Summarizing...';
+                    feather.replace();
+
+                    const prompt = `Summarize the GitHub project "${projectName}" with description "${projectDescription}" in one concise sentence (max 20 words) from the perspective of a minimalist designer.`;
+
+                    try {
+                        const aiResponse = await fetch('/.netlify/functions/ask-gemini', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ prompt: prompt }),
+                        });
+
+                        if (!aiResponse.ok) {
+                            const errorData = await aiResponse.json();
+                            throw new Error(errorData.message || 'AI summary failed.');
+                        }
+                        const data = await aiResponse.json();
+                        if (data && data.response) {
+                            showToast(`AI Summary: ${data.response}`);
+                        } else {
+                            showToast('AI could not generate a summary.');
+                        }
+                    } catch (error) {
+                        console.error('Error getting AI summary:', error);
+                        showToast(`AI Summary Error: ${error.message}`);
+                    } finally {
+                        btn.disabled = false;
+                        btn.innerHTML = '<i data-feather="terminal"></i> AI Summary';
+                        feather.replace();
+                    }
+                });
+            });
+
         } catch (e) {
             container.innerHTML = '<p>Could not load projects at this time.</p>';
             showToast('API Error: Could not fetch GitHub projects.');
@@ -1983,7 +2060,7 @@ _           _                     _   _
         updateTime();
         updateWeather();
         updateGitHubStats();
-        updateNowPlaying(); // NEW: Call now playing update
+        updateNowPlaying();
         renderBlogPosts();
         
         // --- Personalized Greeting Logic ---
@@ -2030,7 +2107,7 @@ _           _                     _   _
         setInterval(updateTime, 60000);
         setInterval(updateWeather, 30 * 60 * 1000);
         setInterval(updateGitHubStats, 60 * 60 * 1000);
-        setInterval(updateNowPlaying, 15 * 1000); // NEW: Update Now Playing every 15 seconds
+        setInterval(updateNowPlaying, 15 * 1000); // Update Now Playing every 15 seconds
         
         // Add hover sounds
         document.querySelectorAll('a, button').forEach(el => {
