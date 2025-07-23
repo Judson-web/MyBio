@@ -721,15 +721,20 @@
     
     const showToast = (message) => {
         const toast = document.getElementById('toast');
-        toast.textContent = message;
-        toast.classList.add('show');
-        setTimeout(() => toast.classList.remove('show'), 3000);
+        if (toast) {
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
     };
 
 
     // --- PRELOADER ---
     window.addEventListener('load', () => {
-        document.getElementById('preloader').classList.add('loaded');
+        const preloader = document.getElementById('preloader');
+        if (preloader) {
+            preloader.classList.add('loaded');
+        }
     });
 
 
@@ -770,13 +775,15 @@
     // --- COOKIE BANNER ---
     const banner = document.getElementById("cookie-banner");
     const button = document.getElementById("cookie-btn");
-    setTimeout(() => {
-        if (!localStorage.getItem("cookieAccepted")) banner.classList.add("show");
-    }, 2000);
-    button.addEventListener("click", () => {
-      localStorage.setItem("cookieAccepted", "true");
-      banner.classList.remove("show");
-    });
+    if (banner && button) {
+        setTimeout(() => {
+            if (!localStorage.getItem("cookieAccepted")) banner.classList.add("show");
+        }, 2000);
+        button.addEventListener("click", () => {
+          localStorage.setItem("cookieAccepted", "true");
+          banner.classList.remove("show");
+        });
+    }
 
     // --- 3D TILT EFFECT ---
     const card = document.getElementById('profile-card');
@@ -802,7 +809,8 @@
         modal.classList.add('active');
         playSound('C4', 'triangle');
         if(modalId === 'contact') {
-            document.getElementById('cli-input').focus();
+            const cliInput = document.getElementById('cli-input');
+            if (cliInput) cliInput.focus();
             cli.init();
         }
         if (modalId === 'projects') {
@@ -950,68 +958,70 @@
     }
 
 
-    // --- GEMINI AI INTEGRATION ---
-    const encodedApiKey = 'QUl6YVN5QWJOT0xrZVNyQjdocjZ6YjZIS2R0bDg3RXJYbDNwOUVv';
-    const GEMINI_API_KEY = atob(encodedApiKey);
-    const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
-    let chatHistory = [];
+    // --- GEMINI AI INTEGRATION (NOW USING NETLIFY FUNCTIONS) ---
 
-    async function callGemini(prompt) {
-        chatHistory.push({ role: "user", parts: [{ text: prompt }] });
-        const payload = { contents: chatHistory };
-
-        try {
-            const response = await fetch(GEMINI_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-            if (!response.ok) throw new Error(`API Error: ${response.status}`);
-            const data = await response.json();
-            const aiResponse = data.candidates[0].content.parts[0].text;
-            chatHistory.push({ role: "model", parts: [{ text: aiResponse }] });
-            return aiResponse;
-        } catch (error) {
-            console.error("Gemini API call failed:", error);
-            showToast("AI Error: Could not get a response.");
-            chatHistory.pop(); // Remove the failed user prompt
-            return null;
-        }
-    }
+    // REMOVE OR COMMENT OUT THE OLD INSECURE API KEY FETCHING LOGIC
+    // let chatHistory = []; // This chatHistory is now managed within the cli object for the 'ask' command
+    // let cachedApiKey = null;
+    // const apiKeyUrl = 'https://firebasestorage.googleapis.com/v0/b/crnn-b7d8f.appspot.com/o/files%2Fgeminiapikey.txt?alt=media&token=3dbe7f3e-32e9-40eb-acec-7dec6445e675';
+    // async function getApiKey() { /* ... */ }
+    // async function callGemini(prompt) { /* ... */ }
 
     const generateThoughtBtn = document.getElementById('generate-thought-btn');
     if (generateThoughtBtn) {
         generateThoughtBtn.addEventListener('click', async () => {
             generateThoughtBtn.textContent = 'Generating...';
             generateThoughtBtn.disabled = true;
-            
-            const prompt = "Generate a short, creative blog post about the intersection of art, code, and minimalism. The response should be in JSON format with two keys: 'title' (a creative, short title) and 'snippet' (a 2-3 sentence thought).";
-            const responseText = await callGemini(prompt);
 
-            if (responseText) {
-                try {
-                    const jsonString = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
-                    const thought = JSON.parse(jsonString);
+            // The prompt for the AI. This will be sent to your Netlify Function.
+            // The Netlify Function `generate-thought.js` is configured to return JSON directly.
+            const prompt = "Generate a short, creative blog post about the intersection of art, code, and minimalism. The response should be in JSON format with two keys: 'title' (a creative, short title) and 'snippet' (a 2-3 sentence thought).";
+
+            try {
+                // Call your Netlify Function for generating blog thoughts
+                const response = await fetch('/.netlify/functions/generate-thought', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ prompt: prompt }),
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || `Netlify Function error! Status: ${response.status}`);
+                }
+
+                // Parse the JSON response from your Netlify Function
+                // The function is designed to return { title: "...", snippet: "..." } directly
+                const thought = await response.json(); // Expects { title: "...", snippet: "..." }
+
+                if (thought && thought.title && thought.snippet) {
                     const now = new Date();
                     const newPost = {
-                        title: thought.title || 'AI Generated Thought',
+                        title: thought.title,
                         date: now.toISOString().split('T')[0],
-                        snippet: thought.snippet || 'No content generated.'
+                        snippet: thought.snippet
                     };
-                    blogPosts.unshift(newPost);
-                    renderBlogPosts();
-                } catch (e) {
-                    console.error("Failed to parse AI response:", e);
-                    showToast("AI Error: Could not parse response.");
+                    blogPosts.unshift(newPost); // Add to your existing blogPosts array
+                    renderBlogPosts(); // Re-render the blog posts list
+                } else {
+                    console.error("Unexpected response structure from Netlify Function:", thought);
+                    showToast("AI Error: Generated content was not in the expected format.");
                 }
+
+            } catch (error) {
+                console.error('Error generating thought:', error);
+                showToast(`AI Error: ${error.message}`);
+            } finally {
+                generateThoughtBtn.textContent = 'Generate a new thought';
+                generateThoughtBtn.disabled = false;
             }
-            
-            generateThoughtBtn.textContent = 'Generate a new thought';
-            generateThoughtBtn.disabled = false;
         });
     }
 
-    // --- COMMAND PALETTE LOGIC ---
+
+    // --- COMMAND PALETTE LOGIC (Keep as is) ---
     const commandPaletteOverlay = document.getElementById('command-palette-overlay');
     const commandInput = document.getElementById('command-input');
     const commandList = document.getElementById('command-list');
@@ -1027,6 +1037,7 @@
     ];
 
     function openCommandPalette() {
+        if (!commandPaletteOverlay || !commandInput) return;
         commandPaletteOverlay.classList.add('active');
         renderCommands(commands);
         commandInput.focus();
@@ -1034,11 +1045,13 @@
     }
 
     function closeCommandPalette() {
+        if (!commandPaletteOverlay || !commandInput) return;
         commandPaletteOverlay.classList.remove('active');
         commandInput.value = '';
     }
 
     function renderCommands(items) {
+        if (!commandList) return;
         commandList.innerHTML = items.map(item => `
             <li class="command-item" data-action="${item.name}">
                 <i data-feather="${item.icon}"></i>
@@ -1050,7 +1063,8 @@
     }
 
     function updateSelectedCommand() {
-        document.querySelectorAll('.command-item').forEach((item, index) => {
+        const items = commandList ? commandList.querySelectorAll('.command-item') : [];
+        items.forEach((item, index) => {
             if (index === selectedCommandIndex) {
                 item.classList.add('selected');
                 item.scrollIntoView({ block: 'nearest' });
@@ -1060,43 +1074,49 @@
         });
     }
 
-    commandInput.addEventListener('input', () => {
-        const query = commandInput.value.toLowerCase();
-        const filtered = commands.filter(c => c.name.toLowerCase().includes(query));
-        selectedCommandIndex = 0;
-        renderCommands(filtered);
-    });
+    if (commandInput) {
+        commandInput.addEventListener('input', () => {
+            const query = commandInput.value.toLowerCase();
+            const filtered = commands.filter(c => c.name.toLowerCase().includes(query));
+            selectedCommandIndex = 0;
+            renderCommands(filtered);
+        });
 
-    commandInput.addEventListener('keydown', (e) => {
-        const items = commandList.querySelectorAll('.command-item');
-        if (e.key === 'ArrowDown') {
-            e.preventDefault();
-            selectedCommandIndex = (selectedCommandIndex + 1) % items.length;
-            updateSelectedCommand();
-        } else if (e.key === 'ArrowUp') {
-            e.preventDefault();
-            selectedCommandIndex = (selectedCommandIndex - 1 + items.length) % items.length;
-            updateSelectedCommand();
-        } else if (e.key === 'Enter') {
-            const selectedItem = items[selectedCommandIndex];
-            if (selectedItem) {
-                const actionName = selectedItem.dataset.action;
+        commandInput.addEventListener('keydown', (e) => {
+            const items = commandList ? commandList.querySelectorAll('.command-item') : [];
+            if (items.length === 0) return;
+
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                selectedCommandIndex = (selectedCommandIndex + 1) % items.length;
+                updateSelectedCommand();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                selectedCommandIndex = (selectedCommandIndex - 1 + items.length) % items.length;
+                updateSelectedCommand();
+            } else if (e.key === 'Enter') {
+                const selectedItem = items[selectedCommandIndex];
+                if (selectedItem) {
+                    const actionName = selectedItem.dataset.action;
+                    const command = commands.find(c => c.name === actionName);
+                    if (command) command.action();
+                }
+            } else if (e.key === 'Escape') {
+                closeCommandPalette();
+            }
+        });
+    }
+
+    if (commandList) {
+        commandList.addEventListener('click', (e) => {
+            const item = e.target.closest('.command-item');
+            if (item) {
+                const actionName = item.dataset.action;
                 const command = commands.find(c => c.name === actionName);
                 if (command) command.action();
             }
-        } else if (e.key === 'Escape') {
-            closeCommandPalette();
-        }
-    });
-
-    commandList.addEventListener('click', (e) => {
-        const item = e.target.closest('.command-item');
-        if (item) {
-            const actionName = item.dataset.action;
-            const command = commands.find(c => c.name === actionName);
-            if (command) command.action();
-        }
-    });
+        });
+    }
 
     // Global keyboard shortcut for command palette
     document.addEventListener('keydown', (e) => {
@@ -1107,7 +1127,7 @@
     });
 
 
-    // --- CLI CONTACT FORM [UPDATED] ---
+    // --- CLI CONTACT FORM [UPDATED TO USE NETLIFY FUNCTION FOR 'ask'] ---
     const cli = {
         outputElement: document.getElementById('cli-output'),
         inputElement: document.getElementById('cli-input'),
@@ -1116,17 +1136,19 @@
         isInitialized: false,
         isTyping: false,
         thinkingInterval: null,
+        chatHistory: [], // Keep chat history for the 'ask' command within the CLI
 
         init() {
             if (this.isInitialized) return;
+            if (!this.outputElement || !this.inputElement) return; // Ensure elements exist
             this.outputElement.innerHTML = '';
             const judsonAscii = `
-  _           _                     _   _ 
- | |         | |                   | | (_)
- | | ____   _| | ____  ____   ____  | |  _ 
- | |/ ___) /_  |/ _  )/ ___) / ___) | | | |
- | | |    (  _ ( (/ /| |    | |     | | | |
- |_|_|     \\_)_)\\____)_|    |_|     |_| |_|
+_           _                     _   _
+| |         | |                   | | (_)
+| | ____   _| | ____  ____   ____  | |  _
+| |/ ___) /_  |/ _  )/ ___) / ___) | | | |
+| | |    (  _ ( (/ /| |    | |     | | | |
+|_|_|     \\_)_)\\____)_|    |_|     |_|_|
 `;
             this.log('prompt', judsonAscii);
             this.typeLog('response', "Contact Terminal v2.8. Type 'help' for commands.", () => {
@@ -1144,8 +1166,9 @@
             this.outputElement.appendChild(line);
             this.outputElement.scrollTop = this.outputElement.scrollHeight;
         },
-        
+
         typeLog(type, message, callback) {
+            if (!this.outputElement || !this.inputElement) return;
             this.isTyping = true;
             this.inputElement.disabled = true;
             const line = document.createElement('div');
@@ -1168,13 +1191,14 @@
                 }
             }, 25);
         },
-        
+
         startThinking() {
+            if (!this.outputElement || !this.inputElement) return null;
             this.inputElement.disabled = true;
             const line = document.createElement('div');
             line.className = 'cli-line cli-response';
             this.outputElement.appendChild(line);
-            
+
             const spinnerChars = ['|', '/', '-', '\\'];
             let i = 0;
             this.thinkingInterval = setInterval(() => {
@@ -1191,7 +1215,7 @@
         },
 
         handleInput(e) {
-            if (this.isTyping) return;
+            if (this.isTyping || !this.inputElement) return;
             if (e.key === 'Enter' && this.inputElement.value.trim() !== '') {
                 const value = this.inputElement.value.trim();
                 this.log('prompt', `> ${value}`);
@@ -1245,7 +1269,7 @@
                 },
                 'clear': () => {
                     this.isInitialized = false;
-                    chatHistory = []; // Clear AI memory
+                    this.chatHistory = []; // Clear AI memory for CLI
                     this.init();
                 },
                 'whoami': () => {
@@ -1294,11 +1318,32 @@
                         return;
                     }
                     const thinkingLine = this.startThinking();
-                    const response = await callGemini(fullPrompt);
-                    if (response) {
-                        this.stopThinking(thinkingLine, response, 'response');
-                    } else {
-                        this.stopThinking(thinkingLine, 'The AI is currently offline or the API key is missing.', 'error');
+                    try {
+                        // Send the current chat history along with the new prompt to the Netlify Function
+                        this.chatHistory.push({ role: "user", parts: [{ text: fullPrompt }] });
+
+                        const response = await fetch('/.netlify/functions/ask-gemini', { // <-- Calls your new ask-gemini.js function
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ prompt: fullPrompt, history: this.chatHistory }), // Pass history
+                        });
+
+                        if (!response.ok) {
+                            const errorData = await response.json();
+                            throw new Error(errorData.message || `API call failed with status: ${response.status}`);
+                        }
+                        const data = await response.json(); // Expects { response: "..." }
+
+                        if (data && data.response) {
+                            this.chatHistory.push({ role: "model", parts: [{ text: data.response }] }); // Add AI response to history
+                            this.stopThinking(thinkingLine, data.response, 'response');
+                        } else {
+                            throw new Error("Unexpected response from AI.");
+                        }
+                    } catch (e) {
+                        console.error("CLI 'ask' error:", e);
+                        this.chatHistory.pop(); // Remove user prompt from history if AI call failed
+                        this.stopThinking(thinkingLine, `AI Error: ${e.message}`, 'error');
                     }
                 },
                 'default': () => {
