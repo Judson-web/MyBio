@@ -525,6 +525,31 @@
         stroke: currentColor; /* Inherit color from parent */
         margin-right: 0; /* Remove default margin */
     }
+    /* Styles for AI Project Idea section */
+    #ai-project-idea-output {
+        background: rgba(0,0,0,0.1);
+        border: 1px solid var(--card-border);
+        border-radius: 12px;
+        padding: 1rem;
+        margin-top: 1.5rem;
+        text-align: left;
+        display: none; /* Hidden by default */
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    #ai-project-idea-output.active {
+        display: flex;
+    }
+    #ai-project-idea-output h3 {
+        margin: 0;
+        color: var(--glow-color-2);
+        font-size: 1.1rem;
+    }
+    #ai-project-idea-output p {
+        margin: 0;
+        font-size: 0.9rem;
+        color: var(--dim-text-color);
+    }
 
 
     /* My Tools specific styles */
@@ -877,6 +902,13 @@
     <div class="modal-content">
       <i data-feather="x" class="close-modal" aria-label="Close modal"></i>
       <h2>GitHub Projects</h2>
+      <button id="generate-project-idea-btn" class="ambient-btn" style="margin-bottom: 1rem; width: 100%;">
+          <i data-feather="lightbulb"></i> Generate a Project Idea
+      </button>
+      <div id="ai-project-idea-output">
+          <h3 id="ai-project-idea-title"></h3>
+          <p id="ai-project-idea-concept"></p>
+      </div>
       <div id="projects-list"></div>
     </div>
   </div>
@@ -1294,9 +1326,11 @@
                         <span><i data-feather="star"></i> ${repo.stargazers_count}</span>
                         <span><i data-feather="git-branch"></i> ${repo.forks_count}</span>
                     </div>
-                    <button class="ai-summary-btn" data-project-name="${repo.name}" data-project-description="${repo.description || 'No description provided.'}">
-                        <i data-feather="terminal"></i> AI Summary
-                    </button>
+                    <div style="display: flex; gap: 10px; margin-top: 0.75rem;">
+                        <button class="ai-summary-btn" data-project-name="${repo.name}" data-project-description="${repo.description || 'No description provided.'}">
+                            <i data-feather="terminal"></i> AI Summary
+                        </button>
+                    </div>
                 </div>
             `).join('');
             feather.replace();
@@ -1340,6 +1374,54 @@
                     }
                 });
             });
+
+            // NEW: Event listener for Generate Project Idea button
+            const generateProjectIdeaBtn = document.getElementById('generate-project-idea-btn');
+            const aiProjectIdeaOutput = document.getElementById('ai-project-idea-output');
+            const aiProjectIdeaTitle = document.getElementById('ai-project-idea-title');
+            const aiProjectIdeaConcept = document.getElementById('ai-project-idea-concept');
+
+            if (generateProjectIdeaBtn) {
+                generateProjectIdeaBtn.addEventListener('click', async () => {
+                    generateProjectIdeaBtn.disabled = true;
+                    generateProjectIdeaBtn.innerHTML = '<i data-feather="loader" class="spin"></i> Generating Idea...';
+                    feather.replace();
+                    hide(aiProjectIdeaOutput); // Hide previous idea
+
+                    const prompt = `Generate a creative and minimalist web project idea for a developer who is an ex-poet, ex-minimalist, ex-thinker, now creator. The idea should combine elements of art, code, and philosophy. Provide the response in JSON format with two keys: 'title' (a concise, catchy title) and 'concept' (a 2-3 sentence concept description).`;
+
+                    try {
+                        const response = await fetch('/.netlify/functions/generate-thought', { // Re-using generate-thought as it expects JSON
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ prompt: prompt }),
+                        });
+
+                        if (!response.ok) {
+                            const errorData = await response.json();
+                            throw new Error(errorData.message || 'Failed to generate project idea.');
+                        }
+                        const data = await response.json();
+
+                        if (data && data.title && data.concept) {
+                            aiProjectIdeaTitle.textContent = data.title;
+                            aiProjectIdeaConcept.textContent = data.concept;
+                            show(aiProjectIdeaOutput); // Show the new idea
+                            showToast('New project idea generated!');
+                        } else {
+                            showToast('AI could not generate a project idea in the expected format.');
+                            console.error("Unexpected AI project idea format:", data);
+                        }
+                    } catch (error) {
+                        console.error('Error generating project idea:', error);
+                        showToast(`Project Idea Error: ${error.message}`);
+                    } finally {
+                        generateProjectIdeaBtn.disabled = false;
+                        generateProjectIdeaBtn.innerHTML = '<i data-feather="lightbulb"></i> Generate a Project Idea';
+                        feather.replace();
+                    }
+                });
+            }
 
         } catch (e) {
             container.innerHTML = '<p>Could not load projects at this time.</p>';
@@ -1460,8 +1542,7 @@
         { name: 'Open Blog', icon: 'book-open', action: () => { openModal('blog'); closeCommandPalette(); } },
         { name: 'Open My Tools', icon: 'tool', action: () => { openModal('tools'); closeCommandPalette(); } },
         { name: 'Open Ex-Timeline', icon: 'clock', action: () => { openModal('timeline'); closeCommandPalette(); } },
-        { name: 'Open Contact', icon: 'mail', action: () => { openModal('contact'); closeCommandPalette(); } },
-        { name: 'View on GitHub', icon: 'github', action: () => { window.open('https://github.com/Judson-web', '_blank'); closeCommandPalette(); } },
+        { name: 'Open Contact', icon: 'mail', action: () => { openModal('contact'); closeCommandPalette(); } }
     ];
 
     function openCommandPalette() {
