@@ -263,6 +263,58 @@
         transition: transform 0.3s ease-out; /* For subtle bounce */
     }
 
+    /* --- Now Playing Widget --- */
+    #now-playing-widget {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        background: rgba(0,0,0,0.05);
+        border-radius: 12px;
+        padding: 0.6rem 1rem;
+        margin: 0 auto 1.5rem;
+        font-size: 0.9rem;
+        color: var(--dim-text-color);
+        min-height: 48px; /* Ensure consistent height */
+        box-sizing: border-box;
+        transition: all 0.3s ease;
+    }
+    #now-playing-widget.loading {
+        opacity: 0.7;
+    }
+    #now-playing-widget .album-art {
+        width: 36px;
+        height: 36px;
+        border-radius: 6px;
+        object-fit: cover;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    #now-playing-widget .track-info {
+        display: flex;
+        flex-direction: column;
+        text-align: left;
+        flex-grow: 1;
+        min-width: 0; /* Allow text ellipsis */
+    }
+    #now-playing-widget .track-name {
+        color: var(--text-color);
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    #now-playing-widget .artist-name {
+        color: var(--dim-text-color);
+        font-size: 0.8em;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    #now-playing-widget .no-track {
+        color: var(--dim-text-color);
+        font-style: italic;
+    }
+
+
     /* --- Buttons --- */
     .btn-group {
       display: flex;
@@ -736,7 +788,7 @@
       <a data-modal="projects" aria-label="Projects">Projects</a>
       <a data-modal="blog" aria-label="Blog">Blog</a>
       <a data-modal="tools" aria-label="My Tools">My Tools</a>
-      <a data-modal="timeline" aria-label="Ex-Timeline">Ex-Timeline</a> <!-- NEW: Ex-Timeline link -->
+      <a data-modal="timeline" aria-label="Ex-Timeline">Ex-Timeline</a>
       <a data-modal="contact" aria-label="Contact">Contact</a>
     </nav>
   </header>
@@ -759,6 +811,15 @@
         <span id="time-widget"><i data-feather="clock"></i> --:-- --</span>
         <span id="weather-widget"><i data-feather="loader" class="spin"></i></span>
         <span id="github-widget"><i data-feather="github"></i> --</span>
+      </div>
+
+      <!-- NEW: Now Playing Widget -->
+      <div id="now-playing-widget">
+        <img class="album-art" src="https://placehold.co/64x64/333333/ffffff?text=Loading..." alt="Album Art" />
+        <div class="track-info">
+          <div class="track-name">Loading...</div>
+          <div class="artist-name"></div>
+        </div>
       </div>
 
       <div class="btn-group">
@@ -804,7 +865,7 @@
       </div>
     </div>
   </div>
-  <div id="timeline-modal" class="modal-overlay"> <!-- NEW: Ex-Timeline Modal -->
+  <div id="timeline-modal" class="modal-overlay">
     <div class="modal-content">
       <i data-feather="x" class="close-modal" aria-label="Close modal"></i>
       <h2>The Ex-Timeline: My Creative Evolution</h2>
@@ -837,7 +898,7 @@
 
   <!-- Footer -->
   <footer>
-    <!-- IMPORTANT: Replace '18a92f6a-c358-4f87-939a-02709ab1dfc2' with your actual Netlify Site ID -->
+    <!-- IMPORTANT: Replace 'YOUR_NETLIFY_SITE_ID_HERE' with your actual Netlify Site ID -->
     <!-- You can find this in your Netlify dashboard under Site settings > General > Site information > API ID -->
     <img src="https://api.netlify.com/api/v1/badges/YOUR_NETLIFY_SITE_ID_HERE/deploy-status" alt="Netlify Status" />
     <span>&copy; 2025 Judson Saji.</span>
@@ -993,7 +1054,7 @@
         if (modalId === 'tools') {
             renderTools();
         }
-        if (modalId === 'timeline') { // NEW: Render timeline when timeline modal opens
+        if (modalId === 'timeline') {
             renderExTimeline();
         }
     };
@@ -1119,6 +1180,54 @@
         }
     }
 
+    // NEW: Function to update Now Playing widget
+    async function updateNowPlaying() {
+        const nowPlayingWidget = document.getElementById('now-playing-widget');
+        if (!nowPlayingWidget) return;
+
+        nowPlayingWidget.classList.add('loading'); // Show loading state
+
+        try {
+            const response = await fetch('/.netlify/functions/get-now-playing');
+            if (!response.ok) {
+                throw new Error(`Now Playing API returned status ${response.status}`);
+            }
+            const data = await response.json();
+
+            const albumArt = nowPlayingWidget.querySelector('.album-art');
+            const trackName = nowPlayingWidget.querySelector('.track-name');
+            const artistName = nowPlayingWidget.querySelector('.artist-name');
+
+            if (data.name && data.artist) {
+                albumArt.src = data.imageUrl;
+                albumArt.alt = `${data.album} album art`;
+                trackName.textContent = data.name;
+                artistName.textContent = data.artist;
+                nowPlayingWidget.classList.remove('no-track'); // Remove no-track class if it was there
+            } else {
+                albumArt.src = 'https://placehold.co/64x64/333333/ffffff?text=No+Track';
+                albumArt.alt = 'No track playing';
+                trackName.textContent = 'Not Playing';
+                artistName.textContent = 'Last.fm';
+                nowPlayingWidget.classList.add('no-track'); // Add no-track class for styling
+            }
+        } catch (error) {
+            console.error("Failed to fetch now playing:", error.message);
+            const albumArt = nowPlayingWidget.querySelector('.album-art');
+            const trackName = nowPlayingWidget.querySelector('.track-name');
+            const artistName = nowPlayingWidget.querySelector('.artist-name');
+            albumArt.src = 'https://placehold.co/64x64/333333/ffffff?text=Error';
+            albumArt.alt = 'Error fetching track';
+            trackName.textContent = 'Error Loading';
+            artistName.textContent = 'Please try again later.';
+            nowPlayingWidget.classList.add('no-track');
+            showToast('API Error: Could not fetch now playing data.');
+        } finally {
+            nowPlayingWidget.classList.remove('loading'); // Hide loading state
+        }
+    }
+
+
     // --- DYNAMIC CONTENT ---
     let blogPosts = [
         { title: 'The Art of Imperfection in Code', date: '2025-07-20', snippet: 'Why "good enough" is often better than perfect. A look at shipping projects and embracing the beauty of wabi-sabi in development.' },
@@ -1161,7 +1270,7 @@
         }
     }
 
-    // NEW: My Tools Data and Render Function
+    // My Tools Data and Render Function
     const myTools = [
         { name: 'JavaScript', icon: 'code' },
         { name: 'HTML/CSS', icon: 'code' },
@@ -1187,7 +1296,7 @@
         feather.replace(); // Ensure new icons are rendered
     }
 
-    // NEW: Ex-Timeline Data and Render Function
+    // Ex-Timeline Data and Render Function
     const exTimelineData = [
         { year: 'Early Days', title: 'ExPoet', description: 'My initial foray into creative expression, exploring rhythm, metaphor, and the power of concise language through poetry. This phase honed my ability to convey complex ideas efficiently.', icon: 'feather' },
         { year: 'Mid-Journey', title: 'ExMinimalist', description: 'A period focused on stripping away the unnecessary, seeking elegance and efficiency in all aspects. This philosophy deeply influenced my approach to clean code and user-centric design.', icon: 'maximize' },
@@ -1273,7 +1382,7 @@
         { name: 'Open Projects', icon: 'briefcase', action: () => { openModal('projects'); closeCommandPalette(); } },
         { name: 'Open Blog', icon: 'book-open', action: () => { openModal('blog'); closeCommandPalette(); } },
         { name: 'Open My Tools', icon: 'tool', action: () => { openModal('tools'); closeCommandPalette(); } },
-        { name: 'Open Ex-Timeline', icon: 'clock', action: () => { openModal('timeline'); closeCommandPalette(); } }, <!-- NEW: Command for Ex-Timeline -->
+        { name: 'Open Ex-Timeline', icon: 'clock', action: () => { openModal('timeline'); closeCommandPalette(); } },
         { name: 'Open Contact', icon: 'mail', action: () => { openModal('contact'); closeCommandPalette(); } },
         { name: 'View on GitHub', icon: 'github', action: () => { window.open('https://github.com/Judson-web', '_blank'); closeCommandPalette(); } },
     ];
@@ -1874,6 +1983,7 @@ _           _                     _   _
         updateTime();
         updateWeather();
         updateGitHubStats();
+        updateNowPlaying(); // NEW: Call now playing update
         renderBlogPosts();
         
         // --- Personalized Greeting Logic ---
@@ -1920,6 +2030,7 @@ _           _                     _   _
         setInterval(updateTime, 60000);
         setInterval(updateWeather, 30 * 60 * 1000);
         setInterval(updateGitHubStats, 60 * 60 * 1000);
+        setInterval(updateNowPlaying, 15 * 1000); // NEW: Update Now Playing every 15 seconds
         
         // Add hover sounds
         document.querySelectorAll('a, button').forEach(el => {
