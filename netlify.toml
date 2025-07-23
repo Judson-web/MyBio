@@ -1,0 +1,9 @@
+# In your project's root directory: netlify.toml
+[build]
+  publish = "." # This means Netlify will deploy files from the root of your repo
+  functions = "netlify/functions" # This is where your serverless functions will live
+
+# Optional: You can specify Node.js version for your functions if needed
+# [functions]
+#   node_bundler = "esbuild" # Default and recommended
+#   node_version = "18" # Or "20", align with what you use locally if possible
