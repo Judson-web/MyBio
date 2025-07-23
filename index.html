@@ -675,6 +675,43 @@
         }
     }
 
+    /* Generative Art Modal Specific Styles */
+    #generative-art-modal .modal-content {
+        max-width: 90vw; /* Wider for art */
+        max-height: 90vh;
+        display: flex;
+        flex-direction: column;
+    }
+    #generative-art-canvas {
+        flex-grow: 1;
+        width: 100%;
+        min-height: 200px; /* Minimum height for canvas */
+        background-color: #000;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+    }
+    #generative-art-controls {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    #generative-art-controls button {
+        /* Inherit ambient-btn styles or define specific ones */
+        background: rgba(127, 127, 127, 0.1);
+        border: 1px solid rgba(127, 127, 127, 0.2);
+        color: var(--text-color);
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    #generative-art-controls button:hover {
+        background: rgba(127, 127, 127, 0.2);
+        border-color: var(--glow-color-1);
+        box-shadow: 0 0 10px var(--glow-color-1);
+    }
+
 
     /* --- Command Palette --- */
     #command-palette-overlay { z-index: 2500; }
@@ -711,7 +748,7 @@
         --terminal-prompt: var(--glow-color-1);
         --terminal-response: #aaa;
         --terminal-error: var(--error-color);
-        --terminal-success: var(--success-color);
+        --terminal-success: #50fa7b; /* Direct color for success */
         --terminal-filename: var(--glow-color-2);
     }
     .light-theme .terminal {
@@ -847,6 +884,7 @@
       <a data-modal="blog" aria-label="Blog">Blog</a>
       <a data-modal="tools" aria-label="My Tools">My Tools</a>
       <a data-modal="timeline" aria-label="Ex-Timeline">Ex-Timeline</a>
+      <a data-modal="generative-art" aria-label="Generative Art">Generative Art</a> <!-- NEW: Generative Art link -->
       <a data-modal="contact" aria-label="Contact">Contact</a>
     </nav>
   </header>
@@ -937,6 +975,18 @@
       <p>A journey through the phases that have shaped my approach to creation.</p>
       <div id="ex-timeline-content" class="timeline">
         <!-- Timeline items will be rendered here by JavaScript -->
+      </div>
+    </div>
+  </div>
+  <div id="generative-art-modal" class="modal-overlay"> <!-- NEW: Generative Art Modal -->
+    <div class="modal-content">
+      <i data-feather="x" class="close-modal" aria-label="Close modal"></i>
+      <h2>Generative Art Lab</h2>
+      <p>Explore a live generative art piece. It reacts to your mouse movement!</p>
+      <canvas id="generative-art-canvas"></canvas>
+      <div id="generative-art-controls">
+        <button id="reset-art-btn"><i data-feather="refresh-cw"></i> Reset</button>
+        <button id="change-color-btn"><i data-feather="droplet"></i> Change Color</button>
       </div>
     </div>
   </div>
@@ -1121,6 +1171,9 @@
         }
         if (modalId === 'timeline') {
             renderExTimeline();
+        }
+        if (modalId === 'generative-art') { // NEW: Initialize generative art when modal opens
+            renderGenerativeArt();
         }
     };
     const closeModal = (modal) => {
@@ -1375,7 +1428,7 @@
                 });
             });
 
-            // NEW: Event listener for Generate Project Idea button
+            // Event listener for Generate Project Idea button
             const generateProjectIdeaBtn = document.getElementById('generate-project-idea-btn');
             const aiProjectIdeaOutput = document.getElementById('ai-project-idea-output');
             const aiProjectIdeaTitle = document.getElementById('ai-project-idea-title');
@@ -1477,6 +1530,116 @@
         feather.replace(); // Ensure new icons are rendered
     }
 
+    // --- GENERATIVE ART LOGIC ---
+    let generativeArtAnimationId; // To store requestAnimationFrame ID
+    let particles = [];
+    let particleColor = 'rgba(56, 231, 255, 0.7)'; // Default glow-color-1 with opacity
+
+    function initGenerativeArt() {
+        const canvas = document.getElementById('generative-art-canvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+
+        // Set canvas size to fill its container
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+
+        particles = [];
+        for (let i = 0; i < 100; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                radius: Math.random() * 2 + 1,
+                vx: (Math.random() - 0.5) * 2,
+                vy: (Math.random() - 0.5) * 2,
+                alpha: Math.random() * 0.8 + 0.2,
+                originalVx: (Math.random() - 0.5) * 2,
+                originalVy: (Math.random() - 0.5) * 2,
+            });
+        }
+    }
+
+    function animateGenerativeArt() {
+        const canvas = document.getElementById('generative-art-canvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = particleColor;
+
+        const influenceRadius = 80;
+        const repulsionStrength = 0.5;
+
+        particles.forEach(p => {
+            // Mouse repulsion
+            const dx = mouse.x - p.x;
+            const dy = mouse.y - p.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < influenceRadius) {
+                const force = (1 - distance / influenceRadius) * repulsionStrength;
+                p.vx -= dx * force;
+                p.vy -= dy * force;
+            }
+
+            // Return to original velocity slowly
+            p.vx += (p.originalVx - p.vx) * 0.02;
+            p.vy += (p.originalVy - p.vy) * 0.02;
+
+            p.x += p.vx;
+            p.y += p.vy;
+
+            // Wrap around edges
+            if (p.x < 0) p.x = canvas.width;
+            if (p.x > canvas.width) p.x = 0;
+            if (p.y < 0) p.y = canvas.height;
+            if (p.y > canvas.height) p.y = 0;
+
+            ctx.globalAlpha = p.alpha;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+            ctx.fill();
+        });
+        ctx.globalAlpha = 1;
+
+        generativeArtAnimationId = requestAnimationFrame(animateGenerativeArt);
+    }
+
+    function renderGenerativeArt() {
+        initGenerativeArt(); // Initialize particles and canvas size
+        if (generativeArtAnimationId) { // Stop any previous animation
+            cancelAnimationFrame(generativeArtAnimationId);
+        }
+        animateGenerativeArt(); // Start new animation loop
+
+        // Add event listeners for generative art controls
+        const resetBtn = document.getElementById('reset-art-btn');
+        const changeColorBtn = document.getElementById('change-color-btn');
+
+        if (resetBtn) {
+            resetBtn.onclick = () => {
+                initGenerativeArt(); // Re-initialize particles
+                showToast('Art reset!');
+                playSound('B4', 'sine', '32n');
+            };
+        }
+        if (changeColorBtn) {
+            changeColorBtn.onclick = () => {
+                const colors = [
+                    'rgba(255, 99, 71, 0.7)',  // Tomato
+                    'rgba(60, 179, 113, 0.7)', // MediumSeaGreen
+                    'rgba(138, 43, 226, 0.7)', // BlueViolet
+                    'rgba(255, 215, 0, 0.7)',  // Gold
+                    'rgba(56, 231, 255, 0.7)', // Original glow-color-1
+                    'rgba(255, 115, 250, 0.7)' // Original glow-color-2
+                ];
+                particleColor = colors[Math.floor(Math.random() * colors.length)];
+                showToast('Color changed!');
+                playSound('D5', 'triangle', '32n');
+            };
+        }
+    }
+
 
     // --- GEMINI AI INTEGRATION (NOW USING NETLIFY FUNCTIONS) ---
 
@@ -1542,7 +1705,9 @@
         { name: 'Open Blog', icon: 'book-open', action: () => { openModal('blog'); closeCommandPalette(); } },
         { name: 'Open My Tools', icon: 'tool', action: () => { openModal('tools'); closeCommandPalette(); } },
         { name: 'Open Ex-Timeline', icon: 'clock', action: () => { openModal('timeline'); closeCommandPalette(); } },
-        { name: 'Open Contact', icon: 'mail', action: () => { openModal('contact'); closeCommandPalette(); } }
+        { name: 'Open Generative Art', icon: 'aperture', action: () => { openModal('generative-art'); closeCommandPalette(); } }, <!-- NEW: Command for Generative Art -->
+        { name: 'Open Contact', icon: 'mail', action: () => { openModal('contact'); closeCommandPalette(); } },
+        { name: 'View on GitHub', icon: 'github', action: () => { window.open('https://github.com/Judson-web', '_blank'); closeCommandPalette(); } },
     ];
 
     function openCommandPalette() {
