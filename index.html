@@ -1364,7 +1364,11 @@
     };
 
     document.querySelectorAll('[data-modal]').forEach(el => {
-        el.addEventListener('click', () => openModal(el.getAttribute('data-modal')));
+        el.addEventListener('click', (event) => {
+            // Prevent default navigation for modal links
+            event.preventDefault();
+            openModal(el.getAttribute('data-modal'));
+        });
     });
     document.querySelectorAll('.close-modal').forEach(el => {
         el.addEventListener('click', () => closeModal(el.closest('.modal-overlay')));
@@ -1660,7 +1664,7 @@
                             </svg>
                             Generate a Project Idea
                         `;
-                        feather.replace(); // Ensure new icons are rendered
+                        feather.replace();
                     }
                 });
             }
@@ -2755,10 +2759,14 @@ _           _                     _   _
 
     // Unified handler for drawer link clicks
     function handleDrawerLinkClick(event) {
-        // Prevent default navigation if it's a data-modal link
-        if (event.currentTarget.dataset.modal) {
-            event.preventDefault();
-            openModal(event.currentTarget.dataset.modal); // Open the modal
+        // Prevent default navigation for modal links
+        event.preventDefault(); // Prevent default navigation for all drawer links
+        const modalId = event.currentTarget.dataset.modal;
+        if (modalId) {
+            openModal(modalId); // Open the modal
+        } else if (event.currentTarget.href) {
+            // If it's a regular href link (like GitHub, Twitter), open it
+            window.open(event.currentTarget.href, event.currentTarget.target || '_self');
         }
         closeDrawer(); // Always close the drawer
     }
