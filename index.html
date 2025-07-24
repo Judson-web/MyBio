@@ -832,6 +832,82 @@
     }
 
 
+    /* --- Chatbot Modal Styles --- */
+    #chatbot-modal .modal-content {
+        max-width: 500px; /* Adjust as needed */
+        max-height: 80vh;
+        display: flex;
+        flex-direction: column;
+        padding: 1.5rem;
+    }
+    #chatbot-display {
+        flex-grow: 1;
+        overflow-y: auto;
+        border: 1px solid var(--card-border);
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        background: rgba(0,0,0,0.1);
+        min-height: 200px;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    .chat-message {
+        padding: 0.5rem 0.8rem;
+        border-radius: 12px;
+        max-width: 80%;
+        word-wrap: break-word;
+    }
+    .chat-message.user {
+        background: var(--glow-color-1);
+        color: #000;
+        align-self: flex-end;
+        border-bottom-right-radius: 2px;
+    }
+    .chat-message.ai {
+        background: var(--card-bg);
+        color: var(--text-color);
+        border: 1px solid var(--card-border);
+        align-self: flex-start;
+        border-bottom-left-radius: 2px;
+    }
+    .chat-input-container {
+        display: flex;
+        gap: 0.5rem;
+    }
+    #chatbot-input {
+        flex-grow: 1;
+        padding: 0.75rem;
+        border-radius: 8px;
+        border: 1px solid var(--card-border);
+        background: rgba(0,0,0,0.1);
+        color: var(--text-color);
+        outline: none;
+    }
+    #chatbot-input:focus {
+        border-color: var(--glow-color-1);
+    }
+    #chatbot-send-btn, #chatbot-clear-btn {
+        background: var(--glow-color-2);
+        color: #fff;
+        border: none;
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background 0.2s ease;
+    }
+    #chatbot-send-btn:hover, #chatbot-clear-btn:hover {
+        background: var(--glow-color-1);
+    }
+    #chatbot-thinking-indicator {
+        font-style: italic;
+        color: var(--dim-text-color);
+        align-self: flex-start;
+        margin-left: 0.5rem;
+    }
+
+
     /* --- Command Palette --- */
     #command-palette-overlay { z-index: 2500; }
     .command-palette {
@@ -1039,7 +1115,7 @@
     <nav class="site-nav" id="desktop-nav"> <!-- Added ID for desktop nav -->
       <a data-modal="about" aria-label="About">About</a>
       <a data-modal="projects" aria-label="Projects">Projects</a>
-      <a data-modal="blog" aria-label="Blog">Blog</a>
+      <a data-modal="chatbot" aria-label="Chatbot AI">Chatbot AI</a> <!-- Changed from Blog to Chatbot -->
       <a data-modal="generative-art" aria-label="Generative Art">Generative Art</a>
       <a data-modal="contact" aria-label="Contact">Contact</a>
     </nav>
@@ -1061,7 +1137,7 @@
   <canvas id="aurora-canvas" class="background-canvas"></canvas>
   <canvas id="day-canvas" class="background-canvas"></canvas>
   <canvas id="konami-canvas" class="background-canvas"></canvas>
-  <canvas id="cursor-trail-canvas"></canvas> <!-- NEW: Cursor Trail Canvas -->
+  <canvas id="cursor-trail-canvas"></canvas>
 
 
   <!-- Main Content -->
@@ -1127,14 +1203,7 @@
       <div id="projects-list"></div>
     </div>
   </div>
-  <div id="blog-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="blog-modal-title">
-    <div class="modal-content">
-      <i data-feather="x" class="close-modal" aria-label="Close Blog modal"></i>
-      <h2 id="blog-modal-title">Creator's Log</h2>
-      <button id="generate-thought-btn" class="ambient-btn glitch-effect" data-text="Generate a new thought" aria-label="Generate a new blog thought with AI" style="margin-bottom: 1rem; width: 100%;"><span>Generate a new thought</span></button>
-      <div id="blog-posts"></div>
-    </div>
-  </div>
+  <!-- Removed Blog Modal HTML -->
   <div id="generative-art-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="generative-art-modal-title">
     <div class="modal-content">
       <i data-feather="x" class="close-modal" aria-label="Close Generative Art modal"></i>
@@ -1168,11 +1237,26 @@
       </div>
     </div>
   </div>
+  <div id="chatbot-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="chatbot-modal-title"> <!-- NEW Chatbot Modal -->
+    <div class="modal-content">
+      <i data-feather="x" class="close-modal" aria-label="Close Chatbot modal"></i>
+      <h2 id="chatbot-modal-title">Judson AI Chatbot</h2>
+      <div id="chatbot-display">
+        <div class="chat-message ai">Hello! I am Judson's AI assistant. How can I help you today?</div>
+      </div>
+      <div class="chat-input-container">
+        <input type="text" id="chatbot-input" placeholder="Ask me anything..." aria-label="Chatbot message input">
+        <button id="chatbot-send-btn" aria-label="Send message"><i data-feather="send"></i></button>
+        <button id="chatbot-clear-btn" aria-label="Clear chat history"><i data-feather="trash-2"></i></button>
+      </div>
+      <div id="chatbot-thinking-indicator" style="display:none;">AI is thinking...</div>
+    </div>
+  </div>
   <div id="contact-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="contact-modal-title">
     <div class="modal-content terminal" id="terminal-container">
         <i data-feather="x" class="close-modal" aria-label="Close Contact Terminal modal"></i>
         <h2 id="contact-modal-title">Contact Terminal</h2>
-        <div id="cli-output" role="log" aria-live="polite" aria-atomic="false"></div> <!-- Added ARIA roles -->
+        <div id="cli-output" role="log" aria-live="polite" aria-atomic="false"></div>
         <div class="cli-input-container">
             <span id="cli-prompt-text">></span>
             <input type="text" id="cli-input" autofocus autocomplete="off" aria-label="Terminal command input">
@@ -1184,9 +1268,9 @@
   <!-- Command Palette -->
   <div id="command-palette-overlay" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="command-palette-title">
       <div class="modal-content command-palette">
-          <h2 id="command-palette-title" style="display:none;">Command Palette</h2> <!-- Hidden title for accessibility -->
+          <h2 id="command-palette-title" style="display:none;">Command Palette</h2>
           <input type="text" id="command-input" placeholder="Type a command or search..." aria-label="Command search input">
-          <ul id="command-list" class="command-list" role="listbox"></ul> <!-- Added ARIA roles -->
+          <ul id="command-list" class="command-list" role="listbox"></ul>
       </div>
   </div>
 
@@ -1204,7 +1288,7 @@
     <span>Press Ctrl+K to navigate.</span>
   </footer>
 
-  <div id="toast" class="toast" role="status" aria-live="polite"></div> <!-- Added ARIA roles -->
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
   <!-- Cookie Consent -->
   <div class="cookie-banner" id="cookie-banner" role="dialog" aria-live="polite" aria-label="Cookie consent banner">
@@ -1220,15 +1304,14 @@
     const pageLoadTime = new Date();
     feather.replace();
 
-    const mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 }; // Track mouse position
+    const mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
     let mouseVelocityX = 0;
     let mouseVelocityY = 0;
     let lastMouseX = mouse.x;
     let lastMouseY = mouse.y;
 
     const playSound = (note, type = 'sine', duration = '8n') => {
-        if (typeof Tone === 'undefined') return; // Ensure Tone.js is loaded
-        // Attempt to resume AudioContext if it's suspended (common on mobile/tab switches)
+        if (typeof Tone === 'undefined') return;
         if (Tone.context.state !== 'running' && Tone.context.state !== 'closed') {
             Tone.context.resume().then(() => {
                 console.log("AudioContext resumed successfully.");
@@ -1236,18 +1319,16 @@
                     oscillator: { type },
                     envelope: { attack: 0.005, decay: 0.1, sustain: 0.3, release: 1 }
                 }).toDestination();
-                synth.triggerAttackRelease(note, duration); // Corrected function name
+                synth.triggerAttackRelease(note, duration);
             }).catch(e => console.error("Failed to resume AudioContext:", e));
         } else if (Tone.context.state === 'running') {
             const synth = new Tone.Synth({
                 oscillator: { type },
                 envelope: { attack: 0.005, decay: 0.1, sustain: 0.3, release: 1 }
             }).toDestination();
-            synth.triggerAttackRelease(note, duration); // Corrected function name
+            synth.triggerAttackRelease(note, duration);
         }
     };
-
-    // Ensure Tone.start() is called after a user gesture
     document.body.addEventListener('click', () => {
         if (typeof Tone !== 'undefined' && Tone.context.state !== 'running') {
             Tone.start().then(() => console.log("Tone.js started successfully on user gesture.")).catch(e => console.error("Failed to start Tone.js:", e));
@@ -1289,7 +1370,7 @@
             }
         } else if (theme === 'matrix') {
             document.body.classList.add('matrix-theme');
-            activateKonami(true); // Activate matrix rain without toast
+            activateKonami(true);
         }
         else { // Dark theme
             if (typeof initStarfield === 'function') {
@@ -1298,7 +1379,7 @@
             }
         }
         localStorage.setItem('theme', theme);
-        updateCursorTrailColor(); // Update cursor trail color on theme change
+        updateCursorTrailColor();
     };
     const toggleTheme = () => {
         const currentTheme = localStorage.getItem('theme') || 'dark';
@@ -1351,11 +1432,13 @@
         if (modalId === 'projects') {
             renderProjects();
         }
-        // Removed tools and timeline modal calls
-        if (modalId === 'generative-art') { // Initialize generative art when modal opens
+        if (modalId === 'chatbot') { // NEW: Initialize chatbot when modal opens
+            chatbot.init();
+        }
+        if (modalId === 'generative-art') {
             renderGenerativeArt();
         }
-        closeDrawer(); // Close the drawer if it's open when a modal is opened
+        closeDrawer();
     };
     const closeModal = (modal) => {
         if (!modal) return;
@@ -1365,7 +1448,6 @@
 
     document.querySelectorAll('[data-modal]').forEach(el => {
         el.addEventListener('click', (event) => {
-            // Prevent default navigation for modal links
             event.preventDefault();
             openModal(el.getAttribute('data-modal'));
         });
@@ -1389,8 +1471,7 @@
         const timeOptions = { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: true };
         const timeString = new Intl.DateTimeFormat('en-US', timeOptions).format(now);
         timeWidget.innerHTML = `<i data-feather="clock"></i> ${timeString}`;
-        feather.replace(); // Re-render icon after update
-        // Optional: Add a subtle bounce animation to the icon on update
+        feather.replace();
         const clockIcon = timeWidget.querySelector('i[data-feather="clock"]');
         if (clockIcon) {
             clockIcon.style.transform = 'scale(1.1)';
@@ -1401,7 +1482,6 @@
         const hourOptions = { timeZone: 'Asia/Kolkata', hour: 'numeric', hour12: false };
         const hour = parseInt(new Intl.DateTimeFormat('en-US', hourOptions).format(now));
         
-        // Initial greeting, will be overwritten by AI if returning user
         let greeting = "Welcome.";
         if (hour >= 5 && hour < 12) greeting = "Good morning.";
         else if (hour >= 12 && hour < 17) greeting = "Good afternoon.";
@@ -1441,8 +1521,7 @@
             else if (weatherDesc.includes('mist') || weatherDesc.includes('fog')) icon = 'wind';
 
             weatherWidget.innerHTML = `<i data-feather="${icon}"></i> ${temp}°C`;
-            feather.replace(); // Re-render icon after update
-            // Optional: Add a subtle bounce animation to the icon on update
+            feather.replace();
             const weatherIcon = weatherWidget.querySelector('i[data-feather]');
             if (weatherIcon) {
                 weatherIcon.style.transform = 'scale(1.1)';
@@ -1468,8 +1547,7 @@
             if (!response.ok) throw new Error('GitHub API error');
             const data = await response.json();
             widget.innerHTML = `<i data-feather="github"></i> ${data.followers} / ${data.public_repos}`;
-            feather.replace(); // Re-render icon after update
-            // Optional: Add a subtle bounce animation to the icon on update
+            feather.replace();
             const githubIcon = widget.querySelector('i[data-feather="github"]');
             if (githubIcon) {
                 githubIcon.style.transform = 'scale(1.1)';
@@ -1483,12 +1561,11 @@
         }
     }
 
-    // Function to update Now Playing widget
     async function updateNowPlaying() {
         const nowPlayingWidget = document.getElementById('now-playing-widget');
         if (!nowPlayingWidget) return;
 
-        nowPlayingWidget.classList.add('loading'); // Show loading state
+        nowPlayingWidget.classList.add('loading');
 
         try {
             const response = await fetch('/.netlify/functions/get-now-playing');
@@ -1506,13 +1583,13 @@
                 albumArt.alt = `${data.album} album art`;
                 trackName.textContent = data.name;
                 artistName.textContent = data.artist;
-                nowPlayingWidget.classList.remove('no-track'); // Remove no-track class if it was there
+                nowPlayingWidget.classList.remove('no-track');
             } else {
                 albumArt.src = 'https://placehold.co/64x64/333333/ffffff?text=No+Track';
                 albumArt.alt = 'No track playing';
                 trackName.textContent = 'Not Playing';
                 artistName.textContent = 'Last.fm';
-                nowPlayingWidget.classList.add('no-track'); // Add no-track class for styling
+                nowPlayingWidget.classList.add('no-track');
             }
         } catch (error) {
             console.error("Failed to fetch now playing:", error.message);
@@ -1526,27 +1603,13 @@
             nowPlayingWidget.classList.add('no-track');
             showToast('API Error: Could not fetch now playing data.');
         } finally {
-            nowPlayingWidget.classList.remove('loading'); // Hide loading state
+            nowPlayingWidget.classList.remove('loading');
         }
     }
 
 
-    // --- DYNAMIC CONTENT ---
-    let blogPosts = [
-        { title: 'The Art of Imperfection in Code', date: '2025-07-20', snippet: 'Why "good enough" is often better than perfect. A look at shipping projects and embracing the beauty of wabi-sabi in development.' },
-        { title: 'From Sonnets to Scripts: A Creative Evolution', date: '2025-07-15', snippet: 'How the constraints and structures of poetry informed my approach to writing elegant, readable code.' },
-    ];
-    function renderBlogPosts() {
-        const container = document.getElementById('blog-posts');
-        if (!container) return;
-        container.innerHTML = blogPosts.map(post => `
-            <div class="blog-post">
-                <h3>${post.title}</h3>
-                <div class="date">${post.date}</div>
-                <p>${post.snippet}</p>
-            </div>
-        `).join('');
-    }
+    // --- DYNAMIC CONTENT (Blog removed, Project remains) ---
+    // Removed blogPosts array and renderBlogPosts function
     
     async function renderProjects() {
         const container = document.getElementById('projects-list');
@@ -1556,11 +1619,10 @@
             const response = await fetch('https://api.github.com/users/Judson-web/repos?sort=updated&direction=desc');
             if (!response.ok) throw new Error('Could not fetch projects');
             const data = await response.json();
-            // Filter out forks and limit to 5
             const repos = data.filter(repo => !repo.fork).slice(0, 5);
 
             container.innerHTML = repos.map(repo => `
-                <div class="project-card">
+                <div class="project-card animate-on-scroll">
                     <h3><a href="${repo.html_url}" target="_blank">${repo.name}</a></h3>
                     <p>${repo.description || 'No description available.'}</p>
                     <div class="stats">
@@ -1576,7 +1638,6 @@
             `).join('');
             feather.replace();
 
-            // Add event listeners to the new AI summary buttons
             document.querySelectorAll('.ai-summary-btn').forEach(button => {
                 button.addEventListener('click', async (e) => {
                     const btn = e.currentTarget;
@@ -1616,7 +1677,6 @@
                 });
             });
 
-            // Event listener for Generate Project Idea button
             const generateProjectIdeaBtn = document.getElementById('generate-project-idea-btn');
             const aiProjectIdeaOutput = document.getElementById('ai-project-idea-output');
             const aiProjectIdeaTitle = document.getElementById('ai-project-idea-title');
@@ -1627,12 +1687,12 @@
                     generateProjectIdeaBtn.disabled = true;
                     generateProjectIdeaBtn.innerHTML = '<i data-feather="loader" class="spin"></i> <span>Generating Idea...</span>';
                     feather.replace();
-                    hide(aiProjectIdeaOutput); // Hide previous idea
+                    hide(aiProjectIdeaOutput);
 
                     const prompt = `Generate a creative and minimalist web project idea for a developer who is an ex-poet, ex-minimalist, ex-thinker, now creator. The idea should combine elements of art, code, and philosophy. Provide the response in JSON format with two keys: 'title' (a concise, catchy title) and 'concept' (a 2-3 sentence concept description).`;
 
                     try {
-                        const response = await fetch('/.netlify/functions/generate-thought', { // Re-using generate-thought as it expects JSON
+                        const response = await fetch('/.netlify/functions/generate-thought', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ prompt: prompt }),
@@ -1647,7 +1707,7 @@
                         if (data && data.title && data.concept) {
                             aiProjectIdeaTitle.textContent = data.title;
                             aiProjectIdeaConcept.textContent = data.concept;
-                            show(aiProjectIdeaOutput); // Show the new idea
+                            show(aiProjectIdeaOutput);
                             showToast('New project idea generated!');
                         } else {
                             showToast('AI could not generate a project idea in the expected format.');
@@ -1678,110 +1738,42 @@
         }
     }
 
-    // My Tools Data and Render Function (Re-added)
-    const myTools = [
-        { name: 'JavaScript', icon: 'code', description: 'The backbone of web interactivity, essential for dynamic frontends and server-side logic with Node.js.' },
-        { name: 'HTML/CSS', icon: 'code', description: 'The fundamental languages for structuring and styling web content, crucial for creating beautiful and responsive layouts.' },
-        { name: 'React', icon: 'aperture', description: 'A powerful JavaScript library for building user interfaces, enabling component-based and efficient UI development.' },
-        { name: 'Node.js', icon: 'server', description: 'A JavaScript runtime environment that allows server-side development, enabling full-stack JavaScript applications.' },
-        { name: 'Python', icon: 'terminal', description: 'A versatile language used for scripting, data analysis, machine learning, and backend development, known for its readability.' },
-        { name: 'Git/GitHub', icon: 'git-branch', description: 'Version control system and platform for collaborative coding, essential for tracking changes and working in teams.' },
-        { name: 'Netlify', icon: 'cloud', description: 'A modern web development platform for deploying and hosting static sites and serverless functions, simplifying CI/CD.' },
-        { name: 'VS Code', icon: 'monitor', description: 'My preferred code editor, highly customizable with a rich ecosystem of extensions for efficient development.' },
-        { name: 'Generative AI', icon: 'cpu', description: 'Leveraging AI models like Gemini to generate creative content, assist with coding, and explore new interactive possibilities.' },
-        { name: 'Web Audio API', icon: 'music', description: 'A high-level JavaScript API for processing and synthesizing audio in web applications, enabling interactive sound experiences.' }
-    ];
+    // Removed My Tools Data and Render Function
+    // Removed Ex-Timeline Data and Render Function
 
-    function renderTools() {
-        const container = document.getElementById('tools-list');
-        if (!container) return;
-        container.innerHTML = myTools.map(tool => `
-            <div class="tool-item">
-                <i data-feather="${tool.icon}"></i>
-                <h4>${tool.name}</h4>
-                <p class="tool-description">${tool.description}</p>
-            </div>
-        `).join('');
-        feather.replace(); // Ensure new icons are rendered
-
-        // Add click listeners for tool items
-        document.querySelectorAll('.tool-item').forEach(item => {
-            item.addEventListener('click', (e) => {
-                const clickedItem = e.currentTarget;
-                const descriptionElement = clickedItem.querySelector('.tool-description');
-                
-                // Toggle 'expanded' class
-                const isExpanded = clickedItem.classList.toggle('expanded');
-                clickedItem.setAttribute('aria-expanded', isExpanded);
-
-                // Toggle description visibility via CSS transition
-                if (isExpanded) {
-                    descriptionElement.style.maxHeight = descriptionElement.scrollHeight + "px";
-                    descriptionElement.style.opacity = 1;
-                    playSound('C5', 'sine', '32n'); // Play sound on expand
-                } else {
-                    descriptionElement.style.maxHeight = "0";
-                    descriptionElement.style.opacity = 0;
-                    playSound('C4', 'sine', '32n'); // Play sound on collapse
-                }
-            });
-        });
-    }
-
-    // Ex-Timeline Data and Render Function (Re-added)
-    const exTimelineData = [
-        { year: 'Early Days', title: 'ExPoet', description: 'My initial foray into creative expression, exploring rhythm, metaphor, and the power of concise language through poetry. This phase honed my ability to convey complex ideas efficiently.', icon: 'feather' },
-        { year: 'Mid-Journey', title: 'ExMinimalist', description: 'A period focused on stripping away the unnecessary, seeking elegance and efficiency in all aspects. This philosophy deeply influenced my approach to clean code and user-centric design.', icon: 'maximize' },
-        { year: 'Transition', title: 'ExThinker', description: 'A phase of deep introspection and philosophical inquiry, questioning assumptions and exploring complex systems. This cultivated my analytical problem-solving skills, crucial for development.', icon: 'brain' }, /* using brain as a placeholder */
-        { year: 'Present', title: 'NowCreator', description: 'The culmination of my journey, where poetry, minimalism, and analytical thought converge into building interactive digital experiences and generative art. This is where ideas become reality.', icon: 'code' }
-    ];
-
-    function renderExTimeline() {
-        const container = document.getElementById('ex-timeline-content');
-        if (!container) return;
-        container.innerHTML = exTimelineData.map(item => `
-            <div class="timeline-item">
-                <div class="timeline-item-content">
-                    <h3>${item.title} (${item.year})</h3>
-                    <p>${item.description}</p>
-                </div>
-            </div>
-        `).join('');
-        feather.replace(); // Ensure new icons are rendered
-    }
 
     // --- GENERATIVE ART LOGIC ---
-    let generativeArtAnimationId; // To store requestAnimationFrame ID
-    let generativeArtParticles = []; // Renamed to avoid conflict with global particles
+    let generativeArtAnimationId;
+    let generativeArtParticles = [];
     let generativeArtConfig = {
         count: 100,
         size: 2,
-        speed: 2, // Multiplier for originalVx/Vy
+        speed: 2,
         repulsionStrength: 0.5,
-        influenceRadius: 80, // Default influence radius for mouse repulsion
+        influenceRadius: 80,
         drawLines: true,
-        lineDistance: 100, // Max distance for lines
-        particleColor: 'rgba(56, 231, 255, 0.7)', // Default glow-color-1 with opacity
-        backgroundColor: '#000000', // Default black
+        lineDistance: 100,
+        particleColor: 'rgba(56, 231, 255, 0.7)',
+        backgroundColor: '#000000',
         animationPaused: false
     };
 
     const defaultParticleColors = [
-        'rgba(56, 231, 255, 0.7)',  // Original glow-color-1
-        'rgba(255, 115, 250, 0.7)', // Original glow-color-2
-        'rgba(255, 99, 71, 0.7)',   // Tomato
-        'rgba(60, 179, 113, 0.7)',  // MediumSeaGreen
-        'rgba(138, 43, 226, 0.7)',  // BlueViolet
-        'rgba(255, 215, 0, 0.7)',   // Gold
-        'rgba(255, 255, 255, 0.7)'  // White
+        'rgba(56, 231, 255, 0.7)',
+        'rgba(255, 115, 250, 0.7)',
+        'rgba(255, 99, 71, 0.7)',
+        'rgba(60, 179, 113, 0.7)',
+        'rgba(138, 43, 226, 0.7)',
+        'rgba(255, 215, 0, 0.7)',
+        'rgba(255, 255, 255, 0.7)'
     ];
     const defaultBackgroundColors = [
-        '#000000', // Black
-        '#1a1a1a', // Dark grey
-        '#0a0a0f', // Your default bg-color
-        '#001f3f', // Dark blue
-        '#36013F', // Dark purple
-        '#222222'  // Another dark grey
+        '#000000',
+        '#1a1a1a',
+        '#0a0a0f',
+        '#001f3f',
+        '#36013F',
+        '#222222'
     ];
     let currentParticleColorIndex = 0;
     let currentBackgroundColorIndex = 0;
@@ -1791,7 +1783,6 @@
         if (!canvas) return;
         const ctx = canvas.getContext('2d');
 
-        // Set canvas size to fill its container
         canvas.width = canvas.offsetWidth;
         canvas.height = canvas.offsetHeight;
 
@@ -1820,7 +1811,6 @@
             return;
         }
 
-        // Clear canvas with background color (for trail effect)
         ctx.fillStyle = generativeArtConfig.backgroundColor;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -1828,26 +1818,22 @@
         ctx.fillStyle = generativeArtConfig.particleColor;
 
         generativeArtParticles.forEach(p => {
-            // Mouse repulsion
             const dx = mouse.x - p.x;
             const dy = mouse.y - p.y;
             const distance = Math.sqrt(dx * dx + dy * dy);
 
-            if (distance < generativeArtConfig.influenceRadius) { // Use config value
+            if (distance < generativeArtConfig.influenceRadius) {
                 const force = (1 - distance / generativeArtConfig.influenceRadius) * generativeArtConfig.repulsionStrength;
                 p.vx -= dx * force;
                 p.vy -= dy * force;
             }
 
-            // Return to original velocity slowly
             p.vx += (p.originalVx - p.vx) * 0.02;
             p.vy += (p.originalVy - p.vy) * 0.02;
 
-            // Apply speed multiplier
-            p.x += p.vx * (generativeArtConfig.speed / 2); // Divide by 2 to keep original speed scale
+            p.x += p.vx * (generativeArtConfig.speed / 2);
             p.y += p.vy * (generativeArtConfig.speed / 2);
 
-            // Wrap around edges
             if (p.x < 0) p.x = canvas.width;
             if (p.x > canvas.width) p.x = 0;
             if (p.y < 0) p.y = canvas.height;
@@ -1860,9 +1846,8 @@
         });
         ctx.globalAlpha = 1;
 
-        // Draw lines between particles
         if (generativeArtConfig.drawLines) {
-            ctx.strokeStyle = generativeArtConfig.particleColor.replace('0.7', '0.2'); // Lighter opacity for lines
+            ctx.strokeStyle = generativeArtConfig.particleColor.replace('0.7', '0.2');
             ctx.lineWidth = 0.5;
             for (let i = 0; i < generativeArtParticles.length; i++) {
                 for (let j = i + 1; j < generativeArtParticles.length; j++) {
@@ -1871,7 +1856,7 @@
                     const dist = Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
 
                     if (dist < generativeArtConfig.lineDistance) {
-                        ctx.globalAlpha = (1 - dist / generativeArtConfig.lineDistance) * 0.5; // Fade lines based on distance
+                        ctx.globalAlpha = (1 - dist / generativeArtConfig.lineDistance) * 0.5;
                         ctx.beginPath();
                         ctx.moveTo(p1.x, p1.y);
                         ctx.lineTo(p2.x, p2.y);
@@ -1887,7 +1872,6 @@
     }
 
     function renderGenerativeArt() {
-        // Ensure initial config is applied
         const particleCountSlider = document.getElementById('particle-count-slider');
         const particleSizeSlider = document.getElementById('particle-size-slider');
         const particleSpeedSlider = document.getElementById('particle-speed-slider');
@@ -1903,14 +1887,13 @@
         if (pausePlayBtn) pausePlayBtn.innerHTML = generativeArtConfig.animationPaused ? '<i data-feather="play"></i> Play' : '<i data-feather="pause"></i> Pause';
 
 
-        initGenerativeArt(); // Initialize particles and canvas size
-        if (generativeArtAnimationId) { // Stop any previous animation
+        initGenerativeArt();
+        if (generativeArtAnimationId) {
             cancelAnimationFrame(generativeArtAnimationId);
         }
-        animateGenerativeArt(); // Start new animation loop
-        feather.replace(); // Re-render icons
+        animateGenerativeArt();
+        feather.replace();
 
-        // Add event listeners for generative art controls
         const resetBtn = document.getElementById('reset-art-btn');
         const changeParticleColorBtn = document.getElementById('change-particle-color-btn');
         const changeBgColorBtn = document.getElementById('change-bg-color-btn');
@@ -1919,7 +1902,6 @@
 
         if (resetBtn) {
             resetBtn.onclick = () => {
-                // Reset sliders to default values
                 if (particleCountSlider) particleCountSlider.value = 100;
                 if (particleSizeSlider) particleSizeSlider.value = 2;
                 if (particleSpeedSlider) particleSpeedSlider.value = 2;
@@ -1929,13 +1911,12 @@
                 generativeArtConfig.animationPaused = false;
                 if (pausePlayBtn) pausePlayBtn.innerHTML = '<i data-feather="pause"></i> Pause';
 
-                // Reset colors to default
                 currentParticleColorIndex = 0;
                 currentBackgroundColorIndex = 0;
-                generativeArtConfig.particleColor = defaultParticleColors[currentParticleColorIndex]; // Use default colors
-                generativeArtConfig.backgroundColor = defaultBackgroundColors[currentBackgroundColorIndex]; // Use default colors
+                generativeArtConfig.particleColor = defaultParticleColors[currentParticleColorIndex];
+                generativeArtConfig.backgroundColor = defaultBackgroundColors[currentBackgroundColorIndex];
 
-                initGenerativeArt(); // Re-initialize particles with reset config
+                initGenerativeArt();
                 showToast('Art reset!');
                 playSound('B4', 'sine', '32n');
                 feather.replace();
@@ -1943,7 +1924,7 @@
         }
         if (changeParticleColorBtn) {
             changeParticleColorBtn.onclick = () => {
-                currentParticleColorIndex = (currentParticleColorIndex + 1) % defaultParticleColors.length; // Use default colors array
+                currentParticleColorIndex = (currentParticleColorIndex + 1) % defaultParticleColors.length;
                 generativeArtConfig.particleColor = defaultParticleColors[currentParticleColorIndex];
                 showToast('Particle color changed!');
                 playSound('D5', 'triangle', '32n');
@@ -1951,7 +1932,7 @@
         }
         if (changeBgColorBtn) {
             changeBgColorBtn.onclick = () => {
-                currentBackgroundColorIndex = (currentBackgroundColorIndex + 1) % defaultBackgroundColors.length; // Use default colors array
+                currentBackgroundColorIndex = (currentBackgroundColorIndex + 1) % defaultBackgroundColors.length;
                 generativeArtConfig.backgroundColor = defaultBackgroundColors[currentBackgroundColorIndex];
                 showToast('Background color changed!');
                 playSound('E5', 'triangle', '32n');
@@ -1976,7 +1957,6 @@
             };
         }
 
-        // NEW: AI Generate Palette Button Logic
         if (aiGeneratePaletteBtn) {
             aiGeneratePaletteBtn.onclick = async () => {
                 aiGeneratePaletteBtn.disabled = true;
@@ -1987,9 +1967,6 @@
                 const prompt = "Generate a minimalist, futuristic color palette suitable for generative art. Provide 5 distinct hexadecimal color codes (e.g., #RRGGBB) in a JSON array. Example: [\"#HEX1\", \"#HEX2\", \"#HEX3\", \"#HEX4\", \"#HEX5\"]";
                 
                 try {
-                    // We need to use ask-gemini for general text, but tell it to structure as JSON.
-                    // The generate-thought function is already set up to expect JSON schema.
-                    // So, we'll use generate-thought but will need to extract the JSON from its 'snippet' field.
                     const response = await fetch('/.netlify/functions/generate-thought', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -2000,33 +1977,20 @@
                         const errorData = await response.json();
                         throw new Error(errorData.message || 'AI palette generation failed.');
                     }
-                    const data = await response.json(); // This will return { title: "...", snippet: "..." }
+                    const data = await response.json();
 
                     let parsedColors = [];
                     if (data && data.snippet) {
-                        try {
-                            // Clean the snippet from markdown backticks before parsing
-                            const cleanSnippet = data.snippet.replace(/```json\n?/, '').replace(/\n?```/, '').trim();
-                            parsedColors = JSON.parse(cleanSnippet);
-                        } catch (parseError) {
-                            console.error("Failed to parse AI palette JSON from snippet:", parseError, data.snippet);
-                            showToast('AI provided malformed palette JSON. Try again.');
-                            return;
-                        }
+                        const cleanSnippet = data.snippet.replace(/```json\n?/, '').replace(/\n?```/, '').trim();
+                        parsedColors = JSON.parse(cleanSnippet);
                     }
 
                     if (Array.isArray(parsedColors) && parsedColors.length >= 2) {
-                        // Update particle and background colors with the AI-generated palette
-                        generativeArtConfig.particleColor = `${parsedColors[0]}B3`; // First color, 70% opacity
-                        generativeArtConfig.backgroundColor = parsedColors[1]; // Second color for background
-
-                        // Optionally, you might want to update the defaultParticleColors/backgroundColors
-                        // arrays if you want the cycle buttons to include these new colors.
-                        // For now, they only apply to the current generativeArtConfig.
+                        generativeArtConfig.particleColor = `${parsedColors[0]}B3`;
+                        generativeArtConfig.backgroundColor = parsedColors[1];
 
                         showToast('AI generated a new color palette!');
                         playSound('E6', 'triangle', '32n');
-                        // No need to re-init particles, just animate loop will use new colors
                     } else {
                         showToast('AI could not generate a valid color palette (expected JSON array of hex codes).');
                         console.error("AI generated invalid palette format:", parsedColors);
@@ -2044,23 +2008,21 @@
         }
 
 
-        // Sliders
         if (particleCountSlider) {
             particleCountSlider.oninput = () => {
                 generativeArtConfig.count = parseInt(particleCountSlider.value);
-                initGenerativeArt(); // Re-initialize particles when count changes
+                initGenerativeArt();
             };
         }
         if (particleSizeSlider) {
             particleSizeSlider.oninput = () => {
                 generativeArtConfig.size = parseFloat(particleSizeSlider.value);
-                generativeArtParticles.forEach(p => p.radius = generativeArtConfig.size); // Update existing particles
+                generativeArtParticles.forEach(p => p.radius = generativeArtConfig.size);
             };
         }
         if (particleSpeedSlider) {
             particleSpeedSlider.oninput = () => {
                 generativeArtConfig.speed = parseFloat(particleSpeedSlider.value);
-                // No need to re-init particles, speed multiplier is applied in animate
             };
         }
         if (repulsionStrengthSlider) {
@@ -2071,55 +2033,112 @@
     }
 
 
-    // --- GEMINI AI INTEGRATION (NOW USING NETLIFY FUNCTIONS) ---
+    // --- CHATBOT AI LOGIC (NEW) ---
+    const chatbot = {
+        displayElement: null,
+        inputElement: null,
+        sendButton: null,
+        clearButton: null,
+        thinkingIndicator: null,
+        chatHistory: [], // Stores conversation for AI context
+        isThinking: false,
 
-    const generateThoughtBtn = document.getElementById('generate-thought-btn');
-    if (generateThoughtBtn) {
-        generateThoughtBtn.addEventListener('click', async () => {
-            generateThoughtBtn.textContent = 'Generating...';
-            generateThoughtBtn.disabled = true;
+        init() {
+            this.displayElement = document.getElementById('chatbot-display');
+            this.inputElement = document.getElementById('chatbot-input');
+            this.sendButton = document.getElementById('chatbot-send-btn');
+            this.clearButton = document.getElementById('chatbot-clear-btn');
+            this.thinkingIndicator = document.getElementById('chatbot-thinking-indicator');
 
-            const prompt = "Generate a short, creative blog post about the intersection of art, code, and minimalism. The response should be in JSON format with two keys: 'title' (a creative, short title) and 'snippet' (a 2-3 sentence thought).";
+            if (!this.displayElement || !this.inputElement || !this.sendButton || !this.clearButton || !this.thinkingIndicator) {
+                console.error("Chatbot elements not found.");
+                return;
+            }
+
+            // Clear display and add initial message only if starting fresh
+            if (this.displayElement.children.length === 0 || this.chatHistory.length === 0) {
+                 this.addMessage('ai', "Hello! I am Judson's AI assistant. How can I help you today?");
+            }
+           
+
+            this.sendButton.onclick = () => this.sendMessage();
+            this.inputElement.onkeydown = (e) => {
+                if (e.key === 'Enter' && !this.isThinking) {
+                    this.sendMessage();
+                }
+            };
+            this.clearButton.onclick = () => this.clearChat();
+
+            this.inputElement.focus();
+        },
+
+        addMessage(sender, text) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-message ${sender}`;
+            messageDiv.textContent = text;
+            this.displayElement.appendChild(messageDiv);
+            this.displayElement.scrollTop = this.displayElement.scrollHeight; // Scroll to bottom
+            playSound('C4', 'sine', '64n'); // Subtle sound for new message
+        },
+
+        showThinking(show) {
+            if (this.thinkingIndicator) {
+                this.thinkingIndicator.style.display = show ? 'block' : 'none';
+            }
+            if (this.inputElement) this.inputElement.disabled = show;
+            if (this.sendButton) this.sendButton.disabled = show;
+            if (this.clearButton) this.clearButton.disabled = show;
+            this.isThinking = show;
+        },
+
+        async sendMessage() {
+            const userMessage = this.inputElement.value.trim();
+            if (!userMessage) return;
+
+            this.addMessage('user', userMessage);
+            this.inputElement.value = ''; // Clear input
+            this.showThinking(true);
+
+            // Add user message to history
+            this.chatHistory.push({ role: "user", parts: [{ text: userMessage }] });
 
             try {
-                const response = await fetch('/.netlify/functions/generate-thought', {
+                const response = await fetch('/.netlify/functions/ask-gemini', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ prompt: prompt }),
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: userMessage, history: this.chatHistory }),
                 });
 
                 if (!response.ok) {
                     const errorData = await response.json();
-                    throw new Error(errorData.message || `Netlify Function error! Status: ${response.status}`);
+                    throw new Error(errorData.message || `API call failed with status: ${response.status}`);
                 }
+                const data = await response.json();
 
-                const thought = await response.json();
-
-                if (thought && thought.title && thought.snippet) {
-                    const now = new Date();
-                    const newPost = {
-                        title: thought.title,
-                        date: now.toISOString().split('T')[0],
-                        snippet: thought.snippet
-                    };
-                    blogPosts.unshift(newPost);
-                    renderBlogPosts();
+                if (data && data.response) {
+                    this.addMessage('ai', data.response);
+                    this.chatHistory.push({ role: "model", parts: [{ text: data.response }] }); // Add AI response to history
                 } else {
-                    console.error("Unexpected response structure from Netlify Function:", thought);
-                    showToast("AI Error: Generated content was not in the expected format.");
+                    this.addMessage('ai', "I'm sorry, I couldn't generate a response.");
+                    console.error("Unexpected AI response:", data);
                 }
-
             } catch (error) {
-                console.error('Error generating thought:', error);
-                showToast(`AI Error: ${error.message}`);
+                this.addMessage('ai', `Error: ${error.message}`);
+                console.error("Chatbot AI error:", error);
             } finally {
-                generateThoughtBtn.textContent = 'Generate a new thought';
-                generateThoughtBtn.disabled = false;
+                this.showThinking(false);
             }
-        });
-    }
+        },
+
+        clearChat() {
+            if (this.displayElement) {
+                this.displayElement.innerHTML = '';
+            }
+            this.chatHistory = []; // Reset conversation memory
+            this.addMessage('ai', "Chat cleared. How can I help you now?"); // Start fresh
+            playSound('C3', 'sine', '16n');
+        }
+    };
 
 
     // --- COMMAND PALETTE LOGIC ---
@@ -2132,7 +2151,7 @@
         { name: 'Toggle Theme', icon: 'moon', action: () => { toggleTheme(); closeCommandPalette(); } },
         { name: 'Open About', icon: 'user', action: () => { openModal('about'); closeCommandPalette(); } },
         { name: 'Open Projects', icon: 'briefcase', action: () => { openModal('projects'); closeCommandPalette(); } },
-        { name: 'Open Blog', icon: 'book-open', action: () => { openModal('blog'); closeCommandPalette(); } },
+        { name: 'Open Chatbot', icon: 'message-square', action: () => { openModal('chatbot'); closeCommandPalette(); } }, <!-- Changed from Blog to Chatbot -->
         { name: 'Open Generative Art', icon: 'aperture', action: () => { openModal('generative-art'); closeCommandPalette(); } },
         { name: 'Open Contact', icon: 'mail', action: () => { openModal('contact'); closeCommandPalette(); } },
         { name: 'View on GitHub', icon: 'github', action: () => { window.open('https://github.com/Judson-web', '_blank'); closeCommandPalette(); } },
@@ -2251,7 +2270,7 @@
 
         showWelcome() {
             if (!this.outputElement) return;
-            this.outputElement.innerHTML = ''; // Clear existing content to prevent repetition
+            this.outputElement.innerHTML = '';
             const judsonAscii = `
 _           _                     _   _
 | |         | |                   | | (_)
@@ -2288,7 +2307,7 @@ _           _                     _   _
             const typingInterval = setInterval(() => {
                 if (i < message.length) {
                     line.textContent += message.charAt(i);
-                    playSound('C6', 'triangle', '64n'); // Typewriter sound
+                    playSound('C6', 'triangle', '64n');
                     this.outputElement.scrollTop = this.outputElement.scrollHeight;
                     i++;
                 } else {
@@ -2359,7 +2378,7 @@ _           _                     _   _
             }
 
             const cliCommands = {
-                'help': async () => { // Made async to allow AI call
+                'help': async () => {
                     const helpText = [
                         'Available commands:',
                         '  help      - Show this help message',
@@ -2378,10 +2397,9 @@ _           _                     _   _
                     ].join('\n');
                     this.typeLog('success', helpText);
 
-                    // NEW: AI-generated "What should I ask?" suggestions
                     const promptForSuggestions = "Generate 3 very short, distinct example questions a user could ask an AI assistant about creative coding, minimalism, or digital art. Provide them as a JSON array of strings.";
                     try {
-                        const response = await fetch('/.netlify/functions/generate-thought', { // Re-using generate-thought for JSON output
+                        const response = await fetch('/.netlify/functions/generate-thought', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ prompt: promptForSuggestions }),
@@ -2389,15 +2407,9 @@ _           _                     _   _
                         if (response.ok) {
                             const data = await response.json();
                             let suggestions = [];
-                            if (data && data.snippet) { // generate-thought returns snippet
-                                try {
-                                    const cleanSnippet = data.snippet.replace(/```json\n?/, '').replace(/\n?```/, '').trim();
-                                    suggestions = JSON.parse(cleanSnippet);
-                                } catch (parseError) {
-                                    console.error("Failed to parse AI suggestions JSON:", parseError, cleanSnippet);
-                                }
-                            } else if (Array.isArray(data)) { // If ask-gemini was modified to return array directly
-                                suggestions = data;
+                            if (data && data.snippet) {
+                                const cleanSnippet = data.snippet.replace(/```json\n?/, '').replace(/\n?```/, '').trim();
+                                suggestions = JSON.parse(cleanSnippet);
                             }
 
                             if (Array.isArray(suggestions) && suggestions.length > 0) {
@@ -2410,9 +2422,9 @@ _           _                     _   _
                     }
                 },
                 'clear': () => {
-                    this.chatHistory = []; // ONLY clear AI memory here
-                    this.aiQueryCount = 0; // Reset AI query count
-                    this.showWelcome(); // Re-display welcome message
+                    this.chatHistory = [];
+                    this.aiQueryCount = 0;
+                    this.showWelcome();
                 },
                 'whoami': () => {
                     this.typeLog('response', 'You are a curious visitor on my digital domain.');
@@ -2498,35 +2510,34 @@ _           _                     _   _
                     }
                     const thinkingLine = this.startThinking();
                     try {
-                        // Send the current chat history along with the new prompt to the Netlify Function
                         this.chatHistory.push({ role: "user", parts: [{ text: fullPrompt }] });
 
-                        const response = await fetch('/.netlify/functions/ask-gemini', { // <-- Calls your ask-gemini.js function
+                        const response = await fetch('/.netlify/functions/ask-gemini', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ prompt: fullPrompt, history: this.chatHistory }), // Pass history
+                            body: JSON.stringify({ prompt: fullPrompt, history: this.chatHistory }),
                         });
 
                         if (!response.ok) {
                             const errorData = await response.json();
                             throw new Error(errorData.message || `API call failed with status: ${response.status}`);
                         }
-                        const data = await response.json(); // Expects { response: "..." }
+                        const data = await response.json();
 
                         if (data && data.response) {
-                            this.chatHistory.push({ role: "model", parts: [{ text: data.response }] }); // Add AI response to history
-                            this.aiQueryCount++; // Increment AI query count
+                            this.chatHistory.push({ role: "model", parts: [{ text: data.response }] });
+                            this.aiQueryCount++;
                             this.stopThinking(thinkingLine, data.response, 'response');
                         } else {
                             throw new Error("Unexpected response from AI.");
                         }
                     } catch (e) {
                         console.error("CLI 'ask' error:", e);
-                        this.chatHistory.pop(); // Remove user prompt from history if AI call failed
+                        this.chatHistory.pop();
                         this.stopThinking(thinkingLine, `AI Error: ${e.message}`, 'error');
                     }
                 },
-                'dream': async () => { // NEW: Dream interpreter command
+                'dream': async () => {
                     if (!fullPrompt) {
                         this.typeLog('error', 'Usage: dream [your dream description]');
                         return;
@@ -2566,10 +2577,9 @@ _           _                     _   _
         }
     };
     
-    // Ensure cli.setupUI() runs before initializePage()
     document.addEventListener('DOMContentLoaded', () => {
-        cli.setupUI(); // Setup UI elements and listeners first
-        initializePage(); // Then run the rest of the page initialization
+        cli.setupUI();
+        initializePage();
     });
 
     // --- KONAMI CODE EASTER EGG ---
@@ -2639,7 +2649,6 @@ _           _                     _   _
     let stars = [];
     let bubbles = [];
 
-    // --- Dark Theme: Starfield Animation ---
     function initStarfield() {
         const canvas = document.getElementById('aurora-canvas');
         if (!canvas) return;
@@ -2654,7 +2663,6 @@ _           _                     _   _
                 alpha: Math.random() * 0.5 + 0.5
             });
         }
-        // Add some shooting stars
         for (let i = 0; i < 3; i++) {
              stars.push({
                 x: Math.random() * canvas.width,
@@ -2675,13 +2683,11 @@ _           _                     _   _
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // Calculate mouse influence
-        const influenceRadius = 150; // How far mouse influences stars
-        const influenceStrength = 0.005; // How strongly mouse influences stars
+        const influenceRadius = 150;
+        const influenceStrength = 0.005;
 
         ctx.fillStyle = 'white';
         stars.forEach(star => {
-            // Apply mouse influence
             const dx = mouse.x - star.x;
             const dy = mouse.y - star.y;
             const distance = Math.sqrt(dx * dx + dy * dy);
@@ -2692,7 +2698,6 @@ _           _                     _   _
                 star.vy -= dy * force;
             }
 
-            // Dampen velocity to prevent infinite acceleration
             star.vx *= 0.99;
             star.vy *= 0.99;
 
@@ -2721,7 +2726,6 @@ _           _                     _   _
         activeAnimationId = requestAnimationFrame(animateAurora);
     }
 
-    // --- Light Theme: Bubbles Animation ---
     function initBubbles() {
         const canvas = document.getElementById('day-canvas');
         if (!canvas) return;
@@ -2744,26 +2748,24 @@ _           _                     _   _
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // Calculate mouse influence for bubbles
-        const influenceRadiusBubbles = 100; // How far mouse influences bubbles
-        const influenceStrengthBubbles = 0.05; // How strongly mouse influences bubbles
+        const influenceRadiusBubbles = 100;
+        const influenceStrengthBubbles = 0.05;
 
         bubbles.forEach(bubble => {
             ctx.beginPath();
             ctx.arc(bubble.x, bubble.y, bubble.radius, 0, Math.PI * 2);
-            ctx.fillStyle = `${bubble.color}33`; // 20% opacity
+            ctx.fillStyle = `${bubble.color}33`;
             ctx.fill();
-            ctx.strokeStyle = `${bubble.color}80`; // 50% opacity
+            ctx.strokeStyle = `${bubble.color}80`;
             ctx.stroke();
 
-            // Apply mouse influence
             const dx = mouse.x - bubble.x;
             const dy = mouse.y - bubble.y;
             const distance = Math.sqrt(dx * dx + dy * dy);
 
             if (distance < influenceRadiusBubbles) {
                 const force = (1 - distance / influenceRadiusBubbles) * influenceStrengthBubbles;
-                bubble.x -= dx * force; // Push bubbles away from mouse
+                bubble.x -= dx * force;
                 bubble.y -= dy * force;
             }
 
@@ -2779,84 +2781,6 @@ _           _                     _   _
         activeAnimationId = requestAnimationFrame(animateDay);
     }
 
-    // --- CURSOR TRAIL LOGIC ---
-    const cursorTrailCanvas = document.getElementById('cursor-trail-canvas');
-    let cursorTrailCtx;
-    let trailParticles = [];
-    let trailColor = 'rgba(56, 231, 255, 0.5)'; // Default glow-color-1 with opacity
-    let trailMaxParticles = 50;
-    let trailParticleSize = 2;
-    let trailFadeSpeed = 0.05;
-
-    function initCursorTrail() {
-        if (!cursorTrailCanvas) return;
-        cursorTrailCtx = cursorTrailCanvas.getContext('2d');
-        cursorTrailCanvas.width = window.innerWidth;
-        cursorTrailCanvas.height = window.innerHeight;
-        trailParticles = [];
-    }
-
-    function animateCursorTrail() {
-        if (!cursorTrailCtx) return;
-
-        // Clear canvas with a low opacity to create trails
-        cursorTrailCtx.clearRect(0, 0, cursorTrailCanvas.width, cursorTrailCanvas.height);
-        // For a fading trail, use:
-        // cursorTrailCtx.fillStyle = 'rgba(0, 0, 0, 0.1)'; // Black with low opacity
-        // cursorTrailCtx.fillRect(0, 0, cursorTrailCanvas.width, cursorTrailCanvas.height);
-
-
-        // Add a new particle at mouse position
-        trailParticles.push({
-            x: mouse.x,
-            y: mouse.y,
-            size: trailParticleSize,
-            alpha: 1,
-            vx: (Math.random() - 0.5) * 2,
-            vy: (Math.random() - 0.5) * 2,
-        });
-
-        // Limit number of particles
-        if (trailParticles.length > trailMaxParticles) {
-            trailParticles.shift();
-        }
-
-        // Draw and update particles
-        for (let i = 0; i < trailParticles.length; i++) {
-            let p = trailParticles[i];
-
-            p.x += p.vx;
-            p.y += p.vy;
-            p.alpha -= trailFadeSpeed; // Fade out
-
-            if (p.alpha <= 0) {
-                trailParticles.splice(i, 1); // Remove if fully faded
-                i--;
-                continue;
-            }
-
-            cursorTrailCtx.fillStyle = trailColor;
-            cursorTrailCtx.globalAlpha = p.alpha;
-            cursorTrailCtx.beginPath();
-            cursorTrailCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-            cursorTrailCtx.fill();
-        }
-        cursorTrailCtx.globalAlpha = 1; // Reset global alpha
-
-        requestAnimationFrame(animateCursorTrail);
-    }
-
-    // Update trail color based on theme
-    function updateCursorTrailColor() {
-        const currentTheme = localStorage.getItem('theme') || 'dark';
-        if (currentTheme === 'light') {
-            trailColor = 'rgba(0, 123, 255, 0.5)'; // Light theme glow-color-1
-        } else {
-            trailColor = 'rgba(56, 231, 255, 0.5)'; // Dark theme glow-color-1
-        }
-    }
-
-
     // --- CANVAS RESIZING FUNCTION ---
     function resizeAllCanvases() {
         const canvases = document.querySelectorAll('.background-canvas');
@@ -2864,15 +2788,13 @@ _           _                     _   _
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
         });
-        // Also resize generative art canvas if open
         const generativeArtCanvas = document.getElementById('generative-art-canvas');
-        if (generativeArtCanvas && generativeArtCanvas.offsetParent !== null) { // Check if visible
+        if (generativeArtCanvas && generativeArtCanvas.offsetParent !== null) {
             generativeArtCanvas.width = generativeArtCanvas.offsetWidth;
             generativeArtCanvas.height = generativeArtCanvas.offsetHeight;
-            initGenerativeArt(); // Re-initialize particles for new size
+            initGenerativeArt();
         }
-        // Resize cursor trail canvas
-        if (cursorTrailCanvas) {
+        if (cursorTrailCanvas) { // Ensure cursorTrailCanvas is defined before accessing
             cursorTrailCanvas.width = window.innerWidth;
             cursorTrailCanvas.height = window.innerHeight;
         }
@@ -2886,9 +2808,8 @@ _           _                     _   _
         updateWeather();
         updateGitHubStats();
         updateNowPlaying();
-        renderBlogPosts();
+        // renderBlogPosts(); // No longer needed as Blog is replaced by Chatbot
         
-        // --- Personalized Greeting Logic ---
         const greetingEl = document.getElementById('greeting');
         const lastVisitTimestamp = localStorage.getItem('lastVisitTimestamp');
         const currentTime = Date.now();
@@ -2916,7 +2837,7 @@ _           _                     _   _
                 if (response.ok) {
                     const data = await response.json();
                     if (data && data.response) {
-                        greetingEl.textContent = data.response; // Set AI-generated greeting
+                        greetingEl.textContent = data.response;
                     }
                 } else {
                     console.error("Failed to get AI greeting:", await response.text());
@@ -2925,37 +2846,33 @@ _           _                     _   _
                 console.error("Error calling AI for greeting:", e);
             }
         }
-        localStorage.setItem('lastVisitTimestamp', currentTime.toString()); // Update last visit timestamp
+        localStorage.setItem('lastVisitTimestamp', currentTime.toString());
 
-        // Call cli.showWelcome() here after setupUI has run
         cli.showWelcome(); 
         setInterval(updateTime, 60000);
         setInterval(updateWeather, 30 * 60 * 1000);
         setInterval(updateGitHubStats, 60 * 60 * 1000);
-        setInterval(updateNowPlaying, 15 * 1000); // Update Now Playing every 15 seconds
+        setInterval(updateNowPlaying, 15 * 1000);
         
-        // Add hover sounds
         document.querySelectorAll('a, button').forEach(el => {
             el.addEventListener('mouseenter', () => playSound('A5', 'sine', '32n'));
         });
 
-        // Initialize cursor trail
         initCursorTrail();
         animateCursorTrail();
-        updateCursorTrailColor(); // Set initial color
+        updateCursorTrailColor();
     }
 
     // Event Listeners
     window.addEventListener("resize", () => {
       resizeAllCanvases();
       applyTheme(localStorage.getItem('theme') || 'dark');
-      updateCursorTrailColor(); // Update trail color on theme change
+      updateCursorTrailColor();
     });
 
     window.addEventListener('mousemove', (e) => {
         mouse.x = e.clientX;
         mouse.y = e.clientY;
-        // Calculate mouse velocity for potential future use
         mouseVelocityX = e.clientX - lastMouseX;
         mouseVelocityY = e.clientY - lastMouseY;
         lastMouseX = e.clientX;
@@ -2971,9 +2888,7 @@ _           _                     _   _
     function openDrawer() {
         if (mainNavDrawer) mainNavDrawer.classList.add('active');
         if (drawerBackdrop) drawerBackdrop.classList.add('active');
-        // Populate and re-attach listeners for drawer links every time it opens
         populateDrawerLinks();
-        // Prevent scrolling on body when drawer is open
         document.body.style.overflow = 'hidden';
         playSound('A4', 'triangle');
     }
@@ -2981,38 +2896,33 @@ _           _                     _   _
     function closeDrawer() {
         if (mainNavDrawer) mainNavDrawer.classList.remove('active');
         if (drawerBackdrop) drawerBackdrop.classList.remove('active');
-        document.body.style.overflow = ''; // Restore scrolling
+        document.body.style.overflow = '';
         playSound('C3', 'triangle', '16n');
     }
 
-    // Function to populate drawer links and attach event listeners
     function populateDrawerLinks() {
         const desktopNavLinks = document.querySelectorAll('#desktop-nav a');
         if (drawerNavLinksContainer) {
-            drawerNavLinksContainer.innerHTML = ''; // Clear existing links
+            drawerNavLinksContainer.innerHTML = '';
             desktopNavLinks.forEach(link => {
-                const clonedLink = link.cloneNode(true); // Clone the link element
-                // Remove existing event listeners if any, then add new ones
-                clonedLink.removeEventListener('click', handleDrawerLinkClick); // Remove old listener
-                clonedLink.addEventListener('click', handleDrawerLinkClick); // Add new listener
+                const clonedLink = link.cloneNode(true);
+                clonedLink.removeEventListener('click', handleDrawerLinkClick);
+                clonedLink.addEventListener('click', handleDrawerLinkClick);
                 drawerNavLinksContainer.appendChild(clonedLink);
             });
-            feather.replace(); // Re-render feather icons in cloned links
+            feather.replace();
         }
     }
 
-    // Unified handler for drawer link clicks
     function handleDrawerLinkClick(event) {
-        // Prevent default navigation for modal links
-        event.preventDefault(); // Prevent default navigation for all drawer links
+        event.preventDefault();
         const modalId = event.currentTarget.dataset.modal;
         if (modalId) {
-            openModal(modalId); // Open the modal
+            openModal(modalId);
         } else if (event.currentTarget.href) {
-            // If it's a regular href link (like GitHub, Twitter), open it
             window.open(event.currentTarget.href, event.currentTarget.target || '_self');
         }
-        closeDrawer(); // Always close the drawer
+        closeDrawer();
     }
 
 
@@ -3022,27 +2932,25 @@ _           _                     _   _
     if (drawerBackdrop) {
         drawerBackdrop.addEventListener('click', closeDrawer);
     }
-    // Initial population of drawer links (important for first open)
     document.addEventListener('DOMContentLoaded', populateDrawerLinks);
 
     // --- SCROLL ANIMATION LOGIC ---
     const animateOnScrollElements = document.querySelectorAll('.animate-on-scroll');
     const observerOptions = {
-        root: null, // viewport
+        root: null,
         rootMargin: '0px',
-        threshold: 0.1 // 10% of element visible to trigger
+        threshold: 0.1
     };
 
     const observer = new IntersectionObserver((entries, observer) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 entry.target.classList.add('is-visible');
-                observer.unobserve(entry.target); // Stop observing once animated
+                observer.unobserve(entry.target);
             }
         });
     }, observerOptions);
 
-    // Observe elements on DOMContentLoaded
     document.addEventListener('DOMContentLoaded', () => {
         animateOnScrollElements.forEach(el => {
             observer.observe(el);
@@ -3052,26 +2960,22 @@ _           _                     _   _
 
     // --- CUSTOM CONTEXT MENU LOGIC ---
     const customContextMenu = document.getElementById('custom-context-menu');
-    // const cliContactModal = document.getElementById('contact-modal'); // Removed as not directly used here
 
     document.addEventListener('contextmenu', (e) => {
-        e.preventDefault(); // Prevent default right-click menu
+        e.preventDefault();
 
-        // Position the custom menu
         customContextMenu.style.top = `${e.clientY}px`;
         customContextMenu.style.left = `${e.clientX}px`;
-        customContextMenu.style.display = 'flex'; // Show it
-        feather.replace(); // Ensure icons are rendered
+        customContextMenu.style.display = 'flex';
+        feather.replace();
     });
 
-    // Hide custom context menu when clicking anywhere else
     document.addEventListener('click', (e) => {
         if (customContextMenu && customContextMenu.style.display === 'flex' && !customContextMenu.contains(e.target)) {
             customContextMenu.style.display = 'none';
         }
     });
 
-    // Handle clicks on custom context menu items
     if (customContextMenu) {
         customContextMenu.querySelectorAll('.context-menu-item').forEach(item => {
             item.addEventListener('click', (e) => {
@@ -3081,10 +2985,9 @@ _           _                     _   _
                         toggleTheme();
                         break;
                     case 'openCli':
-                        openModal('contact'); // Use existing openModal for CLI
+                        openModal('contact');
                         break;
                     case 'copyUrl':
-                        // Use execCommand for broader compatibility in iframes
                         const dummy = document.createElement('textarea');
                         document.body.appendChild(dummy);
                         dummy.value = window.location.href;
@@ -3096,16 +2999,15 @@ _           _                     _   _
                     default:
                         console.log(`Context menu action: ${action}`);
                 }
-                customContextMenu.style.display = 'none'; // Hide menu after action
+                customContextMenu.style.display = 'none';
             });
         });
     }
 
 
-    // Ensure cli.setupUI() runs before initializePage()
     document.addEventListener('DOMContentLoaded', () => {
-        cli.setupUI(); // Setup UI elements and listeners first
-        initializePage(); // Then run the rest of the page initialization
+        cli.setupUI();
+        initializePage();
     });
 
   </script>
