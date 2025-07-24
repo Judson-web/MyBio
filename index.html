@@ -834,7 +834,7 @@
 
     /* --- Chatbot Modal Styles --- */
     #chatbot-modal .modal-content {
-        max-width: 500px; /* Adjust as needed */
+        max-width: 500px;
         max-height: 80vh;
         display: flex;
         flex-direction: column;
@@ -872,6 +872,12 @@
         align-self: flex-start;
         border-bottom-left-radius: 2px;
     }
+    #chatbot-thinking-indicator {
+        font-style: italic;
+        color: var(--dim-text-color);
+        align-self: flex-start;
+        margin-left: 0.5rem;
+    }
     .chat-input-container {
         display: flex;
         gap: 0.5rem;
@@ -899,12 +905,6 @@
     }
     #chatbot-send-btn:hover, #chatbot-clear-btn:hover {
         background: var(--glow-color-1);
-    }
-    #chatbot-thinking-indicator {
-        font-style: italic;
-        color: var(--dim-text-color);
-        align-self: flex-start;
-        margin-left: 0.5rem;
     }
 
 
@@ -1004,7 +1004,7 @@
         box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         padding: 0.5rem 0;
         z-index: 3500;
-        display: none; /* Hidden by default */
+        display: none;
         flex-direction: column;
         min-width: 180px;
     }
@@ -1242,12 +1242,12 @@
       </div>
     </div>
   </div>
-  <div id="chatbot-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="chatbot-modal-title"> <!-- NEW Chatbot Modal -->
+  <div id="chatbot-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="chatbot-modal-title">
     <div class="modal-content">
       <i data-feather="x" class="close-modal" aria-label="Close Chatbot modal"></i>
       <h2 id="chatbot-modal-title">Judson AI Chatbot</h2>
       <div id="chatbot-display">
-        <div class="chat-message ai">Hello! I am Judson's AI assistant. How can I help you today?</div>
+        <!-- Initial greeting will be added by JS, not duplicated here -->
       </div>
       <div class="chat-input-container">
         <input type="text" id="chatbot-input" placeholder="Ask me anything..." aria-label="Chatbot message input">
@@ -1613,8 +1613,8 @@
     }
 
 
-    // --- DYNAMIC CONTENT (Blog removed, Project remains) ---
-    // Removed blogPosts array and renderBlogPosts function
+    // --- DYNAMIC CONTENT (Blog removed) ---
+    // blogPosts and renderBlogPosts are removed.
     
     async function renderProjects() {
         const container = document.getElementById('projects-list');
@@ -1743,8 +1743,7 @@
         }
     }
 
-    // Removed My Tools Data and Render Function
-    // Removed Ex-Timeline Data and Render Function
+    // Removed My Tools and Ex-Timeline data and render functions entirely.
 
 
     // --- GENERATIVE ART LOGIC ---
@@ -2038,14 +2037,14 @@
     }
 
 
-    // --- CHATBOT AI LOGIC (NEW) ---
+    // --- CHATBOT AI LOGIC ---
     const chatbot = {
         displayElement: null,
         inputElement: null,
         sendButton: null,
         clearButton: null,
         thinkingIndicator: null,
-        chatHistory: [],
+        chatHistory: [], // Stores conversation for AI context
         isThinking: false,
 
         init() {
@@ -2060,8 +2059,8 @@
                 return;
             }
 
-            // Clear display and add initial message only if starting fresh
-            if (this.displayElement.children.length === 0 || this.chatHistory.length === 0) {
+            // Only add initial greeting if chat is empty
+            if (this.chatHistory.length === 0) {
                  this.addMessage('ai', "Hello! I am Judson's AI assistant. How can I help you today?");
             }
            
@@ -2382,7 +2381,7 @@ _           _                     _   _
             }
 
             const cliCommands = {
-                'help': async () => {
+                'help': () => { // Removed async and AI call
                     const helpText = [
                         'Available commands:',
                         '  help      - Show this help message',
@@ -2400,30 +2399,6 @@ _           _                     _   _
                         '  exit      - Close the terminal'
                     ].join('\n');
                     this.typeLog('success', helpText);
-
-                    const promptForSuggestions = "Generate 3 very short, distinct example questions a user could ask an AI assistant about creative coding, minimalism, or digital art. Provide them as a JSON array of strings.";
-                    try {
-                        const response = await fetch('/.netlify/functions/generate-thought', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ prompt: promptForSuggestions }),
-                        });
-                        if (response.ok) {
-                            const data = await response.json();
-                            let suggestions = [];
-                            if (data && data.snippet) {
-                                const cleanSnippet = data.snippet.replace(/```json\n?/, '').replace(/\n?```/, '').trim();
-                                suggestions = JSON.parse(cleanSnippet);
-                            }
-
-                            if (Array.isArray(suggestions) && suggestions.length > 0) {
-                                this.typeLog('response', '\nAI suggests trying:');
-                                suggestions.forEach(s => this.typeLog('response', `  - ask ${s}`));
-                            }
-                        }
-                    } catch (e) {
-                        console.error("Error getting AI suggestions:", e);
-                    }
                 },
                 'clear': () => {
                     this.chatHistory = [];
@@ -2881,7 +2856,7 @@ _           _                     _   _
         updateWeather();
         updateGitHubStats();
         updateNowPlaying();
-        // renderBlogPosts(); // Removed as Blog is replaced by Chatbot
+        // Removed renderBlogPosts();
         
         const greetingEl = document.getElementById('greeting');
         const lastVisitTimestamp = localStorage.getItem('lastVisitTimestamp');
@@ -2957,7 +2932,7 @@ _           _                     _   _
     const mainNavDrawer = document.getElementById('main-nav-drawer');
     const drawerBackdrop = document.getElementById('drawer-backdrop');
     const drawerNavLinksContainer = mainNavDrawer ? mainNavDrawer.querySelector('.drawer-nav-links') : null;
-    const drawerCloseBtn = document.getElementById('drawer-close-btn'); // Get close button
+    const drawerCloseBtn = document.getElementById('drawer-close-btn');
 
     function openDrawer() {
         if (mainNavDrawer) mainNavDrawer.classList.add('active');
@@ -3006,7 +2981,7 @@ _           _                     _   _
     if (drawerBackdrop) {
         drawerBackdrop.addEventListener('click', closeDrawer);
     }
-    if (drawerCloseBtn) { // Add listener for the new close button
+    if (drawerCloseBtn) {
         drawerCloseBtn.addEventListener('click', closeDrawer);
     }
     document.addEventListener('DOMContentLoaded', populateDrawerLinks);
