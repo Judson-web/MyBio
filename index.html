@@ -79,6 +79,10 @@
       color: var(--text-color);
       overflow-x: hidden;
       transition: background 0.4s ease, color 0.4s ease;
+      box-sizing: border-box; /* Ensure padding/border included in element's total width/height */
+    }
+    *, *::before, *::after {
+        box-sizing: inherit; /* Inherit box-sizing for all elements */
     }
     
     @keyframes spin {
@@ -152,6 +156,7 @@
       align-items: center;
       z-index: 1000;
       transition: background 0.4s ease, border-color 0.4s ease;
+      position: relative; /* Added for z-index context of hamburger */
     }
 
     .header-logo {
@@ -205,16 +210,16 @@
     #main-nav-drawer {
         position: fixed;
         top: 0;
-        right: 0; /* Start off-screen to the right */
+        left: 0; /* Changed from right to left for consistency */
         width: 250px; /* Width of the drawer */
         height: 100%;
         background: var(--header-bg); /* Use header background for consistency */
         backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
         z-index: 1000;
-        transform: translateX(100%); /* Initially off-screen */
+        transform: translateX(-100%); /* Initially off-screen to the left */
         transition: transform 0.3s ease-out;
-        box-shadow: -4px 0 15px rgba(0,0,0,0.3);
+        box-shadow: 4px 0 15px rgba(0,0,0,0.3); /* Adjusted shadow for left slide */
         display: flex;
         flex-direction: column;
         padding-top: 5rem; /* Space for header */
@@ -1034,13 +1039,7 @@
   <!-- Main Navigation Drawer (Mobile) -->
   <div id="main-nav-drawer">
       <div class="drawer-nav-links">
-          <a data-modal="about" aria-label="About">About</a>
-          <a data-modal="projects" aria-label="Projects">Projects</a>
-          <a data-modal="blog" aria-label="Blog">Blog</a>
-          <a data-modal="tools" aria-label="My Tools">My Tools</a>
-          <a data-modal="timeline" aria-label="Ex-Timeline">Ex-Timeline</a>
-          <a data-modal="generative-art" aria-label="Generative Art">Generative Art</a>
-          <a data-modal="contact" aria-label="Contact">Contact</a>
+          <!-- Links will be dynamically added here by JS -->
       </div>
   </div>
   <div id="drawer-backdrop"></div> <!-- Backdrop for the drawer -->
@@ -1098,7 +1097,7 @@
       <i data-feather="x" class="close-modal" aria-label="Close modal"></i>
       <h2>GitHub Projects</h2>
       <button id="generate-project-idea-btn" class="ambient-btn" style="margin-bottom: 1rem; width: 100%;">
-          <i data-feather="lightbulb"></i> Generate a Project Idea
+          <i data-feather="bulb"></i> Generate a Project Idea
       </button>
       <div id="ai-project-idea-output">
           <h3 id="ai-project-idea-title"></h3>
@@ -1648,7 +1647,7 @@
                         showToast(`Project Idea Error: ${error.message}`);
                     } finally {
                         generateProjectIdeaBtn.disabled = false;
-                        generateProjectIdeaBtn.innerHTML = '<i data-feather="lightbulb"></i> Generate a Project Idea';
+                        generateProjectIdeaBtn.innerHTML = '<i data-feather="bulb"></i> Generate a Project Idea'; // Changed back to bulb
                         feather.replace();
                     }
                 });
@@ -2703,6 +2702,51 @@ _           _                     _   _
         lastMouseY = e.clientY;
     });
     
+    // --- NAVIGATION DRAWER LOGIC ---
+    const hamburgerBtn = document.getElementById('hamburger-btn');
+    const mainNavDrawer = document.getElementById('main-nav-drawer');
+    const drawerBackdrop = document.getElementById('drawer-backdrop');
+    const drawerNavLinksContainer = mainNavDrawer ? mainNavDrawer.querySelector('.drawer-nav-links') : null;
+
+    function openDrawer() {
+        if (mainNavDrawer) mainNavDrawer.classList.add('active');
+        if (drawerBackdrop) drawerBackdrop.classList.add('active');
+        // Prevent scrolling on body when drawer is open
+        document.body.style.overflow = 'hidden';
+        playSound('A4', 'pluck');
+    }
+
+    function closeDrawer() {
+        if (mainNavDrawer) mainNavDrawer.classList.remove('active');
+        if (drawerBackdrop) drawerBackdrop.classList.remove('active');
+        document.body.style.overflow = ''; // Restore scrolling
+        playSound('C3', 'triangle', '16n');
+    }
+
+    if (hamburgerBtn) {
+        hamburgerBtn.addEventListener('click', openDrawer);
+    }
+    if (drawerBackdrop) {
+        drawerBackdrop.addEventListener('click', closeDrawer);
+    }
+
+    // Populate drawer links dynamically from desktop nav (or define them here)
+    // This ensures consistency and simplifies adding/removing links
+    const desktopNavLinks = document.querySelectorAll('#desktop-nav a');
+    if (drawerNavLinksContainer) {
+        drawerNavLinksContainer.innerHTML = ''; // Clear existing
+        desktopNavLinks.forEach(link => {
+            const clonedLink = link.cloneNode(true);
+            clonedLink.addEventListener('click', () => {
+                // When a link in the drawer is clicked, close the drawer
+                closeDrawer();
+                // The openModal function (if data-modal link) will be handled by its own listener
+            });
+            drawerNavLinksContainer.appendChild(clonedLink);
+        });
+    }
+
+
     // Ensure cli.setupUI() runs before initializePage()
     document.addEventListener('DOMContentLoaded', () => {
         cli.setupUI(); // Setup UI elements and listeners first
