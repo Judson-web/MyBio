@@ -1097,7 +1097,14 @@
       <i data-feather="x" class="close-modal" aria-label="Close modal"></i>
       <h2>GitHub Projects</h2>
       <button id="generate-project-idea-btn" class="ambient-btn" style="margin-bottom: 1rem; width: 100%;">
-          <i data-feather="bulb"></i> Generate a Project Idea
+          <!-- Inline SVG for lightbulb icon -->
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-lightbulb" style="width: 18px; height: 18px; stroke: currentColor; margin-right: 5px;">
+              <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1.3.5 2.6 1.5 3.5.8.8 1.3 1.5 1.5 2.5"></path>
+              <path d="M9 18h6"></path>
+              <path d="M10 22h4"></path>
+              <path d="M12 22v-4"></path>
+          </svg>
+          Generate a Project Idea
       </button>
       <div id="ai-project-idea-output">
           <h3 id="ai-project-idea-title"></h3>
@@ -1189,9 +1196,6 @@
 
   <!-- Footer -->
   <footer>
-    <!-- IMPORTANT: Replace 'YOUR_NETLIFY_SITE_ID_HERE' with your actual Netlify Site ID -->
-    <!-- You can find this in your Netlify dashboard under Site settings > General > Site information > API ID -->
-    <img src="https://api.netlify.com/api/v1/badges/YOUR_NETLIFY_SITE_ID_HERE/deploy-status" alt="Netlify Status" />
     <span>&copy; 2025 Judson Saji.</span>
     <span>Press Ctrl+K to navigate.</span>
   </footer>
@@ -1647,8 +1651,16 @@
                         showToast(`Project Idea Error: ${error.message}`);
                     } finally {
                         generateProjectIdeaBtn.disabled = false;
-                        generateProjectIdeaBtn.innerHTML = '<i data-feather="bulb"></i> Generate a Project Idea'; // Changed back to bulb
-                        feather.replace();
+                        generateProjectIdeaBtn.innerHTML = `
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-lightbulb" style="width: 18px; height: 18px; stroke: currentColor; margin-right: 5px;">
+                                <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1.3.5 2.6 1.5 3.5.8.8 1.3 1.5 1.5 2.5"></path>
+                                <path d="M9 18h6"></path>
+                                <path d="M10 22h4"></path>
+                                <path d="M12 22v-4"></path>
+                            </svg>
+                            Generate a Project Idea
+                        `;
+                        feather.replace(); // Ensure new icons are rendered
                     }
                 });
             }
@@ -2033,7 +2045,7 @@
         commandPaletteOverlay.classList.add('active');
         renderCommands(commands);
         commandInput.focus();
-        playSound('A4', 'pluck');
+        playSound('A4', 'triangle'); // Changed from 'pluck'
     }
 
     function closeCommandPalette() {
@@ -2711,9 +2723,11 @@ _           _                     _   _
     function openDrawer() {
         if (mainNavDrawer) mainNavDrawer.classList.add('active');
         if (drawerBackdrop) drawerBackdrop.classList.add('active');
+        // Populate and re-attach listeners for drawer links every time it opens
+        populateDrawerLinks();
         // Prevent scrolling on body when drawer is open
         document.body.style.overflow = 'hidden';
-        playSound('A4', 'pluck');
+        playSound('A4', 'triangle'); // Changed from 'pluck'
     }
 
     function closeDrawer() {
@@ -2723,28 +2737,41 @@ _           _                     _   _
         playSound('C3', 'triangle', '16n');
     }
 
+    // Function to populate drawer links and attach event listeners
+    function populateDrawerLinks() {
+        const desktopNavLinks = document.querySelectorAll('#desktop-nav a');
+        if (drawerNavLinksContainer) {
+            drawerNavLinksContainer.innerHTML = ''; // Clear existing links
+            desktopNavLinks.forEach(link => {
+                const clonedLink = link.cloneNode(true); // Clone the link element
+                // Remove existing event listeners if any, then add new ones
+                clonedLink.removeEventListener('click', handleDrawerLinkClick); // Remove old listener
+                clonedLink.addEventListener('click', handleDrawerLinkClick); // Add new listener
+                drawerNavLinksContainer.appendChild(clonedLink);
+            });
+            feather.replace(); // Re-render feather icons in cloned links
+        }
+    }
+
+    // Unified handler for drawer link clicks
+    function handleDrawerLinkClick(event) {
+        // Prevent default navigation if it's a data-modal link
+        if (event.currentTarget.dataset.modal) {
+            event.preventDefault();
+            openModal(event.currentTarget.dataset.modal); // Open the modal
+        }
+        closeDrawer(); // Always close the drawer
+    }
+
+
     if (hamburgerBtn) {
         hamburgerBtn.addEventListener('click', openDrawer);
     }
     if (drawerBackdrop) {
         drawerBackdrop.addEventListener('click', closeDrawer);
     }
-
-    // Populate drawer links dynamically from desktop nav (or define them here)
-    // This ensures consistency and simplifies adding/removing links
-    const desktopNavLinks = document.querySelectorAll('#desktop-nav a');
-    if (drawerNavLinksContainer) {
-        drawerNavLinksContainer.innerHTML = ''; // Clear existing
-        desktopNavLinks.forEach(link => {
-            const clonedLink = link.cloneNode(true);
-            clonedLink.addEventListener('click', () => {
-                // When a link in the drawer is clicked, close the drawer
-                closeDrawer();
-                // The openModal function (if data-modal link) will be handled by its own listener
-            });
-            drawerNavLinksContainer.appendChild(clonedLink);
-        });
-    }
+    // Initial population of drawer links (important for first open)
+    document.addEventListener('DOMContentLoaded', populateDrawerLinks);
 
 
     // Ensure cli.setupUI() runs before initializePage()
