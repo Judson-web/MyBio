@@ -244,16 +244,27 @@
         box-shadow: 4px 0 15px rgba(0,0,0,0.3);
         display: flex;
         flex-direction: column;
-        padding-top: 5rem;
     }
     #main-nav-drawer.active {
         transform: translateX(0);
+    }
+    #main-nav-drawer .drawer-header { /* NEW: Drawer Header Styling */
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid var(--card-border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 4rem; /* Match main header height */
+    }
+    #main-nav-drawer .drawer-header .header-logo {
+        font-size: 1.3rem; /* Match main header logo size */
     }
     #main-nav-drawer .drawer-nav-links {
         display: flex;
         flex-direction: column;
         gap: 0.5rem;
         padding: 1rem;
+        flex-grow: 1; /* Allow links to take available space */
     }
     #main-nav-drawer .drawer-nav-links a {
         color: var(--text-color);
@@ -267,6 +278,19 @@
         background: rgba(127, 127, 127, 0.15);
         color: var(--glow-color-1);
     }
+    /* Drawer close button */
+    #drawer-close-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0.5rem;
+        color: var(--text-color);
+    }
+    #drawer-close-btn svg {
+        width: 24px;
+        height: 24px;
+    }
+
     /* Drawer backdrop */
     #drawer-backdrop {
         position: fixed;
@@ -625,30 +649,6 @@
     }
     
     /* --- Dynamic Content Styling --- */
-    /* Scroll animation styles */
-    .animate-on-scroll {
-        opacity: 0;
-        transform: translateY(20px);
-        transition: opacity 0.6s ease-out, transform 0.6s ease-out;
-    }
-    .animate-on-scroll.is-visible {
-        opacity: 1;
-        transform: translateY(0);
-    }
-    .animate-on-scroll.slide-left {
-        transform: translateX(-50px);
-    }
-    .animate-on-scroll.slide-left.is-visible {
-        transform: translateX(0);
-    }
-    .animate-on-scroll.slide-right {
-        transform: translateX(50px);
-    }
-    .animate-on-scroll.slide-right.is-visible {
-        transform: translateX(0);
-    }
-
-
     .blog-post, .project-card {
         padding: 1rem;
         border: 1px solid rgba(127,127,127,0.2);
@@ -1126,6 +1126,12 @@
 
   <!-- Main Navigation Drawer (Mobile) -->
   <div id="main-nav-drawer">
+      <div class="drawer-header"> <!-- NEW: Drawer Header -->
+          <a href="/" class="header-logo" aria-label="Judson Saji - Home">Judson Saji</a>
+          <button id="drawer-close-btn" aria-label="Close navigation menu">
+              <i data-feather="x"></i>
+          </button>
+      </div>
       <div class="drawer-nav-links">
           <!-- Links will be dynamically added here by JS -->
       </div>
@@ -1203,7 +1209,6 @@
       <div id="projects-list"></div>
     </div>
   </div>
-  <!-- Removed Blog Modal HTML -->
   <div id="generative-art-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="generative-art-modal-title">
     <div class="modal-content">
       <i data-feather="x" class="close-modal" aria-label="Close Generative Art modal"></i>
@@ -1432,7 +1437,7 @@
         if (modalId === 'projects') {
             renderProjects();
         }
-        if (modalId === 'chatbot') { // NEW: Initialize chatbot when modal opens
+        if (modalId === 'chatbot') { // Initialize chatbot when modal opens
             chatbot.init();
         }
         if (modalId === 'generative-art') {
@@ -1960,7 +1965,7 @@
         if (aiGeneratePaletteBtn) {
             aiGeneratePaletteBtn.onclick = async () => {
                 aiGeneratePaletteBtn.disabled = true;
-                aiGeneratePaletteBtn.innerHTML = '<i data-feather="loader" class="spin"></i> Generating...';
+                aiGeneratePaletteBtn.innerHTML = '<i data-feather="loader" class="spin"></i> <span>Generating...</span>';
                 feather.replace();
                 showToast('Asking AI for a palette...');
 
@@ -2001,7 +2006,7 @@
                     showToast(`AI Palette Error: ${error.message}`);
                 } finally {
                     aiGeneratePaletteBtn.disabled = false;
-                    aiGeneratePaletteBtn.innerHTML = '<i data-feather="cpu"></i> AI Palette';
+                    aiGeneratePaletteBtn.innerHTML = '<i data-feather="cpu"></i> <span>AI Palette</span>';
                     feather.replace();
                 }
             };
@@ -2040,7 +2045,7 @@
         sendButton: null,
         clearButton: null,
         thinkingIndicator: null,
-        chatHistory: [], // Stores conversation for AI context
+        chatHistory: [],
         isThinking: false,
 
         init() {
@@ -2051,7 +2056,7 @@
             this.thinkingIndicator = document.getElementById('chatbot-thinking-indicator');
 
             if (!this.displayElement || !this.inputElement || !this.sendButton || !this.clearButton || !this.thinkingIndicator) {
-                console.error("Chatbot elements not found.");
+                console.error("Chatbot elements not found. Ensure HTML is correct.");
                 return;
             }
 
@@ -2077,8 +2082,8 @@
             messageDiv.className = `chat-message ${sender}`;
             messageDiv.textContent = text;
             this.displayElement.appendChild(messageDiv);
-            this.displayElement.scrollTop = this.displayElement.scrollHeight; // Scroll to bottom
-            playSound('C4', 'sine', '64n'); // Subtle sound for new message
+            this.displayElement.scrollTop = this.displayElement.scrollHeight;
+            playSound('C4', 'sine', '64n');
         },
 
         showThinking(show) {
@@ -2096,10 +2101,9 @@
             if (!userMessage) return;
 
             this.addMessage('user', userMessage);
-            this.inputElement.value = ''; // Clear input
+            this.inputElement.value = '';
             this.showThinking(true);
 
-            // Add user message to history
             this.chatHistory.push({ role: "user", parts: [{ text: userMessage }] });
 
             try {
@@ -2117,7 +2121,7 @@
 
                 if (data && data.response) {
                     this.addMessage('ai', data.response);
-                    this.chatHistory.push({ role: "model", parts: [{ text: data.response }] }); // Add AI response to history
+                    this.chatHistory.push({ role: "model", parts: [{ text: data.response }] });
                 } else {
                     this.addMessage('ai', "I'm sorry, I couldn't generate a response.");
                     console.error("Unexpected AI response:", data);
@@ -2134,8 +2138,8 @@
             if (this.displayElement) {
                 this.displayElement.innerHTML = '';
             }
-            this.chatHistory = []; // Reset conversation memory
-            this.addMessage('ai', "Chat cleared. How can I help you now?"); // Start fresh
+            this.chatHistory = [];
+            this.addMessage('ai', "Chat cleared. How can I help you now?");
             playSound('C3', 'sine', '16n');
         }
     };
@@ -2151,7 +2155,7 @@
         { name: 'Toggle Theme', icon: 'moon', action: () => { toggleTheme(); closeCommandPalette(); } },
         { name: 'Open About', icon: 'user', action: () => { openModal('about'); closeCommandPalette(); } },
         { name: 'Open Projects', icon: 'briefcase', action: () => { openModal('projects'); closeCommandPalette(); } },
-        { name: 'Open Chatbot', icon: 'message-square', action: () => { openModal('chatbot'); closeCommandPalette(); } }, <!-- Changed from Blog to Chatbot -->
+        { name: 'Open Chatbot', icon: 'message-square', action: () => { openModal('chatbot'); closeCommandPalette(); } },
         { name: 'Open Generative Art', icon: 'aperture', action: () => { openModal('generative-art'); closeCommandPalette(); } },
         { name: 'Open Contact', icon: 'mail', action: () => { openModal('contact'); closeCommandPalette(); } },
         { name: 'View on GitHub', icon: 'github', action: () => { window.open('https://github.com/Judson-web', '_blank'); closeCommandPalette(); } },
@@ -2781,6 +2785,75 @@ _           _                     _   _
         activeAnimationId = requestAnimationFrame(animateDay);
     }
 
+    // --- CURSOR TRAIL LOGIC ---
+    const cursorTrailCanvas = document.getElementById('cursor-trail-canvas');
+    let cursorTrailCtx;
+    let trailParticles = [];
+    let trailColor = 'rgba(56, 231, 255, 0.5)';
+    let trailMaxParticles = 50;
+    let trailParticleSize = 2;
+    let trailFadeSpeed = 0.05;
+
+    function initCursorTrail() {
+        if (!cursorTrailCanvas) return;
+        cursorTrailCtx = cursorTrailCanvas.getContext('2d');
+        cursorTrailCanvas.width = window.innerWidth;
+        cursorTrailCanvas.height = window.innerHeight;
+        trailParticles = [];
+    }
+
+    function animateCursorTrail() {
+        if (!cursorTrailCtx) return;
+
+        cursorTrailCtx.clearRect(0, 0, cursorTrailCanvas.width, cursorTrailCanvas.height);
+
+        trailParticles.push({
+            x: mouse.x,
+            y: mouse.y,
+            size: trailParticleSize,
+            alpha: 1,
+            vx: (Math.random() - 0.5) * 2,
+            vy: (Math.random() - 0.5) * 2,
+        });
+
+        if (trailParticles.length > trailMaxParticles) {
+            trailParticles.shift();
+        }
+
+        for (let i = 0; i < trailParticles.length; i++) {
+            let p = trailParticles[i];
+
+            p.x += p.vx;
+            p.y += p.vy;
+            p.alpha -= trailFadeSpeed;
+
+            if (p.alpha <= 0) {
+                trailParticles.splice(i, 1);
+                i--;
+                continue;
+            }
+
+            cursorTrailCtx.fillStyle = trailColor;
+            cursorTrailCtx.globalAlpha = p.alpha;
+            cursorTrailCtx.beginPath();
+            cursorTrailCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            cursorTrailCtx.fill();
+        }
+        cursorTrailCtx.globalAlpha = 1;
+
+        requestAnimationFrame(animateCursorTrail);
+    }
+
+    function updateCursorTrailColor() {
+        const currentTheme = localStorage.getItem('theme') || 'dark';
+        if (currentTheme === 'light') {
+            trailColor = 'rgba(0, 123, 255, 0.5)';
+        } else {
+            trailColor = 'rgba(56, 231, 255, 0.5)';
+        }
+    }
+
+
     // --- CANVAS RESIZING FUNCTION ---
     function resizeAllCanvases() {
         const canvases = document.querySelectorAll('.background-canvas');
@@ -2794,7 +2867,7 @@ _           _                     _   _
             generativeArtCanvas.height = generativeArtCanvas.offsetHeight;
             initGenerativeArt();
         }
-        if (cursorTrailCanvas) { // Ensure cursorTrailCanvas is defined before accessing
+        if (cursorTrailCanvas) {
             cursorTrailCanvas.width = window.innerWidth;
             cursorTrailCanvas.height = window.innerHeight;
         }
@@ -2808,7 +2881,7 @@ _           _                     _   _
         updateWeather();
         updateGitHubStats();
         updateNowPlaying();
-        // renderBlogPosts(); // No longer needed as Blog is replaced by Chatbot
+        // renderBlogPosts(); // Removed as Blog is replaced by Chatbot
         
         const greetingEl = document.getElementById('greeting');
         const lastVisitTimestamp = localStorage.getItem('lastVisitTimestamp');
@@ -2884,6 +2957,7 @@ _           _                     _   _
     const mainNavDrawer = document.getElementById('main-nav-drawer');
     const drawerBackdrop = document.getElementById('drawer-backdrop');
     const drawerNavLinksContainer = mainNavDrawer ? mainNavDrawer.querySelector('.drawer-nav-links') : null;
+    const drawerCloseBtn = document.getElementById('drawer-close-btn'); // Get close button
 
     function openDrawer() {
         if (mainNavDrawer) mainNavDrawer.classList.add('active');
@@ -2931,6 +3005,9 @@ _           _                     _   _
     }
     if (drawerBackdrop) {
         drawerBackdrop.addEventListener('click', closeDrawer);
+    }
+    if (drawerCloseBtn) { // Add listener for the new close button
+        drawerCloseBtn.addEventListener('click', closeDrawer);
     }
     document.addEventListener('DOMContentLoaded', populateDrawerLinks);
 
