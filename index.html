@@ -161,15 +161,19 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       transition: text-shadow 0.3s ease;
+      text-decoration: none; /* Ensure link doesn't have underline */
     }
     .header-logo:hover {
         text-shadow: 0 0 8px var(--glow-color-1);
     }
 
+    .site-nav {
+      display: flex; /* Default for desktop */
+      gap: 0.5rem;
+    }
     .site-nav a {
       color: var(--dim-text-color);
       text-decoration: none;
-      margin-left: 0.5rem;
       font-weight: 500;
       padding: 0.5rem 0.75rem;
       border-radius: 8px;
@@ -181,6 +185,90 @@
       background: rgba(127, 127, 127, 0.1);
       color: var(--text-color);
     }
+
+    /* Hamburger Button */
+    #hamburger-btn {
+        display: none; /* Hidden by default on desktop */
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0.5rem;
+        z-index: 1001; /* Above header nav */
+        color: var(--text-color);
+    }
+    #hamburger-btn svg {
+        width: 24px;
+        height: 24px;
+    }
+
+    /* Main Navigation Drawer */
+    #main-nav-drawer {
+        position: fixed;
+        top: 0;
+        right: 0; /* Start off-screen to the right */
+        width: 250px; /* Width of the drawer */
+        height: 100%;
+        background: var(--header-bg); /* Use header background for consistency */
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        z-index: 1000;
+        transform: translateX(100%); /* Initially off-screen */
+        transition: transform 0.3s ease-out;
+        box-shadow: -4px 0 15px rgba(0,0,0,0.3);
+        display: flex;
+        flex-direction: column;
+        padding-top: 5rem; /* Space for header */
+    }
+    #main-nav-drawer.active {
+        transform: translateX(0); /* Slide in */
+    }
+    #main-nav-drawer .drawer-nav-links {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        padding: 1rem;
+    }
+    #main-nav-drawer .drawer-nav-links a {
+        color: var(--text-color);
+        text-decoration: none;
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        font-weight: 500;
+    }
+    #main-nav-drawer .drawer-nav-links a:hover {
+        background: rgba(127, 127, 127, 0.15);
+        color: var(--glow-color-1);
+    }
+    /* Drawer backdrop */
+    #drawer-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 999;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+    #drawer-backdrop.active {
+        opacity: 1;
+        visibility: visible;
+    }
+
+
+    /* Media Queries for Responsive Navigation */
+    @media (max-width: 768px) {
+        .site-nav {
+            display: none; /* Hide desktop nav */
+        }
+        #hamburger-btn {
+            display: block; /* Show hamburger */
+        }
+    }
+
 
     /* --- Main Content --- */
     .centerbox {
@@ -928,8 +1016,8 @@
 
   <!-- Header -->
   <header class="site-header">
-    <div class="header-logo">Judson Saji</div>
-    <nav class="site-nav">
+    <a href="/" class="header-logo" aria-label="Judson Saji - Home">Judson Saji</a> <!-- Branding is now a link -->
+    <nav class="site-nav" id="desktop-nav"> <!-- Added ID for desktop nav -->
       <a data-modal="about" aria-label="About">About</a>
       <a data-modal="projects" aria-label="Projects">Projects</a>
       <a data-modal="blog" aria-label="Blog">Blog</a>
@@ -938,7 +1026,25 @@
       <a data-modal="generative-art" aria-label="Generative Art">Generative Art</a>
       <a data-modal="contact" aria-label="Contact">Contact</a>
     </nav>
+    <button id="hamburger-btn" aria-label="Open navigation menu">
+        <i data-feather="menu"></i>
+    </button>
   </header>
+
+  <!-- Main Navigation Drawer (Mobile) -->
+  <div id="main-nav-drawer">
+      <div class="drawer-nav-links">
+          <a data-modal="about" aria-label="About">About</a>
+          <a data-modal="projects" aria-label="Projects">Projects</a>
+          <a data-modal="blog" aria-label="Blog">Blog</a>
+          <a data-modal="tools" aria-label="My Tools">My Tools</a>
+          <a data-modal="timeline" aria-label="Ex-Timeline">Ex-Timeline</a>
+          <a data-modal="generative-art" aria-label="Generative Art">Generative Art</a>
+          <a data-modal="contact" aria-label="Contact">Contact</a>
+      </div>
+  </div>
+  <div id="drawer-backdrop"></div> <!-- Backdrop for the drawer -->
+
 
   <!-- Canvas Backgrounds -->
   <canvas id="aurora-canvas" class="background-canvas"></canvas>
@@ -1037,10 +1143,10 @@
       <canvas id="generative-art-canvas"></canvas>
       <div id="generative-art-controls">
         <button id="reset-art-btn"><i data-feather="refresh-cw"></i> Reset</button>
-        <button id="change-particle-color-btn"><i data-feather="droplet"></i> Particle Color</button> <!-- Renamed ID -->
-        <button id="change-bg-color-btn"><i data-feather="square"></i> Background Color</button> <!-- NEW Button -->
-        <button id="toggle-lines-btn"><i data-feather="link-2"></i> Lines: ON</button> <!-- NEW Button -->
-        <button id="pause-play-btn"><i data-feather="pause"></i> Pause</button> <!-- NEW Button -->
+        <button id="change-particle-color-btn"><i data-feather="droplet"></i> Particle Color</button>
+        <button id="change-bg-color-btn"><i data-feather="square"></i> Background Color</button>
+        <button id="toggle-lines-btn"><i data-feather="link-2"></i> Lines: ON</button>
+        <button id="pause-play-btn"><i data-feather="pause"></i> Pause</button>
 
         <div class="control-group">
             <label for="particle-count-slider">Count</label>
@@ -1243,9 +1349,10 @@
         if (modalId === 'timeline') {
             renderExTimeline();
         }
-        if (modalId === 'generative-art') { // NEW: Initialize generative art when modal opens
+        if (modalId === 'generative-art') { // Initialize generative art when modal opens
             renderGenerativeArt();
         }
+        closeDrawer(); // Close the drawer if it's open when a modal is opened
     };
     const closeModal = (modal) => {
         if (!modal) return;
@@ -1609,6 +1716,7 @@
         size: 2,
         speed: 2, // Multiplier for originalVx/Vy
         repulsionStrength: 0.5,
+        influenceRadius: 80, // Default influence radius for mouse repulsion
         drawLines: true,
         lineDistance: 100, // Max distance for lines
         particleColor: 'rgba(56, 231, 255, 0.7)', // Default glow-color-1 with opacity
@@ -1672,9 +1780,7 @@
 
         // Clear canvas with background color (for trail effect)
         ctx.fillStyle = generativeArtConfig.backgroundColor;
-        ctx.fillRect(0, 0, canvas.width, canvas.height); // Completely redraw for solid background
-        // For subtle trails, use: ctx.fillStyle = `${generativeArtConfig.backgroundColor}10`; // Low opacity for trail
-        // ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
 
 
         ctx.fillStyle = generativeArtConfig.particleColor;
@@ -1751,7 +1857,7 @@
         if (particleSizeSlider) generativeArtConfig.size = parseFloat(particleSizeSlider.value);
         if (particleSpeedSlider) generativeArtConfig.speed = parseFloat(particleSpeedSlider.value);
         if (repulsionStrengthSlider) generativeArtConfig.repulsionStrength = parseFloat(repulsionStrengthSlider.value);
-        if (toggleLinesBtn) toggleLinesBtn.textContent = `Lines: ${generativeArtConfig.drawLines ? 'ON' : 'OFF'}`;
+        if (toggleLinesBtn) toggleLinesBtn.innerHTML = `<i data-feather="${generativeArtConfig.drawLines ? 'link-2' : 'link-off'}"></i> Lines: ${generativeArtConfig.drawLines ? 'ON' : 'OFF'}`;
         if (pausePlayBtn) pausePlayBtn.innerHTML = generativeArtConfig.animationPaused ? '<i data-feather="play"></i> Play' : '<i data-feather="pause"></i> Pause';
 
 
@@ -1770,9 +1876,26 @@
 
         if (resetBtn) {
             resetBtn.onclick = () => {
-                initGenerativeArt(); // Re-initialize particles
+                // Reset sliders to default values
+                if (particleCountSlider) particleCountSlider.value = 100;
+                if (particleSizeSlider) particleSizeSlider.value = 2;
+                if (particleSpeedSlider) particleSpeedSlider.value = 2;
+                if (repulsionStrengthSlider) repulsionStrengthSlider.value = 0.5;
+                generativeArtConfig.drawLines = true;
+                if (toggleLinesBtn) toggleLinesBtn.innerHTML = '<i data-feather="link-2"></i> Lines: ON';
+                generativeArtConfig.animationPaused = false;
+                if (pausePlayBtn) pausePlayBtn.innerHTML = '<i data-feather="pause"></i> Pause';
+
+                // Reset colors to default
+                currentParticleColorIndex = 0;
+                currentBackgroundColorIndex = 0;
+                generativeArtConfig.particleColor = particleColors[currentParticleColorIndex];
+                generativeArtConfig.backgroundColor = backgroundColors[currentBackgroundColorIndex];
+
+                initGenerativeArt(); // Re-initialize particles with reset config
                 showToast('Art reset!');
                 playSound('B4', 'sine', '32n');
+                feather.replace();
             };
         }
         if (changeParticleColorBtn) {
