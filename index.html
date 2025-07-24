@@ -692,12 +692,16 @@
     }
     #generative-art-controls {
         display: flex;
+        flex-wrap: wrap;
         gap: 10px;
         justify-content: center;
-        flex-wrap: wrap;
+        align-items: center;
+        padding: 0.5rem 0;
+        background: rgba(0,0,0,0.1);
+        border-radius: 12px;
+        border: 1px solid var(--card-border);
     }
     #generative-art-controls button {
-        /* Inherit ambient-btn styles or define specific ones */
         background: rgba(127, 127, 127, 0.1);
         border: 1px solid rgba(127, 127, 127, 0.2);
         color: var(--text-color);
@@ -705,11 +709,58 @@
         border-radius: 8px;
         cursor: pointer;
         transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
     }
     #generative-art-controls button:hover {
         background: rgba(127, 127, 127, 0.2);
         border-color: var(--glow-color-1);
         box-shadow: 0 0 10px var(--glow-color-1);
+    }
+    #generative-art-controls button i {
+        width: 18px;
+        height: 18px;
+        stroke: currentColor;
+    }
+    #generative-art-controls .control-group {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+        padding: 0 10px;
+    }
+    #generative-art-controls label {
+        font-size: 0.8rem;
+        color: var(--dim-text-color);
+    }
+    #generative-art-controls input[type="range"] {
+        width: 80px;
+        -webkit-appearance: none; /* Override default look */
+        height: 4px;
+        background: var(--card-border);
+        border-radius: 5px;
+        outline: none;
+        opacity: 0.7;
+        transition: opacity .2s;
+    }
+    #generative-art-controls input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: var(--glow-color-1);
+        cursor: pointer;
+        box-shadow: 0 0 5px var(--glow-color-1);
+    }
+    #generative-art-controls input[type="range"]::-moz-range-thumb {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: var(--glow-color-1);
+        cursor: pointer;
+        box-shadow: 0 0 5px var(--glow-color-1);
     }
 
 
@@ -884,7 +935,7 @@
       <a data-modal="blog" aria-label="Blog">Blog</a>
       <a data-modal="tools" aria-label="My Tools">My Tools</a>
       <a data-modal="timeline" aria-label="Ex-Timeline">Ex-Timeline</a>
-      <a data-modal="generative-art" aria-label="Generative Art">Generative Art</a> <!-- NEW: Generative Art link -->
+      <a data-modal="generative-art" aria-label="Generative Art">Generative Art</a>
       <a data-modal="contact" aria-label="Contact">Contact</a>
     </nav>
   </header>
@@ -978,7 +1029,7 @@
       </div>
     </div>
   </div>
-  <div id="generative-art-modal" class="modal-overlay"> <!-- NEW: Generative Art Modal -->
+  <div id="generative-art-modal" class="modal-overlay">
     <div class="modal-content">
       <i data-feather="x" class="close-modal" aria-label="Close modal"></i>
       <h2>Generative Art Lab</h2>
@@ -986,7 +1037,27 @@
       <canvas id="generative-art-canvas"></canvas>
       <div id="generative-art-controls">
         <button id="reset-art-btn"><i data-feather="refresh-cw"></i> Reset</button>
-        <button id="change-color-btn"><i data-feather="droplet"></i> Change Color</button>
+        <button id="change-particle-color-btn"><i data-feather="droplet"></i> Particle Color</button> <!-- Renamed ID -->
+        <button id="change-bg-color-btn"><i data-feather="square"></i> Background Color</button> <!-- NEW Button -->
+        <button id="toggle-lines-btn"><i data-feather="link-2"></i> Lines: ON</button> <!-- NEW Button -->
+        <button id="pause-play-btn"><i data-feather="pause"></i> Pause</button> <!-- NEW Button -->
+
+        <div class="control-group">
+            <label for="particle-count-slider">Count</label>
+            <input type="range" id="particle-count-slider" min="50" max="300" value="100">
+        </div>
+        <div class="control-group">
+            <label for="particle-size-slider">Size</label>
+            <input type="range" id="particle-size-slider" min="0.5" max="5" step="0.1" value="2">
+        </div>
+        <div class="control-group">
+            <label for="particle-speed-slider">Speed</label>
+            <input type="range" id="particle-speed-slider" min="0.1" max="5" step="0.1" value="2">
+        </div>
+        <div class="control-group">
+            <label for="repulsion-strength-slider">Repulsion</label>
+            <input type="range" id="repulsion-strength-slider" min="0.01" max="1" step="0.01" value="0.5">
+        </div>
       </div>
     </div>
   </div>
@@ -1532,8 +1603,38 @@
 
     // --- GENERATIVE ART LOGIC ---
     let generativeArtAnimationId; // To store requestAnimationFrame ID
-    let particles = [];
-    let particleColor = 'rgba(56, 231, 255, 0.7)'; // Default glow-color-1 with opacity
+    let generativeArtParticles = []; // Renamed to avoid conflict with global particles
+    let generativeArtConfig = {
+        count: 100,
+        size: 2,
+        speed: 2, // Multiplier for originalVx/Vy
+        repulsionStrength: 0.5,
+        drawLines: true,
+        lineDistance: 100, // Max distance for lines
+        particleColor: 'rgba(56, 231, 255, 0.7)', // Default glow-color-1 with opacity
+        backgroundColor: '#000000', // Default black
+        animationPaused: false
+    };
+
+    const particleColors = [
+        'rgba(56, 231, 255, 0.7)',  // Original glow-color-1
+        'rgba(255, 115, 250, 0.7)', // Original glow-color-2
+        'rgba(255, 99, 71, 0.7)',   // Tomato
+        'rgba(60, 179, 113, 0.7)',  // MediumSeaGreen
+        'rgba(138, 43, 226, 0.7)',  // BlueViolet
+        'rgba(255, 215, 0, 0.7)',   // Gold
+        'rgba(255, 255, 255, 0.7)'  // White
+    ];
+    const backgroundColors = [
+        '#000000', // Black
+        '#1a1a1a', // Dark grey
+        '#0a0a0f', // Your default bg-color
+        '#001f3f', // Dark blue
+        '#36013F', // Dark purple
+        '#222222'  // Another dark grey
+    ];
+    let currentParticleColorIndex = 0;
+    let currentBackgroundColorIndex = 0;
 
     function initGenerativeArt() {
         const canvas = document.getElementById('generative-art-canvas');
@@ -1544,17 +1645,17 @@
         canvas.width = canvas.offsetWidth;
         canvas.height = canvas.offsetHeight;
 
-        particles = [];
-        for (let i = 0; i < 100; i++) {
-            particles.push({
+        generativeArtParticles = [];
+        for (let i = 0; i < generativeArtConfig.count; i++) {
+            generativeArtParticles.push({
                 x: Math.random() * canvas.width,
                 y: Math.random() * canvas.height,
-                radius: Math.random() * 2 + 1,
-                vx: (Math.random() - 0.5) * 2,
-                vy: (Math.random() - 0.5) * 2,
+                radius: generativeArtConfig.size,
+                vx: (Math.random() - 0.5) * generativeArtConfig.speed,
+                vy: (Math.random() - 0.5) * generativeArtConfig.speed,
                 alpha: Math.random() * 0.8 + 0.2,
-                originalVx: (Math.random() - 0.5) * 2,
-                originalVy: (Math.random() - 0.5) * 2,
+                originalVx: (Math.random() - 0.5) * generativeArtConfig.speed,
+                originalVy: (Math.random() - 0.5) * generativeArtConfig.speed,
             });
         }
     }
@@ -1564,20 +1665,28 @@
         if (!canvas) return;
         const ctx = canvas.getContext('2d');
 
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = particleColor;
+        if (generativeArtConfig.animationPaused) {
+            generativeArtAnimationId = requestAnimationFrame(animateGenerativeArt);
+            return;
+        }
 
-        const influenceRadius = 80;
-        const repulsionStrength = 0.5;
+        // Clear canvas with background color (for trail effect)
+        ctx.fillStyle = generativeArtConfig.backgroundColor;
+        ctx.fillRect(0, 0, canvas.width, canvas.height); // Completely redraw for solid background
+        // For subtle trails, use: ctx.fillStyle = `${generativeArtConfig.backgroundColor}10`; // Low opacity for trail
+        // ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        particles.forEach(p => {
+
+        ctx.fillStyle = generativeArtConfig.particleColor;
+
+        generativeArtParticles.forEach(p => {
             // Mouse repulsion
             const dx = mouse.x - p.x;
             const dy = mouse.y - p.y;
             const distance = Math.sqrt(dx * dx + dy * dy);
 
-            if (distance < influenceRadius) {
-                const force = (1 - distance / influenceRadius) * repulsionStrength;
+            if (distance < generativeArtConfig.influenceRadius) { // Use config value
+                const force = (1 - distance / generativeArtConfig.influenceRadius) * generativeArtConfig.repulsionStrength;
                 p.vx -= dx * force;
                 p.vy -= dy * force;
             }
@@ -1586,8 +1695,9 @@
             p.vx += (p.originalVx - p.vx) * 0.02;
             p.vy += (p.originalVy - p.vy) * 0.02;
 
-            p.x += p.vx;
-            p.y += p.vy;
+            // Apply speed multiplier
+            p.x += p.vx * (generativeArtConfig.speed / 2); // Divide by 2 to keep original speed scale
+            p.y += p.vy * (generativeArtConfig.speed / 2);
 
             // Wrap around edges
             if (p.x < 0) p.x = canvas.width;
@@ -1602,19 +1712,61 @@
         });
         ctx.globalAlpha = 1;
 
+        // Draw lines between particles
+        if (generativeArtConfig.drawLines) {
+            ctx.strokeStyle = generativeArtConfig.particleColor.replace('0.7', '0.2'); // Lighter opacity for lines
+            ctx.lineWidth = 0.5;
+            for (let i = 0; i < generativeArtParticles.length; i++) {
+                for (let j = i + 1; j < generativeArtParticles.length; j++) {
+                    const p1 = generativeArtParticles[i];
+                    const p2 = generativeArtParticles[j];
+                    const dist = Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
+
+                    if (dist < generativeArtConfig.lineDistance) {
+                        ctx.globalAlpha = (1 - dist / generativeArtConfig.lineDistance) * 0.5; // Fade lines based on distance
+                        ctx.beginPath();
+                        ctx.moveTo(p1.x, p1.y);
+                        ctx.lineTo(p2.x, p2.y);
+                        ctx.stroke();
+                    }
+                }
+            }
+            ctx.globalAlpha = 1;
+        }
+
+
         generativeArtAnimationId = requestAnimationFrame(animateGenerativeArt);
     }
 
     function renderGenerativeArt() {
+        // Ensure initial config is applied
+        const particleCountSlider = document.getElementById('particle-count-slider');
+        const particleSizeSlider = document.getElementById('particle-size-slider');
+        const particleSpeedSlider = document.getElementById('particle-speed-slider');
+        const repulsionStrengthSlider = document.getElementById('repulsion-strength-slider');
+        const toggleLinesBtn = document.getElementById('toggle-lines-btn');
+        const pausePlayBtn = document.getElementById('pause-play-btn');
+
+        if (particleCountSlider) generativeArtConfig.count = parseInt(particleCountSlider.value);
+        if (particleSizeSlider) generativeArtConfig.size = parseFloat(particleSizeSlider.value);
+        if (particleSpeedSlider) generativeArtConfig.speed = parseFloat(particleSpeedSlider.value);
+        if (repulsionStrengthSlider) generativeArtConfig.repulsionStrength = parseFloat(repulsionStrengthSlider.value);
+        if (toggleLinesBtn) toggleLinesBtn.textContent = `Lines: ${generativeArtConfig.drawLines ? 'ON' : 'OFF'}`;
+        if (pausePlayBtn) pausePlayBtn.innerHTML = generativeArtConfig.animationPaused ? '<i data-feather="play"></i> Play' : '<i data-feather="pause"></i> Pause';
+
+
         initGenerativeArt(); // Initialize particles and canvas size
         if (generativeArtAnimationId) { // Stop any previous animation
             cancelAnimationFrame(generativeArtAnimationId);
         }
         animateGenerativeArt(); // Start new animation loop
+        feather.replace(); // Re-render icons
 
         // Add event listeners for generative art controls
         const resetBtn = document.getElementById('reset-art-btn');
-        const changeColorBtn = document.getElementById('change-color-btn');
+        const changeParticleColorBtn = document.getElementById('change-particle-color-btn');
+        const changeBgColorBtn = document.getElementById('change-bg-color-btn');
+        
 
         if (resetBtn) {
             resetBtn.onclick = () => {
@@ -1623,19 +1775,63 @@
                 playSound('B4', 'sine', '32n');
             };
         }
-        if (changeColorBtn) {
-            changeColorBtn.onclick = () => {
-                const colors = [
-                    'rgba(255, 99, 71, 0.7)',  // Tomato
-                    'rgba(60, 179, 113, 0.7)', // MediumSeaGreen
-                    'rgba(138, 43, 226, 0.7)', // BlueViolet
-                    'rgba(255, 215, 0, 0.7)',  // Gold
-                    'rgba(56, 231, 255, 0.7)', // Original glow-color-1
-                    'rgba(255, 115, 250, 0.7)' // Original glow-color-2
-                ];
-                particleColor = colors[Math.floor(Math.random() * colors.length)];
-                showToast('Color changed!');
+        if (changeParticleColorBtn) {
+            changeParticleColorBtn.onclick = () => {
+                currentParticleColorIndex = (currentParticleColorIndex + 1) % particleColors.length;
+                generativeArtConfig.particleColor = particleColors[currentParticleColorIndex];
+                showToast('Particle color changed!');
                 playSound('D5', 'triangle', '32n');
+            };
+        }
+        if (changeBgColorBtn) {
+            changeBgColorBtn.onclick = () => {
+                currentBackgroundColorIndex = (currentBackgroundColorIndex + 1) % backgroundColors.length;
+                generativeArtConfig.backgroundColor = backgroundColors[currentBackgroundColorIndex];
+                showToast('Background color changed!');
+                playSound('E5', 'triangle', '32n');
+            };
+        }
+        if (toggleLinesBtn) {
+            toggleLinesBtn.onclick = () => {
+                generativeArtConfig.drawLines = !generativeArtConfig.drawLines;
+                toggleLinesBtn.innerHTML = `<i data-feather="${generativeArtConfig.drawLines ? 'link-2' : 'link-off'}"></i> Lines: ${generativeArtConfig.drawLines ? 'ON' : 'OFF'}`;
+                feather.replace();
+                showToast(`Lines ${generativeArtConfig.drawLines ? 'enabled' : 'disabled'}`);
+                playSound('G5', 'triangle', '32n');
+            };
+        }
+        if (pausePlayBtn) {
+            pausePlayBtn.onclick = () => {
+                generativeArtConfig.animationPaused = !generativeArtConfig.animationPaused;
+                pausePlayBtn.innerHTML = generativeArtConfig.animationPaused ? '<i data-feather="play"></i> Play' : '<i data-feather="pause"></i> Pause';
+                feather.replace();
+                showToast(`Animation ${generativeArtConfig.animationPaused ? 'paused' : 'resumed'}`);
+                playSound('C6', 'triangle', '32n');
+            };
+        }
+
+        // Sliders
+        if (particleCountSlider) {
+            particleCountSlider.oninput = () => {
+                generativeArtConfig.count = parseInt(particleCountSlider.value);
+                initGenerativeArt(); // Re-initialize particles when count changes
+            };
+        }
+        if (particleSizeSlider) {
+            particleSizeSlider.oninput = () => {
+                generativeArtConfig.size = parseFloat(particleSizeSlider.value);
+                generativeArtParticles.forEach(p => p.radius = generativeArtConfig.size); // Update existing particles
+            };
+        }
+        if (particleSpeedSlider) {
+            particleSpeedSlider.oninput = () => {
+                generativeArtConfig.speed = parseFloat(particleSpeedSlider.value);
+                // No need to re-init particles, speed multiplier is applied in animate
+            };
+        }
+        if (repulsionStrengthSlider) {
+            repulsionStrengthSlider.oninput = () => {
+                generativeArtConfig.repulsionStrength = parseFloat(repulsionStrengthSlider.value);
             };
         }
     }
@@ -1705,7 +1901,7 @@
         { name: 'Open Blog', icon: 'book-open', action: () => { openModal('blog'); closeCommandPalette(); } },
         { name: 'Open My Tools', icon: 'tool', action: () => { openModal('tools'); closeCommandPalette(); } },
         { name: 'Open Ex-Timeline', icon: 'clock', action: () => { openModal('timeline'); closeCommandPalette(); } },
-        { name: 'Open Generative Art', icon: 'aperture', action: () => { openModal('generative-art'); closeCommandPalette(); } }, <!-- NEW: Command for Generative Art -->
+        { name: 'Open Generative Art', icon: 'aperture', action: () => { openModal('generative-art'); closeCommandPalette(); } },
         { name: 'Open Contact', icon: 'mail', action: () => { openModal('contact'); closeCommandPalette(); } },
         { name: 'View on GitHub', icon: 'github', action: () => { window.open('https://github.com/Judson-web', '_blank'); closeCommandPalette(); } },
     ];
@@ -2297,6 +2493,13 @@ _           _                     _   _
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
         });
+        // Also resize generative art canvas if open
+        const generativeArtCanvas = document.getElementById('generative-art-canvas');
+        if (generativeArtCanvas && generativeArtCanvas.offsetParent !== null) { // Check if visible
+            generativeArtCanvas.width = generativeArtCanvas.offsetWidth;
+            generativeArtCanvas.height = generativeArtCanvas.offsetHeight;
+            initGenerativeArt(); // Re-initialize particles for new size
+        }
     }
     
     // --- INITIALIZATION ---
