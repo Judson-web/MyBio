@@ -476,10 +476,10 @@
 
 
     .ambient-btn svg {
-      margin-right: 8px; /* Reduced margin */
+      margin-right: 10px;
       stroke: var(--text-color);
-      width: 20px; /* Slightly smaller */
-      height: 20px; /* Slightly smaller */
+      width: 22px;
+      height: 22px;
       transition: transform 0.3s ease;
     }
     
@@ -652,7 +652,7 @@
 
     .blog-post, .project-card {
         padding: 0.8rem; /* Reduced padding */
-        border: 1px solid rgba(127,127,127,0.2);
+        border: 1px solid var(--card-border); /* Changed to variable */
         border-radius: 12px;
         margin-bottom: 0.8rem; /* Reduced margin */
         background: rgba(0,0,0,0.05);
@@ -689,7 +689,7 @@
     /* New styles for AI summary button */
     .project-card .ai-summary-btn {
         background: rgba(127, 127, 127, 0.1);
-        border: 1px solid rgba(127, 127, 127, 0.2);
+        border: 1px solid var(--card-border); /* Changed to variable */
         color: var(--dim-text-color);
         font-size: 0.75rem; /* Reduced font size */
         padding: 0.3rem 0.6rem; /* Reduced padding */
@@ -721,7 +721,7 @@
     /* Styles for AI Project Idea section */
     #ai-project-idea-output {
         background: rgba(0,0,0,0.1);
-        border: 1px solid var(--card-border);
+        border: 1px solid var(--card-border); /* Changed to variable */
         border-radius: 12px;
         padding: 0.8rem; /* Reduced padding */
         margin-top: 1.2rem; /* Reduced margin */
@@ -773,7 +773,7 @@
     }
     #generative-art-controls button {
         background: rgba(127, 127, 127, 0.1);
-        border: 1px solid rgba(127, 127, 127, 0.2);
+        border: 1px solid var(--card-border); /* Changed to variable */
         color: var(--text-color);
         padding: 0.4rem 0.8rem; /* Reduced padding */
         border-radius: 8px;
@@ -1045,8 +1045,8 @@
       <a data-modal="about" aria-label="About">About</a>
       <a data-modal="projects" aria-label="Projects">Projects</a>
       <a data-modal="blog" aria-label="Blog">Blog</a>
-      <!-- REMOVED: <a data-modal="tools" aria-label="My Tools">My Tools</a> -->
-      <!-- REMOVED: <a data-modal="timeline" aria-label="Ex-Timeline">Ex-Timeline</a> -->
+      <a data-modal="tools" aria-label="My Tools">My Tools</a> <!-- Re-added My Tools -->
+      <a data-modal="timeline" aria-label="Ex-Timeline">Ex-Timeline</a> <!-- Re-added Ex-Timeline -->
       <a data-modal="generative-art" aria-label="Generative Art">Generative Art</a>
       <a data-modal="contact" aria-label="Contact">Contact</a>
     </nav>
@@ -1074,7 +1074,7 @@
   <!-- Main Content -->
   <div class="centerbox">
     <div class="card animate-on-scroll" id="profile-card"> <!-- Added animate-on-scroll -->
-      <img class="profile-img" src="https://firebasestorage.googleapis.com/v0/b/crnn-b7d8f.appspot.com/o/files%2FIMG_20250717_215454_617-modified.png?alt=Judson Saji Profile Picture" loading="lazy"
+      <img class="profile-img" src="https://firebasestorage.googleapis.com/v0/b/crnn-b7d8f.appspot.com/o/files%2FIMG_20250717_215454_617-modified.png?alt=media&token=bea1f0dd-abf1-4cfb-8a83-0d3b603d3fde" alt="Judson Saji Profile Picture" loading="lazy"
       onerror="this.onerror=null;this.src='https://placehold.co/110x110/161822/ffffff?text=JS';"/>
       <div class="profile-name">Judson Saji</div>
       <div id="greeting" class="profile-greeting"></div>
@@ -1142,8 +1142,26 @@
       <div id="blog-posts"></div>
     </div>
   </div>
-  <!-- REMOVED: My Tools Modal -->
-  <!-- REMOVED: Ex-Timeline Modal -->
+  <div id="tools-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="tools-modal-title"> <!-- Re-added My Tools Modal -->
+    <div class="modal-content">
+      <i data-feather="x" class="close-modal" aria-label="Close My Tools modal"></i>
+      <h2 id="tools-modal-title">My Tools & Stack</h2>
+      <p>Here are some of the technologies and tools I frequently use in my creative and development work:</p>
+      <div id="tools-list" class="tools-grid">
+        <!-- Tools will be rendered here by JavaScript -->
+      </div>
+    </div>
+  </div>
+  <div id="timeline-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="timeline-modal-title"> <!-- Re-added Ex-Timeline Modal -->
+    <div class="modal-content">
+      <i data-feather="x" class="close-modal" aria-label="Close Ex-Timeline modal"></i>
+      <h2 id="timeline-modal-title">The Ex-Timeline: My Creative Evolution</h2>
+      <p>A journey through the phases that have shaped my approach to creation.</p>
+      <div id="ex-timeline-content" class="timeline">
+        <!-- Timeline items will be rendered here by JavaScript -->
+      </div>
+    </div>
+  </div>
   <div id="generative-art-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="generative-art-modal-title">
     <div class="modal-content">
       <i data-feather="x" class="close-modal" aria-label="Close Generative Art modal"></i>
@@ -1245,14 +1263,14 @@
                     oscillator: { type },
                     envelope: { attack: 0.005, decay: 0.1, sustain: 0.3, release: 1 }
                 }).toDestination();
-                synth.triggerAttackRelease(note, duration);
+                synth.triggerAttackRelease(note, duration); // Corrected function name
             }).catch(e => console.error("Failed to resume AudioContext:", e));
         } else if (Tone.context.state === 'running') {
             const synth = new Tone.Synth({
                 oscillator: { type },
                 envelope: { attack: 0.005, decay: 0.1, sustain: 0.3, release: 1 }
             }).toDestination();
-            synth.triggerAttackAttackRelease(note, duration); // Corrected: triggerAttackRelease
+            synth.triggerAttackRelease(note, duration); // Corrected function name
         }
     };
 
@@ -1360,7 +1378,12 @@
         if (modalId === 'projects') {
             renderProjects();
         }
-        // Removed tools and timeline modal calls
+        if (modalId === 'tools') { // Re-added for tools modal
+            renderTools();
+        }
+        if (modalId === 'timeline') { // Re-added for timeline modal
+            renderExTimeline();
+        }
         if (modalId === 'generative-art') { // Initialize generative art when modal opens
             renderGenerativeArt();
         }
@@ -1701,8 +1724,41 @@
         { name: 'Web Audio API', icon: 'music', description: 'A high-level JavaScript API for processing and synthesizing audio in web applications, enabling interactive sound experiences.' }
     ];
 
-    // REMOVED: renderTools function as the modal is removed.
-    // If you add back a "My Tools" section, you'll need to re-add this function.
+    function renderTools() {
+        const container = document.getElementById('tools-list');
+        if (!container) return;
+        container.innerHTML = myTools.map(tool => `
+            <div class="tool-item animate-on-scroll" tabindex="0" role="button" aria-expanded="false" aria-controls="tool-desc-${tool.name.replace(/\s/g, '-')}-id"> <!-- Added ARIA roles and tabindex -->
+                <i data-feather="${tool.icon}"></i>
+                <h4>${tool.name}</h4>
+                <p class="tool-description" id="tool-desc-${tool.name.replace(/\s/g, '-')}-id">${tool.description}</p>
+            </div>
+        `).join('');
+        feather.replace(); // Ensure new icons are rendered
+
+        // Add click listeners for tool items
+        document.querySelectorAll('.tool-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                const clickedItem = e.currentTarget;
+                const descriptionElement = clickedItem.querySelector('.tool-description');
+                
+                // Toggle 'expanded' class
+                const isExpanded = clickedItem.classList.toggle('expanded');
+                clickedItem.setAttribute('aria-expanded', isExpanded);
+
+                // Toggle description visibility via CSS transition
+                if (isExpanded) {
+                    descriptionElement.style.maxHeight = descriptionElement.scrollHeight + "px";
+                    descriptionElement.style.opacity = 1;
+                    playSound('C5', 'sine', '32n'); // Play sound on expand
+                } else {
+                    descriptionElement.style.maxHeight = "0";
+                    descriptionElement.style.opacity = 0;
+                    playSound('C4', 'sine', '32n'); // Play sound on collapse
+                }
+            });
+        });
+    }
 
     // Ex-Timeline Data and Render Function
     const exTimelineData = [
@@ -1712,9 +1768,19 @@
         { year: 'Present', title: 'NowCreator', description: 'The culmination of my journey, where poetry, minimalism, and analytical thought converge into building interactive digital experiences and generative art. This is where ideas become reality.', icon: 'code' }
     ];
 
-    // REMOVED: renderExTimeline function as the modal is removed.
-    // If you add back an "Ex-Timeline" section, you'll need to re-add this function.
-
+    function renderExTimeline() {
+        const container = document.getElementById('ex-timeline-content');
+        if (!container) return;
+        container.innerHTML = exTimelineData.map(item => `
+            <div class="timeline-item animate-on-scroll"> <!-- Added animate-on-scroll -->
+                <div class="timeline-item-content">
+                    <h3>${item.title} (${item.year})</h3>
+                    <p>${item.description}</p>
+                </div>
+            </div>
+        `).join('');
+        feather.replace(); // Ensure new icons are rendered
+    }
 
     // --- GENERATIVE ART LOGIC ---
     let generativeArtAnimationId; // To store requestAnimationFrame ID
@@ -2099,7 +2165,8 @@
         { name: 'Open About', icon: 'user', action: () => { openModal('about'); closeCommandPalette(); } },
         { name: 'Open Projects', icon: 'briefcase', action: () => { openModal('projects'); closeCommandPalette(); } },
         { name: 'Open Blog', icon: 'book-open', action: () => { openModal('blog'); closeCommandPalette(); } },
-        // Removed tools and timeline commands
+        { name: 'Open My Tools', icon: 'tool', action: () => { openModal('tools'); closeCommandPalette(); } }, // Re-added
+        { name: 'Open Ex-Timeline', icon: 'clock', action: () => { openModal('timeline'); closeCommandPalette(); } }, // Re-added
         { name: 'Open Generative Art', icon: 'aperture', action: () => { openModal('generative-art'); closeCommandPalette(); } },
         { name: 'Open Contact', icon: 'mail', action: () => { openModal('contact'); closeCommandPalette(); } },
         { name: 'View on GitHub', icon: 'github', action: () => { window.open('https://github.com/Judson-web', '_blank'); closeCommandPalette(); } },
@@ -2220,7 +2287,7 @@
 
         showWelcome() {
             if (!this.outputElement) return;
-            this.outputElement.innerHTML = '';
+            this.outputElement.innerHTML = ''; // Clear existing content to prevent repetition
             const judsonAscii = `
 _           _                     _   _
 | |         | |                   | | (_)
@@ -2432,8 +2499,8 @@ _           _                     _   _
                         case 'uptime':
                             const uptimeMs = Date.now() - pageLoadTime.getTime();
                             const uptimeMinutes = Math.floor(uptimeMs / (1000 * 60));
-                            const uptimeHours = Math.floor(uptimeMinutes / 60);
-                            const uptimeDays = Math.floor(uptimeHours / 24);
+                            const uptimeHours = Math.floor(uptimeMinutes / 24);
+                            const uptimeDays = Math.floor(uptimeHours / 24 / 24); // Corrected calculation for days
                             let uptimeString = '';
                             if (uptimeDays > 0) uptimeString += `${uptimeDays}d `;
                             if (uptimeHours % 24 > 0) uptimeString += `${uptimeHours % 24}h `;
@@ -2747,84 +2814,6 @@ _           _                     _   _
 
         activeAnimationId = requestAnimationFrame(animateDay);
     }
-
-    // --- CURSOR TRAIL LOGIC ---
-    const cursorTrailCanvas = document.getElementById('cursor-trail-canvas');
-    let cursorTrailCtx;
-    let trailParticles = [];
-    let trailColor = 'rgba(56, 231, 255, 0.5)'; // Default glow-color-1 with opacity
-    let trailMaxParticles = 50;
-    let trailParticleSize = 2;
-    let trailFadeSpeed = 0.05;
-
-    function initCursorTrail() {
-        if (!cursorTrailCanvas) return;
-        cursorTrailCtx = cursorTrailCanvas.getContext('2d');
-        cursorTrailCanvas.width = window.innerWidth;
-        cursorTrailCanvas.height = window.innerHeight;
-        trailParticles = [];
-    }
-
-    function animateCursorTrail() {
-        if (!cursorTrailCtx) return;
-
-        // Clear canvas with a low opacity to create trails
-        cursorTrailCtx.clearRect(0, 0, cursorTrailCanvas.width, cursorTrailCanvas.height);
-        // For a fading trail, use:
-        // cursorTrailCtx.fillStyle = 'rgba(0, 0, 0, 0.1)'; // Black with low opacity
-        // cursorTrailCtx.fillRect(0, 0, cursorTrailCanvas.width, cursorTrailCanvas.height);
-
-
-        // Add a new particle at mouse position
-        trailParticles.push({
-            x: mouse.x,
-            y: mouse.y,
-            size: trailParticleSize,
-            alpha: 1,
-            vx: (Math.random() - 0.5) * 2,
-            vy: (Math.random() - 0.5) * 2,
-        });
-
-        // Limit number of particles
-        if (trailParticles.length > trailMaxParticles) {
-            trailParticles.shift();
-        }
-
-        // Draw and update particles
-        for (let i = 0; i < trailParticles.length; i++) {
-            let p = trailParticles[i];
-
-            p.x += p.vx;
-            p.y += p.vy;
-            p.alpha -= trailFadeSpeed; // Fade out
-
-            if (p.alpha <= 0) {
-                trailParticles.splice(i, 1); // Remove if fully faded
-                i--;
-                continue;
-            }
-
-            cursorTrailCtx.fillStyle = trailColor;
-            cursorTrailCtx.globalAlpha = p.alpha;
-            cursorTrailCtx.beginPath();
-            cursorTrailCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-            cursorTrailCtx.fill();
-        }
-        cursorTrailCtx.globalAlpha = 1; // Reset global alpha
-
-        requestAnimationFrame(animateCursorTrail);
-    }
-
-    // Update trail color based on theme
-    function updateCursorTrailColor() {
-        const currentTheme = localStorage.getItem('theme') || 'dark';
-        if (currentTheme === 'light') {
-            trailColor = 'rgba(0, 123, 255, 0.5)'; // Light theme glow-color-1
-        } else {
-            trailColor = 'rgba(56, 231, 255, 0.5)'; // Dark theme glow-color-1
-        }
-    }
-
 
     // --- CANVAS RESIZING FUNCTION ---
     function resizeAllCanvases() {
