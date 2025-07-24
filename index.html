@@ -1037,7 +1037,7 @@
   <canvas id="aurora-canvas" class="background-canvas"></canvas>
   <canvas id="day-canvas" class="background-canvas"></canvas>
   <canvas id="konami-canvas" class="background-canvas"></canvas>
-  <!-- Removed: <canvas id="cursor-trail-canvas"></canvas> -->
+  <canvas id="cursor-trail-canvas"></canvas> <!-- NEW: Cursor Trail Canvas -->
 
 
   <!-- Main Content -->
@@ -1276,7 +1276,7 @@
             }
         }
         localStorage.setItem('theme', theme);
-        // Removed updateCursorTrailColor() for stability
+        updateCursorTrailColor(); // Update cursor trail color on theme change
     };
     const toggleTheme = () => {
         const currentTheme = localStorage.getItem('theme') || 'dark';
@@ -1546,8 +1546,8 @@
                         <span><i data-feather="git-branch"></i> ${repo.forks_count}</span>
                     </div>
                     <div style="display: flex; gap: 10px; margin-top: 0.75rem;">
-                        <button class="ai-summary-btn" data-project-name="${repo.name}" data-project-description="${repo.description || 'No description provided.'}" aria-label="Get AI summary for ${repo.name}">
-                            <i data-feather="terminal"></i> AI Summary
+                        <button class="ai-summary-btn glitch-effect" data-text="AI Summary" data-project-name="${repo.name}" data-project-description="${repo.description || 'No description provided.'}" aria-label="Get AI summary for ${repo.name}">
+                            <i data-feather="terminal"></i> <span>AI Summary</span>
                         </button>
                     </div>
                 </div>
@@ -1561,7 +1561,7 @@
                     const projectName = btn.dataset.projectName;
                     const projectDescription = btn.dataset.projectDescription;
                     btn.disabled = true;
-                    btn.innerHTML = '<i data-feather="loader" class="spin"></i> Summarizing...';
+                    btn.innerHTML = '<i data-feather="loader" class="spin"></i> <span>Summarizing...</span>';
                     feather.replace();
 
                     const prompt = `Summarize the GitHub project "${projectName}" with description "${projectDescription}" in one concise sentence (max 20 words) from the perspective of a minimalist designer.`;
@@ -1588,7 +1588,7 @@
                         showToast(`AI Summary Error: ${error.message}`);
                     } finally {
                         btn.disabled = false;
-                        btn.innerHTML = '<i data-feather="terminal"></i> AI Summary';
+                        btn.innerHTML = '<i data-feather="terminal"></i> <span>AI Summary</span>';
                         feather.replace();
                     }
                 });
@@ -1603,7 +1603,7 @@
             if (generateProjectIdeaBtn) {
                 generateProjectIdeaBtn.addEventListener('click', async () => {
                     generateProjectIdeaBtn.disabled = true;
-                    generateProjectIdeaBtn.innerHTML = '<i data-feather="loader" class="spin"></i> Generating Idea...';
+                    generateProjectIdeaBtn.innerHTML = '<i data-feather="loader" class="spin"></i> <span>Generating Idea...</span>';
                     feather.replace();
                     hide(aiProjectIdeaOutput); // Hide previous idea
 
@@ -1674,10 +1674,10 @@
         const container = document.getElementById('tools-list');
         if (!container) return;
         container.innerHTML = myTools.map(tool => `
-            <div class="tool-item">
+            <div class="tool-item" tabindex="0" role="button" aria-expanded="false" aria-controls="tool-desc-${tool.name.replace(/\s/g, '-')}-id">
                 <i data-feather="${tool.icon}"></i>
                 <h4>${tool.name}</h4>
-                <p class="tool-description">${tool.description}</p>
+                <p class="tool-description" id="tool-desc-${tool.name.replace(/\s/g, '-')}-id">${tool.description}</p>
             </div>
         `).join('');
         feather.replace(); // Ensure new icons are rendered
@@ -2111,7 +2111,6 @@
         { name: 'Open About', icon: 'user', action: () => { openModal('about'); closeCommandPalette(); } },
         { name: 'Open Projects', icon: 'briefcase', action: () => { openModal('projects'); closeCommandPalette(); } },
         { name: 'Open Blog', icon: 'book-open', action: () => { openModal('blog'); closeCommandPalette(); } },
-        // Removed tools and timeline commands
         { name: 'Open Generative Art', icon: 'aperture', action: () => { openModal('generative-art'); closeCommandPalette(); } },
         { name: 'Open Contact', icon: 'mail', action: () => { openModal('contact'); closeCommandPalette(); } },
         { name: 'View on GitHub', icon: 'github', action: () => { window.open('https://github.com/Judson-web', '_blank'); closeCommandPalette(); } },
@@ -2760,6 +2759,84 @@ _           _                     _   _
         activeAnimationId = requestAnimationFrame(animateDay);
     }
 
+    // --- CURSOR TRAIL LOGIC ---
+    const cursorTrailCanvas = document.getElementById('cursor-trail-canvas');
+    let cursorTrailCtx;
+    let trailParticles = [];
+    let trailColor = 'rgba(56, 231, 255, 0.5)'; // Default glow-color-1 with opacity
+    let trailMaxParticles = 50;
+    let trailParticleSize = 2;
+    let trailFadeSpeed = 0.05;
+
+    function initCursorTrail() {
+        if (!cursorTrailCanvas) return;
+        cursorTrailCtx = cursorTrailCanvas.getContext('2d');
+        cursorTrailCanvas.width = window.innerWidth;
+        cursorTrailCanvas.height = window.innerHeight;
+        trailParticles = [];
+    }
+
+    function animateCursorTrail() {
+        if (!cursorTrailCtx) return;
+
+        // Clear canvas with a low opacity to create trails
+        cursorTrailCtx.clearRect(0, 0, cursorTrailCanvas.width, cursorTrailCanvas.height);
+        // For a fading trail, use:
+        // cursorTrailCtx.fillStyle = 'rgba(0, 0, 0, 0.1)'; // Black with low opacity
+        // cursorTrailCtx.fillRect(0, 0, cursorTrailCanvas.width, cursorTrailCanvas.height);
+
+
+        // Add a new particle at mouse position
+        trailParticles.push({
+            x: mouse.x,
+            y: mouse.y,
+            size: trailParticleSize,
+            alpha: 1,
+            vx: (Math.random() - 0.5) * 2,
+            vy: (Math.random() - 0.5) * 2,
+        });
+
+        // Limit number of particles
+        if (trailParticles.length > trailMaxParticles) {
+            trailParticles.shift();
+        }
+
+        // Draw and update particles
+        for (let i = 0; i < trailParticles.length; i++) {
+            let p = trailParticles[i];
+
+            p.x += p.vx;
+            p.y += p.vy;
+            p.alpha -= trailFadeSpeed; // Fade out
+
+            if (p.alpha <= 0) {
+                trailParticles.splice(i, 1); // Remove if fully faded
+                i--;
+                continue;
+            }
+
+            cursorTrailCtx.fillStyle = trailColor;
+            cursorTrailCtx.globalAlpha = p.alpha;
+            cursorTrailCtx.beginPath();
+            cursorTrailCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            cursorTrailCtx.fill();
+        }
+        cursorTrailCtx.globalAlpha = 1; // Reset global alpha
+
+        requestAnimationFrame(animateCursorTrail);
+    }
+
+    // Update trail color based on theme
+    function updateCursorTrailColor() {
+        const currentTheme = localStorage.getItem('theme') || 'dark';
+        if (currentTheme === 'light') {
+            trailColor = 'rgba(0, 123, 255, 0.5)'; // Light theme glow-color-1
+        } else {
+            trailColor = 'rgba(56, 231, 255, 0.5)'; // Dark theme glow-color-1
+        }
+    }
+
+
     // --- CANVAS RESIZING FUNCTION ---
     function resizeAllCanvases() {
         const canvases = document.querySelectorAll('.background-canvas');
@@ -2774,7 +2851,11 @@ _           _                     _   _
             generativeArtCanvas.height = generativeArtCanvas.offsetHeight;
             initGenerativeArt(); // Re-initialize particles for new size
         }
-        // Removed cursor trail canvas resize for stability
+        // Resize cursor trail canvas
+        if (cursorTrailCanvas) {
+            cursorTrailCanvas.width = window.innerWidth;
+            cursorTrailCanvas.height = window.innerHeight;
+        }
     }
     
     // --- INITIALIZATION ---
@@ -2838,14 +2919,17 @@ _           _                     _   _
             el.addEventListener('mouseenter', () => playSound('A5', 'sine', '32n'));
         });
 
-        // Removed cursor trail initialization for stability
+        // Initialize cursor trail
+        initCursorTrail();
+        animateCursorTrail();
+        updateCursorTrailColor(); // Set initial color
     }
 
     // Event Listeners
     window.addEventListener("resize", () => {
       resizeAllCanvases();
       applyTheme(localStorage.getItem('theme') || 'dark');
-      // updateCursorTrailColor(); // Removed for stability
+      updateCursorTrailColor(); // Update trail color on theme change
     });
 
     window.addEventListener('mousemove', (e) => {
@@ -2921,7 +3005,29 @@ _           _                     _   _
     // Initial population of drawer links (important for first open)
     document.addEventListener('DOMContentLoaded', populateDrawerLinks);
 
-    // --- SCROLL ANIMATION LOGIC (Removed for stability) ---
+    // --- SCROLL ANIMATION LOGIC ---
+    const animateOnScrollElements = document.querySelectorAll('.animate-on-scroll');
+    const observerOptions = {
+        root: null, // viewport
+        rootMargin: '0px',
+        threshold: 0.1 // 10% of element visible to trigger
+    };
+
+    const observer = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('is-visible');
+                observer.unobserve(entry.target); // Stop observing once animated
+            }
+        });
+    }, observerOptions);
+
+    // Observe elements on DOMContentLoaded
+    document.addEventListener('DOMContentLoaded', () => {
+        animateOnScrollElements.forEach(el => {
+            observer.observe(el);
+        });
+    });
 
 
     // --- CUSTOM CONTEXT MENU LOGIC ---
