@@ -7,6 +7,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" href="https://firebasestorage.googleapis.com/v0/b/crnn-b7d8f.appspot.com/o/files%2FIMG_20250717_215454_617-modified.png?alt=media&token=bea1f0dd-abf1-4cfb-8a83-0d3b603d3fde" />
   
+  <!-- Pre-connect and Preload for performance -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://unpkg.com">
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fira+Code:wght@400&display=swap" as="style">
+  <link rel="preload" href="https://unpkg.com/feather-icons" as="script">
+  <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js" as="script">
+
   <!-- Social Media Meta Tags -->
   <meta property="og:title" content="Judson Saji - Creator" />
   <meta property="og:description" content="ExPoet, ExMinimalist, ExThinker, NowCreator" />
@@ -137,6 +147,18 @@
     }
     #konami-canvas.active {
         opacity: 1;
+    }
+
+    /* Cursor Trail Canvas */
+    #cursor-trail-canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 998; /* Above background, below modals */
+        pointer-events: none; /* Allows clicks to pass through */
+        opacity: 0.7;
     }
 
 
@@ -465,6 +487,57 @@
         transform: scale(1.1);
     }
 
+    /* Glitch Effect */
+    .glitch-effect {
+        position: relative;
+        overflow: hidden;
+    }
+    .glitch-effect:hover::before,
+    .glitch-effect:hover::after {
+        content: attr(data-text);
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: var(--card-bg);
+        overflow: hidden;
+        color: var(--glow-color-1);
+        z-index: 1;
+    }
+    .glitch-effect:hover::before {
+        left: 2px;
+        text-shadow: -2px 0 var(--glow-color-2);
+        animation: glitch-anim-1 0.8s infinite linear alternate-reverse;
+    }
+    .glitch-effect:hover::after {
+        left: -2px;
+        text-shadow: -2px 0 var(--glow-color-1);
+        animation: glitch-anim-2 0.8s infinite linear alternate-reverse;
+    }
+    @keyframes glitch-anim-1 {
+        0% { clip-path: inset(80% 0 0 0); }
+        20% { clip-path: inset(30% 0 50% 0); }
+        40% { clip-path: inset(70% 0 10% 0); }
+        60% { clip-path: inset(10% 0 70% 0); }
+        80% { clip-path: inset(50% 0 30% 0); }
+        100% { clip-path: inset(0 0 80% 0); }
+    }
+    @keyframes glitch-anim-2 {
+        0% { clip-path: inset(10% 0 70% 0); }
+        20% { clip-path: inset(50% 0 30% 0); }
+        40% { clip-path: inset(0 0 80% 0); }
+        60% { clip-path: inset(80% 0 0 0); }
+        80% { clip-path: inset(30% 0 50% 0); }
+        100% { clip-path: inset(70% 0 10% 0); }
+    }
+    /* Ensure text is visible for glitch effect */
+    .glitch-effect span {
+        position: relative;
+        z-index: 2;
+    }
+
+
     /* --- Modal Sections --- */
     .modal-overlay {
         position: fixed;
@@ -552,6 +625,30 @@
     }
     
     /* --- Dynamic Content Styling --- */
+    /* Scroll animation styles */
+    .animate-on-scroll {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    }
+    .animate-on-scroll.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    .animate-on-scroll.slide-left {
+        transform: translateX(-50px);
+    }
+    .animate-on-scroll.slide-left.is-visible {
+        transform: translateX(0);
+    }
+    .animate-on-scroll.slide-right {
+        transform: translateX(50px);
+    }
+    .animate-on-scroll.slide-right.is-visible {
+        transform: translateX(0);
+    }
+
+
     .blog-post, .project-card {
         padding: 1rem;
         border: 1px solid rgba(127,127,127,0.2);
@@ -663,6 +760,7 @@
         align-items: center;
         justify-content: center;
         transition: transform 0.2s ease, box-shadow 0.2s ease;
+        cursor: pointer; /* Indicate clickable */
     }
     .tool-item:hover {
         transform: translateY(-5px);
@@ -685,9 +783,15 @@
         margin-top: 0.5rem;
         display: none; /* Hidden by default */
         text-align: left;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+        opacity: 0;
     }
     .tool-item.expanded .tool-description {
         display: block; /* Show when expanded */
+        max-height: 100px; /* Arbitrary max-height for transition */
+        opacity: 1;
     }
 
 
@@ -950,6 +1054,40 @@
         animation: blink 1s step-end infinite;
     }
 
+    /* Custom Context Menu */
+    #custom-context-menu {
+        position: fixed;
+        background: var(--card-bg);
+        backdrop-filter: blur(10px);
+        border-radius: 8px;
+        border: 1px solid var(--card-border);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        padding: 0.5rem 0;
+        z-index: 3500;
+        display: none; /* Hidden by default */
+        flex-direction: column;
+        min-width: 180px;
+    }
+    #custom-context-menu .context-menu-item {
+        padding: 0.75rem 1rem;
+        cursor: pointer;
+        color: var(--text-color);
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        transition: background 0.2s ease;
+    }
+    #custom-context-menu .context-menu-item:hover {
+        background: rgba(127,127,127,0.15);
+    }
+    #custom-context-menu .context-menu-item i {
+        width: 18px;
+        height: 18px;
+        stroke: var(--dim-text-color);
+    }
+
+
     /* --- Footer & Misc --- */
     footer {
       position: relative;
@@ -1060,25 +1198,27 @@
   <canvas id="aurora-canvas" class="background-canvas"></canvas>
   <canvas id="day-canvas" class="background-canvas"></canvas>
   <canvas id="konami-canvas" class="background-canvas"></canvas>
+  <canvas id="cursor-trail-canvas"></canvas> <!-- NEW: Cursor Trail Canvas -->
+
 
   <!-- Main Content -->
   <div class="centerbox">
-    <div class="card" id="profile-card">
-      <img class="profile-img" src="https://firebasestorage.googleapis.com/v0/b/crnn-b7d8f.appspot.com/o/files%2FIMG_20250717_215454_617-modified.png?alt=media&token=bea1f0dd-abf1-4cfb-8a83-0d3b603d3fde" alt="Judson Saji" 
+    <div class="card animate-on-scroll" id="profile-card"> <!-- Added animate-on-scroll -->
+      <img class="profile-img" src="https://firebasestorage.googleapis.com/v0/b/crnn-b7d8f.appspot.com/o/files%2FIMG_20250717_215454_617-modified.png?alt=media&token=bea1f0dd-abf1-4cfb-8a83-0d3b603d3fde" alt="Judson Saji" loading="lazy"
       onerror="this.onerror=null;this.src='https://placehold.co/110x110/161822/ffffff?text=JS';"/>
       <div class="profile-name">Judson Saji</div>
       <div id="greeting" class="profile-greeting"></div>
       <div class="profile-tagline">ExPoet, ExMinimalist, ExThinker, NowCreator</div>
 
-      <div class="status-widget">
+      <div class="status-widget animate-on-scroll slide-left"> <!-- Added animate-on-scroll -->
         <span id="time-widget"><i data-feather="clock"></i> --:-- --</span>
         <span id="weather-widget"><i data-feather="loader" class="spin"></i></span>
         <span id="github-widget"><i data-feather="github"></i> --</span>
       </div>
 
       <!-- Now Playing Widget -->
-      <div id="now-playing-widget">
-        <img class="album-art" src="https://placehold.co/64x64/333333/ffffff?text=Loading..." alt="Album Art" />
+      <div id="now-playing-widget" class="animate-on-scroll slide-right"> <!-- Added animate-on-scroll -->
+        <img class="album-art" src="https://placehold.co/64x64/333333/ffffff?text=Loading..." alt="Album Art" loading="lazy" />
         <div class="track-info">
           <div class="track-name">Loading...</div>
           <div class="artist-name"></div>
@@ -1086,10 +1226,10 @@
       </div>
 
       <div class="btn-group">
-        <a class="ambient-btn" href="https://twitter.com/greyvrita" target="_blank" aria-label="Twitter"><i data-feather="twitter"></i>Twitter</a>
-        <a class="ambient-btn" href="https://github.com/Judson-web" target="_blank" aria-label="GitHub"><i data-feather="github"></i>GitHub</a>
-        <a class="ambient-btn" href="https://www.instagram.com/judson_saji" target="_blank" aria-label="Instagram"><i data-feather="instagram"></i>Instagram</a>
-        <a class="ambient-btn" data-modal="contact" aria-label="Email"><i data-feather="mail"></i>Email</a>
+        <a class="ambient-btn glitch-effect" data-text="Twitter" href="https://twitter.com/greyvrita" target="_blank" aria-label="Twitter"><i data-feather="twitter"></i><span>Twitter</span></a>
+        <a class="ambient-btn glitch-effect" data-text="GitHub" href="https://github.com/Judson-web" target="_blank" aria-label="GitHub"><i data-feather="github"></i><span>GitHub</span></a>
+        <a class="ambient-btn glitch-effect" data-text="Instagram" href="https://www.instagram.com/judson_saji" target="_blank" aria-label="Instagram"><i data-feather="instagram"></i><span>Instagram</span></a>
+        <a class="ambient-btn glitch-effect" data-text="Email" data-modal="contact" aria-label="Email"><i data-feather="mail"></i><span>Email</span></a>
       </div>
     </div>
   </div>
@@ -1107,7 +1247,7 @@
     <div class="modal-content">
       <i data-feather="x" class="close-modal" aria-label="Close modal"></i>
       <h2>GitHub Projects</h2>
-      <button id="generate-project-idea-btn" class="ambient-btn" style="margin-bottom: 1rem; width: 100%;">
+      <button id="generate-project-idea-btn" class="ambient-btn glitch-effect" data-text="Generate a Project Idea" style="margin-bottom: 1rem; width: 100%;">
           <!-- Inline SVG for lightbulb icon -->
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-lightbulb" style="width: 18px; height: 18px; stroke: currentColor; margin-right: 5px;">
               <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1.3.5 2.6 1.5 3.5.8.8 1.3 1.5 1.5 2.5"></path>
@@ -1115,7 +1255,7 @@
               <path d="M10 22h4"></path>
               <path d="M12 22v-4"></path>
           </svg>
-          Generate a Project Idea
+          <span>Generate a Project Idea</span>
       </button>
       <div id="ai-project-idea-output">
           <h3 id="ai-project-idea-title"></h3>
@@ -1128,7 +1268,7 @@
     <div class="modal-content">
       <i data-feather="x" class="close-modal" aria-label="Close modal"></i>
       <h2>Creator's Log</h2>
-      <button id="generate-thought-btn" class="ambient-btn" style="margin-bottom: 1rem; width: 100%;">Generate a new thought</button>
+      <button id="generate-thought-btn" class="ambient-btn glitch-effect" data-text="Generate a new thought" style="margin-bottom: 1rem; width: 100%;"><span>Generate a new thought</span></button>
       <div id="blog-posts"></div>
     </div>
   </div>
@@ -1164,7 +1304,7 @@
         <button id="change-bg-color-btn"><i data-feather="square"></i> Background Color</button>
         <button id="toggle-lines-btn"><i data-feather="link-2"></i> Lines: ON</button>
         <button id="pause-play-btn"><i data-feather="pause"></i> Pause</button>
-        <button id="ai-generate-palette-btn"><i data-feather="cpu"></i> AI Palette</button> <!-- NEW AI Palette Button -->
+        <button id="ai-generate-palette-btn"><i data-feather="cpu"></i> AI Palette</button>
 
         <div class="control-group">
             <label for="particle-count-slider">Count</label>
@@ -1205,6 +1345,14 @@
           <ul id="command-list" class="command-list"></ul>
       </div>
   </div>
+
+  <!-- Custom Right-Click Context Menu -->
+  <div id="custom-context-menu">
+      <div class="context-menu-item" data-action="toggleTheme"><i data-feather="moon"></i> Change Theme</div>
+      <div class="context-menu-item" data-action="openCli"><i data-feather="terminal"></i> Open CLI</div>
+      <div class="context-menu-item" data-action="copyUrl"><i data-feather="copy"></i> Copy Page URL</div>
+  </div>
+
 
   <!-- Footer -->
   <footer>
@@ -1552,7 +1700,7 @@
         const container = document.getElementById('blog-posts');
         if (!container) return;
         container.innerHTML = blogPosts.map(post => `
-            <div class="blog-post">
+            <div class="blog-post animate-on-scroll"> <!-- Added animate-on-scroll -->
                 <h3>${post.title}</h3>
                 <div class="date">${post.date}</div>
                 <p>${post.snippet}</p>
@@ -1569,7 +1717,7 @@
             if (!response.ok) throw new Error('Could not fetch projects');
             const repos = await response.json();
             container.innerHTML = repos.slice(0, 5).map(repo => `
-                <div class="project-card">
+                <div class="project-card animate-on-scroll"> <!-- Added animate-on-scroll -->
                     <h3><a href="${repo.html_url}" target="_blank">${repo.name}</a></h3>
                     <p>${repo.description || 'No description available.'}</p>
                     <div class="stats">
@@ -1705,10 +1853,10 @@
         const container = document.getElementById('tools-list');
         if (!container) return;
         container.innerHTML = myTools.map(tool => `
-            <div class="tool-item" data-tool-name="${tool.name}" data-tool-description="${tool.description}">
+            <div class="tool-item animate-on-scroll"> <!-- Added animate-on-scroll -->
                 <i data-feather="${tool.icon}"></i>
                 <h4>${tool.name}</h4>
-                <p class="tool-description"></p> <!-- Placeholder for description -->
+                <p class="tool-description">${tool.description}</p> <!-- Description now part of HTML -->
             </div>
         `).join('');
         feather.replace(); // Ensure new icons are rendered
@@ -1722,12 +1870,15 @@
                 // Toggle 'expanded' class
                 clickedItem.classList.toggle('expanded');
 
-                // Set or clear description text
+                // Toggle description visibility via CSS transition
                 if (clickedItem.classList.contains('expanded')) {
-                    descriptionElement.textContent = clickedItem.dataset.toolDescription;
+                    // Set max-height to scrollHeight to allow CSS transition
+                    descriptionElement.style.maxHeight = descriptionElement.scrollHeight + "px";
+                    descriptionElement.style.opacity = 1;
                     playSound('C5', 'sine', '32n'); // Play sound on expand
                 } else {
-                    descriptionElement.textContent = '';
+                    descriptionElement.style.maxHeight = "0";
+                    descriptionElement.style.opacity = 0;
                     playSound('C4', 'sine', '32n'); // Play sound on collapse
                 }
             });
@@ -1746,7 +1897,7 @@
         const container = document.getElementById('ex-timeline-content');
         if (!container) return;
         container.innerHTML = exTimelineData.map(item => `
-            <div class="timeline-item">
+            <div class="timeline-item animate-on-scroll"> <!-- Added animate-on-scroll -->
                 <div class="timeline-item-content">
                     <h3>${item.title} (${item.year})</h3>
                     <p>${item.description}</p>
@@ -1920,7 +2071,7 @@
         const resetBtn = document.getElementById('reset-art-btn');
         const changeParticleColorBtn = document.getElementById('change-particle-color-btn');
         const changeBgColorBtn = document.getElementById('change-bg-color-btn');
-        const aiGeneratePaletteBtn = document.getElementById('ai-generate-palette-btn'); // NEW AI Palette Button
+        const aiGeneratePaletteBtn = document.getElementById('ai-generate-palette-btn');
         
 
         if (resetBtn) {
@@ -1990,10 +2141,13 @@
                 feather.replace();
                 showToast('Asking AI for a palette...');
 
-                const prompt = "Generate a minimalist, futuristic color palette suitable for generative art. Provide 5 distinct hexadecimal color codes (e.g., #RRGGBB) in a JSON array. Example: [\"#HEX1\", \"#HEX2\", ...]";
+                const prompt = "Generate a minimalist, futuristic color palette suitable for generative art. Provide 5 distinct hexadecimal color codes (e.g., #RRGGBB) in a JSON array. Example: [\"#HEX1\", \"#HEX2\", \"#HEX3\", \"#HEX4\", \"#HEX5\"]";
                 
                 try {
-                    const response = await fetch('/.netlify/functions/generate-thought', { // Re-using generate-thought as it expects JSON
+                    // We need to use ask-gemini for general text, but tell it to structure as JSON.
+                    // The generate-thought function is already set up to expect JSON schema.
+                    // So, we'll use generate-thought but will need to extract the JSON from its 'snippet' field.
+                    const response = await fetch('/.netlify/functions/generate-thought', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ prompt: prompt }),
@@ -2003,37 +2157,35 @@
                         const errorData = await response.json();
                         throw new Error(errorData.message || 'AI palette generation failed.');
                     }
-                    const data = await response.json(); // Expects { title: "...", snippet: "..." } from generate-thought
+                    const data = await response.json(); // This will return { title: "...", snippet: "..." }
 
-                    // The AI might return JSON directly or embedded in markdown.
-                    // We need to parse the 'snippet' if the response is from generate-thought
                     let parsedColors = [];
                     if (data && data.snippet) {
                         try {
+                            // Clean the snippet from markdown backticks before parsing
                             const cleanSnippet = data.snippet.replace(/```json\n?/, '').replace(/\n?```/, '').trim();
                             parsedColors = JSON.parse(cleanSnippet);
                         } catch (parseError) {
-                            console.error("Failed to parse AI palette JSON from snippet:", parseError, cleanSnippet);
+                            console.error("Failed to parse AI palette JSON from snippet:", parseError, data.snippet);
                             showToast('AI provided malformed palette JSON. Try again.');
                             return;
                         }
-                    } else if (Array.isArray(data)) { // If ask-gemini was modified to return array directly
-                        parsedColors = data;
                     }
 
                     if (Array.isArray(parsedColors) && parsedColors.length >= 2) {
-                        // Update particle and background colors
+                        // Update particle and background colors with the AI-generated palette
                         generativeArtConfig.particleColor = `${parsedColors[0]}B3`; // First color, 70% opacity
                         generativeArtConfig.backgroundColor = parsedColors[1]; // Second color for background
-                        // Optionally, update defaultParticleColors and defaultBackgroundColors arrays for cycling
-                        // defaultParticleColors.unshift(...parsedColors); // Add new colors to the front
-                        // defaultBackgroundColors.unshift(...parsedColors);
+
+                        // Optionally, you might want to update the defaultParticleColors/backgroundColors
+                        // arrays if you want the cycle buttons to include these new colors.
+                        // For now, they only apply to the current generativeArtConfig.
 
                         showToast('AI generated a new color palette!');
                         playSound('E6', 'triangle', '32n');
-                        initGenerativeArt(); // Re-initialize particles with new colors
+                        // No need to re-init particles, just animate loop will use new colors
                     } else {
-                        showToast('AI could not generate a valid color palette.');
+                        showToast('AI could not generate a valid color palette (expected JSON array of hex codes).');
                         console.error("AI generated invalid palette format:", parsedColors);
                     }
 
@@ -2379,6 +2531,7 @@ _           _                     _   _
                         '  ip        - Show your public IP address',
                         '  status    - Display current session status (e.g., status uptime, status ai_queries, status theme, status mood)',
                         '  ask       - Ask the AI a question (e.g., ask what is js)',
+                        '  dream     - Ask AI to interpret a dream (e.g., dream flying over mountains)', // NEW: Dream command
                         '  cmd       - Open the command palette',
                         '  exit      - Close the terminal'
                     ].join('\n');
@@ -2530,6 +2683,35 @@ _           _                     _   _
                         console.error("CLI 'ask' error:", e);
                         this.chatHistory.pop(); // Remove user prompt from history if AI call failed
                         this.stopThinking(thinkingLine, `AI Error: ${e.message}`, 'error');
+                    }
+                },
+                'dream': async () => { // NEW: Dream interpreter command
+                    if (!fullPrompt) {
+                        this.typeLog('error', 'Usage: dream [your dream description]');
+                        return;
+                    }
+                    const thinkingLine = this.startThinking();
+                    const dreamPrompt = `Interpret the following dream in a creative, whimsical, and non-serious way. Focus on imaginative symbolism rather than psychological analysis. Keep it to 2-3 sentences: "${fullPrompt}"`;
+                    try {
+                        const response = await fetch('/.netlify/functions/ask-gemini', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ prompt: dreamPrompt }),
+                        });
+
+                        if (!response.ok) {
+                            const errorData = await response.json();
+                            throw new Error(errorData.message || `Dream interpretation failed.`);
+                        }
+                        const data = await response.json();
+                        if (data && data.response) {
+                            this.stopThinking(thinkingLine, `AI Dream Interpreter: ${data.response}`, 'response');
+                        } else {
+                            throw new Error("AI could not interpret the dream.");
+                        }
+                    } catch (e) {
+                        console.error("CLI 'dream' error:", e);
+                        this.stopThinking(thinkingLine, `Dream Interpreter Error: ${e.message}`, 'error');
                     }
                 },
                 'default': () => {
@@ -2756,6 +2938,84 @@ _           _                     _   _
         activeAnimationId = requestAnimationFrame(animateDay);
     }
 
+    // --- CURSOR TRAIL LOGIC ---
+    const cursorTrailCanvas = document.getElementById('cursor-trail-canvas');
+    let cursorTrailCtx;
+    let trailParticles = [];
+    let trailColor = 'rgba(56, 231, 255, 0.5)'; // Default glow-color-1 with opacity
+    let trailMaxParticles = 50;
+    let trailParticleSize = 2;
+    let trailFadeSpeed = 0.05;
+
+    function initCursorTrail() {
+        if (!cursorTrailCanvas) return;
+        cursorTrailCtx = cursorTrailCanvas.getContext('2d');
+        cursorTrailCanvas.width = window.innerWidth;
+        cursorTrailCanvas.height = window.innerHeight;
+        trailParticles = [];
+    }
+
+    function animateCursorTrail() {
+        if (!cursorTrailCtx) return;
+
+        // Clear canvas with a low opacity to create trails
+        cursorTrailCtx.clearRect(0, 0, cursorTrailCanvas.width, cursorTrailCanvas.height);
+        // For a fading trail, use:
+        // cursorTrailCtx.fillStyle = 'rgba(0, 0, 0, 0.1)'; // Black with low opacity
+        // cursorTrailCtx.fillRect(0, 0, cursorTrailCanvas.width, cursorTrailCanvas.height);
+
+
+        // Add a new particle at mouse position
+        trailParticles.push({
+            x: mouse.x,
+            y: mouse.y,
+            size: trailParticleSize,
+            alpha: 1,
+            vx: (Math.random() - 0.5) * 2,
+            vy: (Math.random() - 0.5) * 2,
+        });
+
+        // Limit number of particles
+        if (trailParticles.length > trailMaxParticles) {
+            trailParticles.shift();
+        }
+
+        // Draw and update particles
+        for (let i = 0; i < trailParticles.length; i++) {
+            let p = trailParticles[i];
+
+            p.x += p.vx;
+            p.y += p.vy;
+            p.alpha -= trailFadeSpeed; // Fade out
+
+            if (p.alpha <= 0) {
+                trailParticles.splice(i, 1); // Remove if fully faded
+                i--;
+                continue;
+            }
+
+            cursorTrailCtx.fillStyle = trailColor;
+            cursorTrailCtx.globalAlpha = p.alpha;
+            cursorTrailCtx.beginPath();
+            cursorTrailCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            cursorTrailCtx.fill();
+        }
+        cursorTrailCtx.globalAlpha = 1; // Reset global alpha
+
+        requestAnimationFrame(animateCursorTrail);
+    }
+
+    // Update trail color based on theme
+    function updateCursorTrailColor() {
+        const currentTheme = localStorage.getItem('theme') || 'dark';
+        if (currentTheme === 'light') {
+            trailColor = 'rgba(0, 123, 255, 0.5)'; // Light theme glow-color-1
+        } else {
+            trailColor = 'rgba(56, 231, 255, 0.5)'; // Dark theme glow-color-1
+        }
+    }
+
+
     // --- CANVAS RESIZING FUNCTION ---
     function resizeAllCanvases() {
         const canvases = document.querySelectorAll('.background-canvas');
@@ -2769,6 +3029,11 @@ _           _                     _   _
             generativeArtCanvas.width = generativeArtCanvas.offsetWidth;
             generativeArtCanvas.height = generativeArtCanvas.offsetHeight;
             initGenerativeArt(); // Re-initialize particles for new size
+        }
+        // Resize cursor trail canvas
+        if (cursorTrailCanvas) {
+            cursorTrailCanvas.width = window.innerWidth;
+            cursorTrailCanvas.height = window.innerHeight;
         }
     }
     
@@ -2832,12 +3097,18 @@ _           _                     _   _
         document.querySelectorAll('a, button').forEach(el => {
             el.addEventListener('mouseenter', () => playSound('A5', 'sine', '32n'));
         });
+
+        // Initialize cursor trail
+        initCursorTrail();
+        animateCursorTrail();
+        updateCursorTrailColor(); // Set initial color
     }
 
     // Event Listeners
     window.addEventListener("resize", () => {
       resizeAllCanvases();
       applyTheme(localStorage.getItem('theme') || 'dark');
+      updateCursorTrailColor(); // Update trail color on theme change
     });
 
     window.addEventListener('mousemove', (e) => {
@@ -2912,6 +3183,82 @@ _           _                     _   _
     }
     // Initial population of drawer links (important for first open)
     document.addEventListener('DOMContentLoaded', populateDrawerLinks);
+
+    // --- SCROLL ANIMATION LOGIC ---
+    const animateOnScrollElements = document.querySelectorAll('.animate-on-scroll');
+    const observerOptions = {
+        root: null, // viewport
+        rootMargin: '0px',
+        threshold: 0.1 // 10% of element visible to trigger
+    };
+
+    const observer = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('is-visible');
+                observer.unobserve(entry.target); // Stop observing once animated
+            }
+        });
+    }, observerOptions);
+
+    // Observe elements on DOMContentLoaded
+    document.addEventListener('DOMContentLoaded', () => {
+        animateOnScrollElements.forEach(el => {
+            observer.observe(el);
+        });
+    });
+
+
+    // --- CUSTOM CONTEXT MENU LOGIC ---
+    const customContextMenu = document.getElementById('custom-context-menu');
+    const cliContactModal = document.getElementById('contact-modal'); // Get CLI modal reference
+
+    document.addEventListener('contextmenu', (e) => {
+        e.preventDefault(); // Prevent default right-click menu
+
+        // Position the custom menu
+        customContextMenu.style.top = `${e.clientY}px`;
+        customContextMenu.style.left = `${e.clientX}px`;
+        customContextMenu.style.display = 'flex'; // Show it
+        feather.replace(); // Ensure icons are rendered
+    });
+
+    // Hide custom context menu when clicking anywhere else
+    document.addEventListener('click', (e) => {
+        if (customContextMenu && customContextMenu.style.display === 'flex' && !customContextMenu.contains(e.target)) {
+            customContextMenu.style.display = 'none';
+        }
+    });
+
+    // Handle clicks on custom context menu items
+    if (customContextMenu) {
+        customContextMenu.querySelectorAll('.context-menu-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                const action = e.currentTarget.dataset.action;
+                switch (action) {
+                    case 'toggleTheme':
+                        toggleTheme();
+                        break;
+                    case 'openCli':
+                        openModal('contact'); // Use existing openModal for CLI
+                        break;
+                    case 'copyUrl':
+                        // Use execCommand for broader compatibility in iframes
+                        const dummy = document.createElement('textarea');
+                        document.body.appendChild(dummy);
+                        dummy.value = window.location.href;
+                        dummy.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(dummy);
+                        showToast('Page URL copied!');
+                        break;
+                    default:
+                        console.log(`Context menu action: ${action}`);
+                }
+                customContextMenu.style.display = 'none'; // Hide menu after action
+            });
+        });
+    }
 
 
     // Ensure cli.setupUI() runs before initializePage()
