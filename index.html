@@ -232,22 +232,22 @@
     #main-nav-drawer {
         position: fixed;
         top: 0;
-        left: 0; /* Changed from right to left for consistency */
-        width: 250px; /* Width of the drawer */
+        left: 0;
+        width: 250px;
         height: 100%;
-        background: var(--header-bg); /* Use header background for consistency */
+        background: var(--header-bg);
         backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
         z-index: 1000;
-        transform: translateX(-100%); /* Initially off-screen to the left */
+        transform: translateX(-100%);
         transition: transform 0.3s ease-out;
-        box-shadow: 4px 0 15px rgba(0,0,0,0.3); /* Adjusted shadow for left slide */
+        box-shadow: 4px 0 15px rgba(0,0,0,0.3);
         display: flex;
         flex-direction: column;
-        padding-top: 5rem; /* Space for header */
+        padding-top: 5rem;
     }
     #main-nav-drawer.active {
-        transform: translateX(0); /* Slide in */
+        transform: translateX(0);
     }
     #main-nav-drawer .drawer-nav-links {
         display: flex;
@@ -625,6 +625,30 @@
     }
     
     /* --- Dynamic Content Styling --- */
+    /* Scroll animation styles */
+    .animate-on-scroll {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    }
+    .animate-on-scroll.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    .animate-on-scroll.slide-left {
+        transform: translateX(-50px);
+    }
+    .animate-on-scroll.slide-left.is-visible {
+        transform: translateX(0);
+    }
+    .animate-on-scroll.slide-right {
+        transform: translateX(50px);
+    }
+    .animate-on-scroll.slide-right.is-visible {
+        transform: translateX(0);
+    }
+
+
     .blog-post, .project-card {
         padding: 1rem;
         border: 1px solid rgba(127,127,127,0.2);
@@ -1042,21 +1066,21 @@
 
   <!-- Main Content -->
   <div class="centerbox">
-    <div class="card" id="profile-card">
+    <div class="card animate-on-scroll" id="profile-card">
       <img class="profile-img" src="https://firebasestorage.googleapis.com/v0/b/crnn-b7d8f.appspot.com/o/files%2FIMG_20250717_215454_617-modified.png?alt=media&token=bea1f0dd-abf1-4cfb-8a83-0d3b603d3fde" alt="Judson Saji Profile Picture" loading="lazy"
       onerror="this.onerror=null;this.src='https://placehold.co/110x110/161822/ffffff?text=JS';"/>
       <div class="profile-name">Judson Saji</div>
       <div id="greeting" class="profile-greeting"></div>
       <div class="profile-tagline">ExPoet, ExMinimalist, ExThinker, NowCreator</div>
 
-      <div class="status-widget">
+      <div class="status-widget animate-on-scroll slide-left">
         <span id="time-widget"><i data-feather="clock"></i> --:-- --</span>
         <span id="weather-widget"><i data-feather="loader" class="spin"></i></span>
         <span id="github-widget"><i data-feather="github"></i> --</span>
       </div>
 
       <!-- Now Playing Widget -->
-      <div id="now-playing-widget">
+      <div id="now-playing-widget" class="animate-on-scroll slide-right">
         <img class="album-art" src="https://placehold.co/64x64/333333/ffffff?text=Loading..." alt="Album Art" loading="lazy" />
         <div class="track-info">
           <div class="track-name">Loading...</div>
@@ -1111,8 +1135,6 @@
       <div id="blog-posts"></div>
     </div>
   </div>
-  <!-- Removed My Tools Modal HTML -->
-  <!-- Removed Ex-Timeline Modal HTML -->
   <div id="generative-art-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="generative-art-modal-title">
     <div class="modal-content">
       <i data-feather="x" class="close-modal" aria-label="Close Generative Art modal"></i>
@@ -1674,10 +1696,10 @@
         const container = document.getElementById('tools-list');
         if (!container) return;
         container.innerHTML = myTools.map(tool => `
-            <div class="tool-item" tabindex="0" role="button" aria-expanded="false" aria-controls="tool-desc-${tool.name.replace(/\s/g, '-')}-id">
+            <div class="tool-item">
                 <i data-feather="${tool.icon}"></i>
                 <h4>${tool.name}</h4>
-                <p class="tool-description" id="tool-desc-${tool.name.replace(/\s/g, '-')}-id">${tool.description}</p>
+                <p class="tool-description">${tool.description}</p>
             </div>
         `).join('');
         feather.replace(); // Ensure new icons are rendered
@@ -2133,7 +2155,7 @@
     function renderCommands(items) {
         if (!commandList) return;
         commandList.innerHTML = items.map(item => `
-            <li class="command-item" data-action="${item.name}" role="option">
+            <li class="command-item" data-action="${item.name}">
                 <i data-feather="${item.icon}"></i>
                 <span>${item.name}</span>
             </li>
@@ -2147,11 +2169,9 @@
         items.forEach((item, index) => {
             if (index === selectedCommandIndex) {
                 item.classList.add('selected');
-                item.setAttribute('aria-selected', 'true');
                 item.scrollIntoView({ block: 'nearest' });
             } else {
                 item.classList.remove('selected');
-                item.setAttribute('aria-selected', 'false');
             }
         });
     }
