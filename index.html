@@ -12,12 +12,10 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://unpkg.com">
   <link rel="preconnect" href="https://cdnjs.cloudflare.com">
-  <link rel="preconnect" href="https://cdn.jsdelivr.net">
 
   <link rel="preload" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fira+Code:wght@400&display=swap" as="style">
   <link rel="preload" href="https://unpkg.com/feather-icons" as="script">
   <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js" as="script">
-  <link rel="preload" href="https://cdn.jsdelivr.net/npm/marked/marked.min.js" as="script">
 
   <!-- Social Media Meta Tags -->
   <meta property="og:title" content="Judson Saji - Creator" />
@@ -33,7 +31,6 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fira+Code:wght@400&display=swap" rel="stylesheet" />
   <script src="https://unpkg.com/feather-icons"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   
   <!-- SEO Structured Data -->
   <script type="application/ld+json">
@@ -599,41 +596,26 @@
         border-radius: 16px;
         border: 1px solid var(--card-border);
         box-shadow: 0 8px 32px 0 var(--card-shadow);
-        padding: 0; /* Changed padding to 0 */
+        padding: 2rem 1.5rem;
         width: 100%;
         max-width: 600px;
         max-height: 90vh;
-        overflow: hidden; /* Changed to hidden */
+        overflow-y: auto;
         transform: scale(0.95); /* Start slightly smaller for subtle zoom */
         transition: transform 0.3s ease, background 0.4s ease, border-color 0.4s ease; /* Adjusted transition */
         position: relative;
-        display: flex; /* Added for layout */
-        flex-direction: column; /* Added for layout */
     }
     .modal-overlay.active .modal-content {
         transform: scale(1);
     }
-    .modal-header { /* New class for modal headers */
-      padding: 1rem 1.5rem;
-      border-bottom: 1px solid var(--card-border);
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .modal-header h2 {
-        margin: 0;
+    .modal-content h2 {
+        margin-top: 0;
         font-size: 1.8rem;
         background: linear-gradient(90deg, var(--glow-color-1), var(--glow-color-2));
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
     }
-    .modal-body { /* New class for modal content area */
-      padding: 1.5rem;
-      overflow-y: auto;
-      flex-grow: 1;
-    }
-    .modal-body p {
+    .modal-content p {
         color: var(--dim-text-color);
         line-height: 1.6;
     }
@@ -644,7 +626,6 @@
         cursor: pointer;
         color: var(--dim-text-color);
         transition: color 0.3s, transform 0.3s;
-        z-index: 10;
     }
     .close-modal:hover {
         color: var(--text-color);
@@ -652,18 +633,18 @@
     }
     
     /* --- Custom Scrollbar --- */
-    .modal-body::-webkit-scrollbar, #chatbot-display::-webkit-scrollbar {
+    .modal-content::-webkit-scrollbar {
         width: 8px;
     }
-    .modal-body::-webkit-scrollbar-track, #chatbot-display::-webkit-scrollbar-track {
+    .modal-content::-webkit-scrollbar-track {
         background: rgba(127,127,127,0.1);
         border-radius: 4px;
     }
-    .modal-body::-webkit-scrollbar-thumb, #chatbot-display::-webkit-scrollbar-thumb {
+    .modal-content::-webkit-scrollbar-thumb {
         background: rgba(127,127,127,0.3);
         border-radius: 4px;
     }
-    .modal-body::-webkit-scrollbar-thumb:hover, #chatbot-display::-webkit-scrollbar-thumb:hover {
+    .modal-content::-webkit-scrollbar-thumb:hover {
         background: rgba(127,127,127,0.5);
     }
     
@@ -760,23 +741,6 @@
         font-size: 0.9rem;
         color: var(--dim-text-color);
     }
-    /* NEW: AI Feature Suggestions styling */
-    .ai-feature-suggestions {
-        margin-top: 1rem;
-        padding-top: 1rem;
-        border-top: 1px solid var(--card-border);
-    }
-    .ai-feature-suggestions h4 {
-        margin: 0 0 0.5rem 0;
-        font-size: 0.9rem;
-        color: var(--glow-color-2);
-    }
-    .ai-feature-suggestions ul {
-        padding-left: 1.2rem;
-        margin: 0;
-        font-size: 0.9rem;
-        color: var(--dim-text-color);
-    }
 
 
     /* Generative Art Modal Specific Styles */
@@ -868,148 +832,55 @@
     }
 
 
-    /* --- Chatbot Modal Styles (ENHANCED) --- */
+    /* --- Chatbot Modal Styles --- */
     #chatbot-modal .modal-content {
         max-width: 500px;
-        height: 85vh; /* Fixed height */
-        max-height: 700px;
-        padding: 0;
-    }
-    .chatbot-header {
+        max-height: 80vh;
         display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 1rem 1.5rem;
-        border-bottom: 1px solid var(--card-border);
-        flex-shrink: 0;
+        flex-direction: column;
+        padding: 1.5rem;
     }
-    .chatbot-header h2 {
-        margin: 0;
-        font-size: 1.5rem;
-        background: none;
-        -webkit-background-clip: unset;
-        -webkit-text-fill-color: unset;
-        color: var(--text-color);
-    }
-    .chatbot-header i {
-        color: var(--glow-color-1);
-    }
-    #chatbot-speech-toggle {
-        background: none; border: none; cursor: pointer;
-        color: var(--dim-text-color);
-        margin-left: auto; padding: 0.25rem;
-        transition: color 0.2s;
-    }
-    #chatbot-speech-toggle.active { color: var(--glow-color-1); }
     #chatbot-display {
         flex-grow: 1;
         overflow-y: auto;
+        border: 1px solid var(--card-border);
+        border-radius: 8px;
         padding: 1rem;
+        margin-bottom: 1rem;
         background: rgba(0,0,0,0.1);
+        min-height: 200px;
         display: flex;
         flex-direction: column;
-        gap: 1rem; /* Increased gap */
+        gap: 0.5rem;
     }
     .chat-message {
-        padding: 0.75rem 1rem;
-        border-radius: 18px;
-        max-width: 85%;
+        padding: 0.5rem 0.8rem;
+        border-radius: 12px;
+        max-width: 80%;
         word-wrap: break-word;
-        line-height: 1.5;
-        position: relative;
     }
     .chat-message.user {
         background: var(--glow-color-1);
         color: #000;
         align-self: flex-end;
-        border-bottom-right-radius: 4px;
+        border-bottom-right-radius: 2px;
     }
     .chat-message.ai {
-        background: rgba(127,127,127,0.15);
+        background: var(--card-bg);
         color: var(--text-color);
         border: 1px solid var(--card-border);
         align-self: flex-start;
-        border-bottom-left-radius: 4px;
+        border-bottom-left-radius: 2px;
     }
-    /* Message bubble tails */
-    .chat-message.ai::before, .chat-message.user::before {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        width: 0;
-        height: 0;
-        border: 10px solid transparent;
-    }
-    .chat-message.ai::before {
-        left: -10px;
-        border-right-color: var(--card-border);
-        border-right-width: 7px;
-    }
-    .light-theme .chat-message.ai::before {
-      border-right-color: var(--card-border);
-    }
-    .chat-message.user::before {
-        right: -7px;
-        border-left-color: var(--glow-color-1);
-    }
-    /* Chatbot Markdown Styling */
-    .chat-message p { margin: 0 0 0.5rem 0; color: inherit; }
-    .chat-message p:last-child { margin-bottom: 0; }
-    .chat-message pre {
-        background: rgba(0,0,0,0.3);
-        border: 1px solid var(--card-border);
-        border-radius: 8px;
-        padding: 1rem;
-        margin: 0.5rem 0;
-        font-family: 'Fira Code', monospace;
-        font-size: 0.9rem;
-        white-space: pre-wrap;
-        word-wrap: break-word;
-        position: relative;
-    }
-    .chat-message code {
-        font-family: 'Fira Code', monospace;
-        background: rgba(127,127,127,0.2);
-        padding: 0.1rem 0.3rem;
-        border-radius: 4px;
-    }
-    .chat-message pre code { background: none; padding: 0; }
-    .chat-message blockquote {
-        border-left: 3px solid var(--glow-color-1);
-        padding-left: 1rem;
-        margin-left: 0;
-        font-style: italic;
-        color: var(--dim-text-color);
-    }
-    .chat-message ul, .chat-message ol { padding-left: 1.5rem; }
-    .chat-message a { color: var(--glow-color-2); text-decoration: underline; }
-    .copy-code-btn {
-        position: absolute;
-        top: 0.5rem;
-        right: 0.5rem;
-        background: rgba(255, 255, 255, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        color: var(--text-color);
-        padding: 0.25rem 0.5rem;
-        border-radius: 6px;
-        cursor: pointer;
-        opacity: 0.3;
-        transition: opacity 0.2s ease;
-        font-size: 0.8rem;
-    }
-    .chat-message pre:hover .copy-code-btn { opacity: 1; }
     #chatbot-thinking-indicator {
         font-style: italic;
         color: var(--dim-text-color);
-        padding: 0 1.5rem 0.5rem;
-        flex-shrink: 0;
+        align-self: flex-start;
+        margin-left: 0.5rem;
     }
     .chat-input-container {
         display: flex;
         gap: 0.5rem;
-        padding: 1rem 1.5rem;
-        border-top: 1px solid var(--card-border);
-        flex-shrink: 0;
     }
     #chatbot-input {
         flex-grow: 1;
@@ -1020,51 +891,20 @@
         color: var(--text-color);
         outline: none;
     }
-    #chatbot-input:focus { border-color: var(--glow-color-1); }
-    #chatbot-send-btn, #chatbot-clear-btn, #chatbot-mic-btn {
+    #chatbot-input:focus {
+        border-color: var(--glow-color-1);
+    }
+    #chatbot-send-btn, #chatbot-clear-btn {
         background: var(--glow-color-2);
         color: #fff;
         border: none;
-        padding: 0.75rem;
+        padding: 0.75rem 1rem;
         border-radius: 8px;
         cursor: pointer;
         transition: background 0.2s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
     }
-    #chatbot-send-btn:hover, #chatbot-clear-btn:hover, #chatbot-mic-btn:hover { background: var(--glow-color-1); }
-    #chatbot-mic-btn.listening {
-        background: var(--error-color);
-        animation: pulse-red 1.5s infinite;
-    }
-    @keyframes pulse-red {
-        0% { box-shadow: 0 0 0 0 rgba(255, 85, 85, 0.7); }
-        70% { box-shadow: 0 0 0 10px rgba(255, 85, 85, 0); }
-        100% { box-shadow: 0 0 0 0 rgba(255, 85, 85, 0); }
-    }
-    /* Suggested Actions */
-    #suggested-actions-container {
-        padding: 0 1rem 1rem;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-        justify-content: center;
-    }
-    .suggested-action-btn {
-        background: rgba(127,127,127,0.1);
-        border: 1px solid var(--card-border);
-        color: var(--dim-text-color);
-        padding: 0.5rem 0.8rem;
-        border-radius: 12px;
-        cursor: pointer;
-        font-size: 0.85rem;
-        transition: all 0.2s ease;
-    }
-    .suggested-action-btn:hover {
-        background: rgba(127,127,127,0.2);
-        color: var(--text-color);
-        border-color: var(--glow-color-1);
+    #chatbot-send-btn:hover, #chatbot-clear-btn:hover {
+        background: var(--glow-color-1);
     }
 
 
@@ -1115,10 +955,13 @@
     }
 
     #cli-output {
-        height: 100%; /* Fill modal body */
+        height: 250px;
         overflow-y: auto;
+        padding: 10px;
         font-family: 'Fira Code', monospace;
         font-size: 0.9rem;
+        border: 1px solid var(--card-border);
+        border-radius: 8px;
         background: var(--terminal-bg);
         color: var(--terminal-text);
         transition: background 0.3s, color 0.3s;
@@ -1340,67 +1183,61 @@
   <div id="about-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="about-modal-title">
     <div class="modal-content">
       <i data-feather="x" class="close-modal" aria-label="Close About modal"></i>
-      <div class="modal-header">
-        <h2 id="about-modal-title">About Me</h2>
-      </div>
-      <div class="modal-body">
-        <p>I'm a creator driven by the fusion of technology and art. My background isn't linear; it's a path woven through poetry, the discipline of minimalism, and a deep-seated love for analytical thought. Today, these threads combine in my work as a creative developer.</p>
-        <p>My focus is on generative art, interactive design, and building digital experiences that feel both intelligent and human. This space is my digital sketchbook and a reflection of my ongoing projects. I'm currently exploring how to tell better stories with code. Welcome.</p>
-      </div>
+      <h2 id="about-modal-title">About Me</h2>
+      <p>I'm a creator driven by the fusion of technology and art. My background isn't linear; it's a path woven through poetry, the discipline of minimalism, and a deep-seated love for analytical thought. Today, these threads combine in my work as a creative developer.</p>
+      <p>My focus is on generative art, interactive design, and building digital experiences that feel both intelligent and human. This space is my digital sketchbook and a reflection of my ongoing projects. I'm currently exploring how to tell better stories with code. Welcome.</p>
     </div>
   </div>
    <div id="projects-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="projects-modal-title">
     <div class="modal-content">
       <i data-feather="x" class="close-modal" aria-label="Close Projects modal"></i>
-      <div class="modal-header">
-        <h2 id="projects-modal-title">GitHub Projects</h2>
+      <h2 id="projects-modal-title">GitHub Projects</h2>
+      <button id="generate-project-idea-btn" class="ambient-btn glitch-effect" data-text="Generate a Project Idea" aria-label="Generate a new project idea with AI" style="margin-bottom: 1rem; width: 100%;">
+          <!-- Inline SVG for lightbulb icon -->
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-lightbulb" style="width: 18px; height: 18px; stroke: currentColor; margin-right: 5px;">
+              <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1.3.5 2.6 1.5 3.5.8.8 1.3 1.5 1.5 2.5"></path>
+              <path d="M9 18h6"></path>
+              <path d="M10 22h4"></path>
+              <path d="M12 22v-4"></path>
+          </svg>
+          <span>Generate a Project Idea</span>
+      </button>
+      <div id="ai-project-idea-output">
+          <h3 id="ai-project-idea-title"></h3>
+          <p id="ai-project-idea-concept"></p>
       </div>
-      <div class="modal-body">
-        <button id="generate-project-idea-btn" class="ambient-btn glitch-effect" data-text="Generate a Project Idea" aria-label="Generate a new project idea with AI" style="margin-bottom: 1rem; width: 100%;">
-            <i data-feather="cpu" style="width: 18px; height: 18px; stroke: currentColor; margin-right: 5px;"></i>
-            <span>✨ Generate a Project Idea</span>
-        </button>
-        <div id="ai-project-idea-output">
-            <h3 id="ai-project-idea-title"></h3>
-            <p id="ai-project-idea-concept"></p>
-        </div>
-        <div id="projects-list"></div>
-      </div>
+      <div id="projects-list"></div>
     </div>
   </div>
   <div id="generative-art-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="generative-art-modal-title">
     <div class="modal-content">
       <i data-feather="x" class="close-modal" aria-label="Close Generative Art modal"></i>
-      <div class="modal-header">
-        <h2 id="generative-art-modal-title">Generative Art Lab</h2>
-      </div>
-      <div class="modal-body">
-        <p>Explore a live generative art piece. It reacts to your mouse movement!</p>
-        <canvas id="generative-art-canvas"></canvas>
-        <div id="generative-art-controls">
-          <button id="reset-art-btn" aria-label="Reset generative art to default"><i data-feather="refresh-cw"></i> Reset</button>
-          <button id="change-particle-color-btn" aria-label="Change particle color"><i data-feather="droplet"></i> Particle Color</button>
-          <button id="change-bg-color-btn" aria-label="Change background color"><i data-feather="square"></i> Background Color</button>
-          <button id="toggle-lines-btn" aria-label="Toggle connection lines"><i data-feather="link-2"></i> Lines: ON</button>
-          <button id="pause-play-btn" aria-label="Pause or play animation"><i data-feather="pause"></i> Pause</button>
-          <button id="ai-generate-palette-btn" aria-label="Ask AI to generate a new color palette"><i data-feather="cpu"></i> ✨ AI Palette</button>
+      <h2 id="generative-art-modal-title">Generative Art Lab</h2>
+      <p>Explore a live generative art piece. It reacts to your mouse movement!</p>
+      <canvas id="generative-art-canvas"></canvas>
+      <div id="generative-art-controls">
+        <button id="reset-art-btn" aria-label="Reset generative art to default"><i data-feather="refresh-cw"></i> Reset</button>
+        <button id="change-particle-color-btn" aria-label="Change particle color"><i data-feather="droplet"></i> Particle Color</button>
+        <button id="change-bg-color-btn" aria-label="Change background color"><i data-feather="square"></i> Background Color</button>
+        <button id="toggle-lines-btn" aria-label="Toggle connection lines"><i data-feather="link-2"></i> Lines: ON</button>
+        <button id="pause-play-btn" aria-label="Pause or play animation"><i data-feather="pause"></i> Pause</button>
+        <button id="ai-generate-palette-btn" aria-label="Ask AI to generate a new color palette"><i data-feather="cpu"></i> AI Palette</button>
 
-          <div class="control-group">
-              <label for="particle-count-slider">Count</label>
-              <input type="range" id="particle-count-slider" min="50" max="300" value="100" aria-label="Adjust particle count">
-          </div>
-          <div class="control-group">
-              <label for="particle-size-slider">Size</label>
-              <input type="range" id="particle-size-slider" min="0.5" max="5" step="0.1" value="2" aria-label="Adjust particle size">
-          </div>
-          <div class="control-group">
-              <label for="particle-speed-slider">Speed</label>
-              <input type="range" id="particle-speed-slider" min="0.1" max="5" step="0.1" value="2" aria-label="Adjust particle speed">
-          </div>
-          <div class="control-group">
-              <label for="repulsion-strength-slider">Repulsion</label>
-              <input type="range" id="repulsion-strength-slider" min="0.01" max="1" step="0.01" value="0.5" aria-label="Adjust mouse repulsion strength">
-          </div>
+        <div class="control-group">
+            <label for="particle-count-slider">Count</label>
+            <input type="range" id="particle-count-slider" min="50" max="300" value="100" aria-label="Adjust particle count">
+        </div>
+        <div class="control-group">
+            <label for="particle-size-slider">Size</label>
+            <input type="range" id="particle-size-slider" min="0.5" max="5" step="0.1" value="2" aria-label="Adjust particle size">
+        </div>
+        <div class="control-group">
+            <label for="particle-speed-slider">Speed</label>
+            <input type="range" id="particle-speed-slider" min="0.1" max="5" step="0.1" value="2" aria-label="Adjust particle speed">
+        </div>
+        <div class="control-group">
+            <label for="repulsion-strength-slider">Repulsion</label>
+            <input type="range" id="repulsion-strength-slider" min="0.01" max="1" step="0.01" value="0.5" aria-label="Adjust mouse repulsion strength">
         </div>
       </div>
     </div>
@@ -1408,41 +1245,27 @@
   <div id="chatbot-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="chatbot-modal-title">
     <div class="modal-content">
       <i data-feather="x" class="close-modal" aria-label="Close Chatbot modal"></i>
-      <div class="chatbot-header">
-        <i data-feather="cpu"></i>
-        <h2 id="chatbot-modal-title">Judson AI</h2>
-        <button id="chatbot-speech-toggle" title="Toggle speech output">
-            <i data-feather="volume-2"></i>
-        </button>
-      </div>
+      <h2 id="chatbot-modal-title">Judson AI Chatbot</h2>
       <div id="chatbot-display">
-        <!-- Chat history will be rendered here by JS -->
+        <!-- Initial greeting will be added by JS, not duplicated here -->
       </div>
-      <div id="suggested-actions-container">
-        <!-- Suggested actions will be rendered here by JS -->
-      </div>
-      <div id="chatbot-thinking-indicator" style="display:none;">AI is thinking...</div>
       <div class="chat-input-container">
-        <input type="text" id="chatbot-input" placeholder="Ask or type..." aria-label="Chatbot message input">
-        <button id="chatbot-mic-btn" title="Use voice input"><i data-feather="mic"></i></button>
+        <input type="text" id="chatbot-input" placeholder="Ask me anything..." aria-label="Chatbot message input">
         <button id="chatbot-send-btn" aria-label="Send message"><i data-feather="send"></i></button>
         <button id="chatbot-clear-btn" aria-label="Clear chat history"><i data-feather="trash-2"></i></button>
       </div>
+      <div id="chatbot-thinking-indicator" style="display:none;">AI is thinking...</div>
     </div>
   </div>
   <div id="contact-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="contact-modal-title">
     <div class="modal-content terminal" id="terminal-container">
         <i data-feather="x" class="close-modal" aria-label="Close Contact Terminal modal"></i>
-        <div class="modal-header">
-          <h2 id="contact-modal-title">Contact Terminal</h2>
-        </div>
-        <div class="modal-body" style="padding: 10px; display: flex; flex-direction: column;">
-          <div id="cli-output" role="log" aria-live="polite" aria-atomic="false"></div>
-          <div class="cli-input-container">
-              <span id="cli-prompt-text">></span>
-              <input type="text" id="cli-input" autofocus autocomplete="off" aria-label="Terminal command input">
-              <div class="blinking-cursor"></div>
-          </div>
+        <h2 id="contact-modal-title">Contact Terminal</h2>
+        <div id="cli-output" role="log" aria-live="polite" aria-atomic="false"></div>
+        <div class="cli-input-container">
+            <span id="cli-prompt-text">></span>
+            <input type="text" id="cli-input" autofocus autocomplete="off" aria-label="Terminal command input">
+            <div class="blinking-cursor"></div>
         </div>
     </div>
   </div>
@@ -1790,7 +1613,9 @@
     }
 
 
-    // --- DYNAMIC CONTENT ---
+    // --- DYNAMIC CONTENT (Blog removed) ---
+    // blogPosts and renderBlogPosts are removed.
+    
     async function renderProjects() {
         const container = document.getElementById('projects-list');
         if (!container) return;
@@ -1802,7 +1627,7 @@
             const repos = data.filter(repo => !repo.fork).slice(0, 5);
 
             container.innerHTML = repos.map(repo => `
-                <div class="project-card animate-on-scroll" data-repo-name="${repo.name}">
+                <div class="project-card animate-on-scroll">
                     <h3><a href="${repo.html_url}" target="_blank">${repo.name}</a></h3>
                     <p>${repo.description || 'No description available.'}</p>
                     <div class="stats">
@@ -1810,73 +1635,117 @@
                         <span><i data-feather="git-branch"></i> ${repo.forks_count}</span>
                     </div>
                     <div style="display: flex; gap: 10px; margin-top: 0.75rem;">
-                         <button class="ai-summary-btn suggest-features-btn" data-project-name="${repo.name}" data-project-description="${repo.description || 'No description provided.'}" aria-label="Suggest features for ${repo.name}">
-                            <i data-feather="cpu"></i> <span>✨ Suggest Features</span>
+                        <button class="ai-summary-btn glitch-effect" data-text="AI Summary" data-project-name="${repo.name}" data-project-description="${repo.description || 'No description provided.'}" aria-label="Get AI summary for ${repo.name}">
+                            <i data-feather="terminal"></i> <span>AI Summary</span>
                         </button>
                     </div>
-                    <div class="ai-feature-suggestions"></div>
                 </div>
             `).join('');
             feather.replace();
 
-            document.querySelectorAll('.suggest-features-btn').forEach(button => {
+            document.querySelectorAll('.ai-summary-btn').forEach(button => {
                 button.addEventListener('click', async (e) => {
                     const btn = e.currentTarget;
-                    const card = btn.closest('.project-card');
-                    const suggestionsContainer = card.querySelector('.ai-feature-suggestions');
                     const projectName = btn.dataset.projectName;
                     const projectDescription = btn.dataset.projectDescription;
-
                     btn.disabled = true;
-                    btn.innerHTML = '<i data-feather="loader" class="spin"></i> <span>Thinking...</span>';
+                    btn.innerHTML = '<i data-feather="loader" class="spin"></i> <span>Summarizing...</span>';
                     feather.replace();
-                    suggestionsContainer.innerHTML = '';
+
+                    const prompt = `Summarize the GitHub project "${projectName}" with description "${projectDescription}" in one concise sentence (max 20 words) from the perspective of a minimalist designer.`;
 
                     try {
-                        const response = await fetch('/.netlify/functions/suggest-features', {
+                        const aiResponse = await fetch('/.netlify/functions/ask-gemini', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ projectName, projectDescription }),
+                            body: JSON.stringify({ prompt: prompt }),
                         });
 
-                        if (!response.ok) {
-                            const errorData = await response.text();
-                            throw new Error(errorData || 'Feature suggestion failed.');
+                        if (!aiResponse.ok) {
+                            const errorData = await aiResponse.json();
+                            throw new Error(errorData.message || 'AI summary failed.');
                         }
-                        
-                        const textData = await response.text();
-                        if (!textData) {
-                             throw new Error("Empty response from server.");
-                        }
-                        const data = JSON.parse(textData);
-
-                        if (data && data.suggestions) {
-                            suggestionsContainer.innerHTML = `
-                                <h4>Feature Ideas:</h4>
-                                <ul>
-                                    ${data.suggestions.map(s => `<li>${s}</li>`).join('')}
-                                </ul>
-                            `;
+                        const data = await aiResponse.json();
+                        if (data && data.response) {
+                            showToast(`AI Summary: ${data.response}`);
                         } else {
-                            suggestionsContainer.innerHTML = '<p>Could not generate suggestions.</p>';
+                            showToast('AI could not generate a summary.');
                         }
                     } catch (error) {
-                        console.error('Error getting feature suggestions:', error);
-                        suggestionsContainer.innerHTML = `<p>Error: Could not get suggestions at this time.</p>`;
+                        console.error('Error getting AI summary:', error);
+                        showToast(`AI Summary Error: ${error.message}`);
                     } finally {
                         btn.disabled = false;
-                        btn.innerHTML = '<i data-feather="cpu"></i> <span>✨ Suggest Features</span>';
+                        btn.innerHTML = '<i data-feather="terminal"></i> <span>AI Summary</span>';
                         feather.replace();
                     }
                 });
             });
+
+            const generateProjectIdeaBtn = document.getElementById('generate-project-idea-btn');
+            const aiProjectIdeaOutput = document.getElementById('ai-project-idea-output');
+            const aiProjectIdeaTitle = document.getElementById('ai-project-idea-title');
+            const aiProjectIdeaConcept = document.getElementById('ai-project-idea-concept');
+
+            if (generateProjectIdeaBtn) {
+                generateProjectIdeaBtn.addEventListener('click', async () => {
+                    generateProjectIdeaBtn.disabled = true;
+                    generateProjectIdeaBtn.innerHTML = '<i data-feather="loader" class="spin"></i> <span>Generating Idea...</span>';
+                    feather.replace();
+                    hide(aiProjectIdeaOutput);
+
+                    const prompt = `Generate a creative and minimalist web project idea for a developer who is an ex-poet, ex-minimalist, ex-thinker, now creator. The idea should combine elements of art, code, and philosophy. Provide the response in JSON format with two keys: 'title' (a concise, catchy title) and 'concept' (a 2-3 sentence concept description).`;
+
+                    try {
+                        const response = await fetch('/.netlify/functions/generate-thought', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ prompt: prompt }),
+                        });
+
+                        if (!response.ok) {
+                            const errorData = await response.json();
+                            throw new Error(errorData.message || 'Failed to generate project idea.');
+                        }
+                        const data = await response.json();
+
+                        if (data && data.title && data.concept) {
+                            aiProjectIdeaTitle.textContent = data.title;
+                            aiProjectIdeaConcept.textContent = data.concept;
+                            show(aiProjectIdeaOutput);
+                            showToast('New project idea generated!');
+                        } else {
+                            showToast('AI could not generate a project idea in the expected format.');
+                            console.error("Unexpected AI project idea format:", data);
+                        }
+                    } catch (error) {
+                        console.error('Error generating project idea:', error);
+                        showToast(`Project Idea Error: ${error.message}`);
+                    } finally {
+                        generateProjectIdeaBtn.disabled = false;
+                        generateProjectIdeaBtn.innerHTML = `
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-lightbulb" style="width: 18px; height: 18px; stroke: currentColor; margin-right: 5px;">
+                                <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1.3.5 2.6 1.5 3.5.8.8 1.3 1.5 1.5 2.5"></path>
+                                <path d="M9 18h6"></path>
+                                <path d="M10 22h4"></path>
+                                <path d="M12 22v-4"></path>
+                            </svg>
+                            <span>Generate a Project Idea</span>
+                        `;
+                        feather.replace();
+                    }
+                });
+            }
 
         } catch (e) {
             container.innerHTML = '<p>Could not load projects at this time.</p>';
             showToast('API Error: Could not fetch GitHub projects.');
         }
     }
-    
+
+    // Removed My Tools and Ex-Timeline data and render functions entirely.
+
+
     // --- GENERATIVE ART LOGIC ---
     let generativeArtAnimationId;
     let generativeArtParticles = [];
@@ -2136,7 +2005,7 @@
                     showToast(`AI Palette Error: ${error.message}`);
                 } finally {
                     aiGeneratePaletteBtn.disabled = false;
-                    aiGeneratePaletteBtn.innerHTML = '<i data-feather="cpu"></i> <span>✨ AI Palette</span>';
+                    aiGeneratePaletteBtn.innerHTML = '<i data-feather="cpu"></i> <span>AI Palette</span>';
                     feather.replace();
                 }
             };
@@ -2168,398 +2037,221 @@
     }
 
 
-    // --- CHATBOT AI LOGIC (AGENT w/ TOOLS, SPEECH, STREAMING) ---
+    // --- CHATBOT AI LOGIC ---
     const chatbot = {
         displayElement: null,
         inputElement: null,
         sendButton: null,
         clearButton: null,
-        micButton: null,
-        speechToggleButton: null,
         thinkingIndicator: null,
-        suggestedActionsContainer: null,
-        chatHistory: [],
+        chatHistory: [], // Stores conversation for AI context
         isThinking: false,
-        isInitialized: false,
-        isAwaitingName: false,
-        speechEnabled: false,
-        isListening: false,
-        speechRecognition: null,
 
         init() {
-            if (this.isInitialized) return;
-            
             this.displayElement = document.getElementById('chatbot-display');
             this.inputElement = document.getElementById('chatbot-input');
             this.sendButton = document.getElementById('chatbot-send-btn');
             this.clearButton = document.getElementById('chatbot-clear-btn');
-            this.micButton = document.getElementById('chatbot-mic-btn');
-            this.speechToggleButton = document.getElementById('chatbot-speech-toggle');
             this.thinkingIndicator = document.getElementById('chatbot-thinking-indicator');
-            this.suggestedActionsContainer = document.getElementById('suggested-actions-container');
 
-            if (!this.displayElement || !this.inputElement || !this.sendButton || !this.clearButton || !this.thinkingIndicator || !this.suggestedActionsContainer || !this.micButton || !this.speechToggleButton) {
-                console.error("Chatbot elements not found.");
+            if (!this.displayElement || !this.inputElement || !this.sendButton || !this.clearButton || !this.thinkingIndicator) {
+                console.error("Chatbot elements not found. Ensure HTML is correct.");
                 return;
             }
 
-            this.loadHistory();
-            this.renderAllMessages();
-            this.setupEventHandlers();
-            this.setupSpeech();
+            // Only add initial greeting if chat is empty
+            if (this.chatHistory.length === 0) {
+                 this.addMessage('ai', "Hello! I am Judson's AI assistant. How can I help you today?");
+            }
+           
 
-            this.inputElement.focus();
-            this.isInitialized = true;
-        },
-
-        setupEventHandlers() {
             this.sendButton.onclick = () => this.sendMessage();
             this.inputElement.onkeydown = (e) => {
                 if (e.key === 'Enter' && !this.isThinking) {
-                    e.preventDefault();
                     this.sendMessage();
                 }
             };
             this.clearButton.onclick = () => this.clearChat();
-            this.micButton.onclick = () => this.toggleVoiceInput();
-            this.speechToggleButton.onclick = () => this.toggleSpeechOutput();
+
+            this.inputElement.focus();
         },
 
-        renderAllMessages() {
-            this.displayElement.innerHTML = '';
-            if (this.chatHistory.length === 0) {
-                const userName = localStorage.getItem('chatbotUserName');
-                let welcomeText;
-                if (userName) {
-                    welcomeText = `Welcome back, ${userName}! How can I assist you today?`;
-                    this.isAwaitingName = false;
-                } else {
-                    welcomeText = "Hello! I'm Judson's AI assistant. What's your name?";
-                    this.isAwaitingName = true;
-                }
-                this.chatHistory.push({ role: 'model', parts: [{ text: welcomeText }] });
-                this.saveHistory();
-            }
-            this.chatHistory.forEach(msg => {
-                if (msg.role === 'model' && msg.parts[0].functionCall) return;
-                if (msg.role === 'tool') return;
-
-                const sender = msg.role === 'model' ? 'ai' : 'user';
-                this._createMessageElement(sender, msg.parts[0].text);
-            });
-            
-            this.renderSuggestedActions();
-            this.displayElement.scrollTop = this.displayElement.scrollHeight;
-            feather.replace();
-        },
-
-        _createMessageElement(sender, text) {
+        addMessage(sender, text) {
             const messageDiv = document.createElement('div');
             messageDiv.className = `chat-message ${sender}`;
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = marked.parse(text || "");
-            messageDiv.appendChild(tempDiv);
-            
+            messageDiv.textContent = text;
             this.displayElement.appendChild(messageDiv);
-
-            if (sender === 'ai') {
-                messageDiv.querySelectorAll('pre code').forEach(block => {
-                    const preElement = block.parentElement;
-                    const copyButton = document.createElement('button');
-                    copyButton.innerHTML = '<i data-feather="copy"></i>';
-                    copyButton.className = 'copy-code-btn';
-                    copyButton.title = 'Copy code';
-                    
-                    copyButton.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        const codeToCopy = block.textContent;
-                        const textArea = document.createElement("textarea");
-                        textArea.value = codeToCopy;
-                        document.body.appendChild(textArea);
-                        textArea.focus();
-                        textArea.select();
-                        try {
-                            document.execCommand('copy');
-                            showToast('Code copied to clipboard!');
-                            playSound('E5', 'sine', '32n');
-                        } catch (err) {
-                            showToast('Failed to copy code.');
-                            console.error('Fallback: Oops, unable to copy', err);
-                        }
-                        document.body.removeChild(textArea);
-                    });
-                    preElement.appendChild(copyButton);
-                });
-            }
-            return messageDiv;
-        },
-        
-        addNewMessage(sender, text) {
-            const messageDiv = this._createMessageElement(sender, text);
             this.displayElement.scrollTop = this.displayElement.scrollHeight;
-            feather.replace();
             playSound('C4', 'sine', '64n');
-            return messageDiv;
-        },
-
-        renderSuggestedActions() {
-            this.suggestedActionsContainer.innerHTML = '';
-            if (this.chatHistory.length <= 1 && !this.isAwaitingName) {
-                const suggestions = [
-                    "What's playing?",
-                    "Navigate to Projects",
-                    "Switch to light mode",
-                    "Make the art particles blue"
-                ];
-                suggestions.forEach(text => {
-                    const button = document.createElement('button');
-                    button.className = 'suggested-action-btn';
-                    button.textContent = text;
-                    button.onclick = () => {
-                        this.inputElement.value = text;
-                        this.sendMessage();
-                    };
-                    this.suggestedActionsContainer.appendChild(button);
-                });
-            }
         },
 
         showThinking(show) {
-            this.thinkingIndicator.style.display = show ? 'block' : 'none';
-            this.inputElement.disabled = show;
-            this.sendButton.disabled = show;
+            if (this.thinkingIndicator) {
+                this.thinkingIndicator.style.display = show ? 'block' : 'none';
+            }
+            if (this.inputElement) this.inputElement.disabled = show;
+            if (this.sendButton) this.sendButton.disabled = show;
+            if (this.clearButton) this.clearButton.disabled = show;
             this.isThinking = show;
         },
 
-        async sendMessage(isVoiceInput = false) {
-            let userMessage = this.inputElement.value.trim();
-            if (!userMessage || this.isThinking) return;
+        async sendMessage() {
+            const userMessage = this.inputElement.value.trim();
+            if (!userMessage) return;
 
-            this.suggestedActionsContainer.innerHTML = '';
-            
-            if (!isVoiceInput) {
-                this.addNewMessage('user', userMessage);
-            }
-            this.chatHistory.push({ role: "user", parts: [{ text: userMessage }] });
-            this.saveHistory();
-            
+            this.addMessage('user', userMessage);
             this.inputElement.value = '';
             this.showThinking(true);
 
-            if (this.isAwaitingName) {
-                localStorage.setItem('chatbotUserName', userMessage);
-                this.isAwaitingName = false;
-                const welcomeText = `Nice to meet you, ${userMessage}! How can I help you today?`;
-                await this._streamResponse(welcomeText);
-                this.renderSuggestedActions();
-                this.showThinking(false);
-                return;
-            }
+            this.chatHistory.push({ role: "user", parts: [{ text: userMessage }] });
 
-            await this.runConversation();
-        },
-
-        async runConversation() {
             try {
-                const userName = localStorage.getItem('chatbotUserName') || '';
-                const aiResponse = await fetch('/.netlify/functions/ask-gemini', {
+                const response = await fetch('/.netlify/functions/ask-gemini', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ history: this.chatHistory, userName: userName }),
+                    body: JSON.stringify({ prompt: userMessage, history: this.chatHistory }),
                 });
 
-                if (!aiResponse.ok) throw new Error(await aiResponse.text());
-                
-                const data = await aiResponse.json();
-                const modelResponse = data.response;
-
-                if (modelResponse.parts[0].functionCall) {
-                    await this.handleFunctionCall(modelResponse);
-                } else {
-                    const textResponse = modelResponse.parts[0].text;
-                    await this._streamResponse(textResponse);
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || `API call failed with status: ${response.status}`);
                 }
+                const data = await response.json();
 
+                if (data && data.response) {
+                    this.addMessage('ai', data.response);
+                    this.chatHistory.push({ role: "model", parts: [{ text: data.response }] });
+                } else {
+                    this.addMessage('ai', "I'm sorry, I couldn't generate a response.");
+                    console.error("Unexpected AI response:", data);
+                }
             } catch (error) {
-                await this._streamResponse(`Error: ${error.message}`);
+                this.addMessage('ai', `Error: ${error.message}`);
+                console.error("Chatbot AI error:", error);
             } finally {
                 this.showThinking(false);
-                this.inputElement.focus();
             }
-        },
-
-        async handleFunctionCall(modelResponse) {
-            const functionCall = modelResponse.parts[0].functionCall;
-            this.chatHistory.push(modelResponse);
-
-            let toolResult;
-            const isFrontendTool = ['set_theme', 'navigate_to', 'control_generative_art'].includes(functionCall.name);
-
-            if (isFrontendTool) {
-                toolResult = this.executeFrontendTool(functionCall.name, functionCall.args);
-            } else {
-                const toolResponse = await fetch('/.netlify/functions/chatbot-tools', {
-                    method: 'POST',
-                    body: JSON.stringify({ toolName: functionCall.name, args: functionCall.args })
-                });
-                toolResult = await toolResponse.json();
-            }
-            
-            this.chatHistory.push({
-                role: "tool",
-                parts: [{ functionResponse: { name: functionCall.name, response: toolResult } }]
-            });
-
-            await this.runConversation();
-        },
-
-        executeFrontendTool(toolName, args) {
-            try {
-                switch (toolName) {
-                    case 'set_theme':
-                        applyTheme(args.theme);
-                        return { success: true, message: `Theme changed to ${args.theme}` };
-                    case 'navigate_to':
-                        openModal(args.section);
-                        return { success: true, message: `Navigating to ${args.section}` };
-                    case 'control_generative_art':
-                        if (typeof window.controlGenerativeArt === 'function') {
-                            window.controlGenerativeArt(args);
-                            return { success: true, message: `Art canvas updated.` };
-                        }
-                        return { success: false, message: `Art canvas controller not found.` };
-                }
-            } catch (e) {
-                return { success: false, message: `Error executing tool: ${e.message}` };
-            }
-        },
-
-        async _streamResponse(text) {
-            const messageDiv = this.addNewMessage('ai', '');
-            const tempDiv = messageDiv.querySelector('div');
-            
-            this.chatHistory.push({ role: "model", parts: [{ text: text }] });
-            this.saveHistory();
-
-            if (this.speechEnabled) this.speak(text);
-
-            const words = text.split(' ');
-            for (let i = 0; i < words.length; i++) {
-                tempDiv.innerHTML = marked.parse(words.slice(0, i + 1).join(' '));
-                this.displayElement.scrollTop = this.displayElement.scrollHeight;
-                await new Promise(resolve => setTimeout(resolve, 50));
-            }
-            feather.replace();
-        },
-
-        loadHistory() {
-            try {
-                const savedHistory = localStorage.getItem('chatbotHistory');
-                if (savedHistory) this.chatHistory = JSON.parse(savedHistory);
-                const userName = localStorage.getItem('chatbotUserName');
-                this.isAwaitingName = !userName;
-            } catch (e) {
-                this.chatHistory = [];
-            }
-        },
-
-        saveHistory() {
-            try {
-                localStorage.setItem('chatbotHistory', JSON.stringify(this.chatHistory));
-            } catch (e) { console.error("Could not save chat history:", e); }
         },
 
         clearChat() {
+            if (this.displayElement) {
+                this.displayElement.innerHTML = '';
+            }
             this.chatHistory = [];
-            localStorage.removeItem('chatbotHistory');
-            localStorage.removeItem('chatbotUserName');
-            this.renderAllMessages();
+            this.addMessage('ai', "Chat cleared. How can I help you now?");
             playSound('C3', 'sine', '16n');
-        },
+        }
+    };
 
-        setupSpeech() {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (SpeechRecognition) {
-                this.speechRecognition = new SpeechRecognition();
-                this.speechRecognition.continuous = false;
-                this.speechRecognition.lang = 'en-US';
-                this.speechRecognition.interimResults = false;
 
-                this.speechRecognition.onresult = (event) => {
-                    const transcript = event.results[0][0].transcript;
-                    this.inputElement.value = transcript;
-                    this.sendMessage(true);
-                };
-                this.speechRecognition.onerror = (event) => {
-                    console.error('Speech recognition error:', event.error);
-                    showToast(`Voice Error: ${event.error}`);
-                };
-                this.speechRecognition.onend = () => {
-                    this.isListening = false;
-                    this.micButton.classList.remove('listening');
-                };
+    // --- COMMAND PALETTE LOGIC ---
+    const commandPaletteOverlay = document.getElementById('command-palette-overlay');
+    const commandInput = document.getElementById('command-input');
+    const commandList = document.getElementById('command-list');
+    let selectedCommandIndex = 0;
+
+    const commands = [
+        { name: 'Toggle Theme', icon: 'moon', action: () => { toggleTheme(); closeCommandPalette(); } },
+        { name: 'Open About', icon: 'user', action: () => { openModal('about'); closeCommandPalette(); } },
+        { name: 'Open Projects', icon: 'briefcase', action: () => { openModal('projects'); closeCommandPalette(); } },
+        { name: 'Open Chatbot', icon: 'message-square', action: () => { openModal('chatbot'); closeCommandPalette(); } },
+        { name: 'Open Generative Art', icon: 'aperture', action: () => { openModal('generative-art'); closeCommandPalette(); } },
+        { name: 'Open Contact', icon: 'mail', action: () => { openModal('contact'); closeCommandPalette(); } },
+        { name: 'View on GitHub', icon: 'github', action: () => { window.open('https://github.com/Judson-web', '_blank'); closeCommandPalette(); } },
+    ];
+
+    function openCommandPalette() {
+        if (!commandPaletteOverlay || !commandInput) return;
+        commandPaletteOverlay.classList.add('active');
+        renderCommands(commands);
+        commandInput.focus();
+        playSound('A4', 'triangle');
+    }
+
+    function closeCommandPalette() {
+        if (!commandPaletteOverlay || !commandInput) return;
+        commandPaletteOverlay.classList.remove('active');
+        commandInput.value = '';
+    }
+
+    function renderCommands(items) {
+        if (!commandList) return;
+        commandList.innerHTML = items.map(item => `
+            <li class="command-item" data-action="${item.name}">
+                <i data-feather="${item.icon}"></i>
+                <span>${item.name}</span>
+            </li>
+        `).join('');
+        feather.replace();
+        updateSelectedCommand();
+    }
+
+    function updateSelectedCommand() {
+        const items = commandList ? commandList.querySelectorAll('.command-item') : [];
+        items.forEach((item, index) => {
+            if (index === selectedCommandIndex) {
+                item.classList.add('selected');
+                item.scrollIntoView({ block: 'nearest' });
             } else {
-                this.micButton.style.display = 'none';
+                item.classList.remove('selected');
             }
-        },
+        });
+    }
 
-        toggleVoiceInput() {
-            if (!this.speechRecognition) return;
-            if (this.isListening) {
-                this.speechRecognition.stop();
-            } else {
-                try {
-                    this.speechRecognition.start();
-                    this.isListening = true;
-                    this.micButton.classList.add('listening');
-                } catch(e) {
-                    showToast("Voice input could not be started.");
-                    console.error("Speech recognition start error:", e);
+    if (commandInput) {
+        commandInput.addEventListener('input', () => {
+            const query = commandInput.value.toLowerCase();
+            const filtered = commands.filter(c => c.name.toLowerCase().includes(query));
+            selectedCommandIndex = 0;
+            renderCommands(filtered);
+        });
+
+        commandInput.addEventListener('keydown', (e) => {
+            const items = commandList ? commandList.querySelectorAll('.command-item') : [];
+            if (items.length === 0) return;
+
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                selectedCommandIndex = (selectedCommandIndex + 1) % items.length;
+                updateSelectedCommand();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                selectedCommandIndex = (selectedCommandIndex - 1 + items.length) % items.length;
+                updateSelectedCommand();
+            } else if (e.key === 'Enter') {
+                const selectedItem = items[selectedCommandIndex];
+                if (selectedItem) {
+                    const actionName = selectedItem.dataset.action;
+                    const command = commands.find(c => c.name === actionName);
+                    if (command) command.action();
                 }
+            } else if (e.key === 'Escape') {
+                closeCommandPalette();
             }
-        },
+        });
+    }
 
-        toggleSpeechOutput() {
-            this.speechEnabled = !this.speechEnabled;
-            this.speechToggleButton.classList.toggle('active', this.speechEnabled);
-            const icon = this.speechEnabled ? 'volume-2' : 'volume-x';
-            this.speechToggleButton.innerHTML = `<i data-feather="${icon}"></i>`;
-            feather.replace();
-            showToast(`Speech output ${this.speechEnabled ? 'enabled' : 'disabled'}.`);
-        },
-
-        speak(text) {
-            if (!this.speechEnabled || !window.speechSynthesis) return;
-            window.speechSynthesis.cancel(); // Cancel any previous speech
-            const cleanText = text.replace(/```[\s\S]*?```/g, 'Code snippet.')
-                                 .replace(/[*_`#]/g, '');
-            const utterance = new SpeechSynthesisUtterance(cleanText);
-            window.speechSynthesis.speak(utterance);
-        }
-    };
-
-    // Make generative art controls globally accessible for the chatbot tool
-    window.controlGenerativeArt = (args) => {
-        if (!args) return;
-        if (args.action === 'reset') {
-            document.getElementById('reset-art-btn')?.click();
-            return;
-        }
-        if (args.property) {
-            const slider = document.getElementById(`particle-${args.property}-slider`);
-            if (slider) {
-                let currentValue = parseFloat(slider.value);
-                if (args.action === 'increase') slider.value = currentValue * 1.5;
-                if (args.action === 'decrease') slider.value = currentValue * 0.5;
-                slider.dispatchEvent(new Event('input'));
+    if (commandList) {
+        commandList.addEventListener('click', (e) => {
+            const item = e.target.closest('.command-item');
+            if (item) {
+                const actionName = item.dataset.action;
+                const command = commands.find(c => c.name === actionName);
+                if (command) command.action();
             }
-        }
-        if (args.color) {
-            generativeArtConfig.particleColor = args.color;
-        }
-    };
+        });
+    }
 
-    // --- CLI LOGIC ---
+    // Global keyboard shortcut for command palette
+    document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.key === 'k') {
+            e.preventDefault();
+            openCommandPalette();
+        }
+    });
+
+
+    // --- CLI CONTACT FORM ---
     const cli = {
         outputElement: null,
         inputElement: null,
@@ -2591,7 +2283,7 @@ _           _                     _   _
 |_|_|     \\_)_)\\____)_|    |_|     |_|_|
 `;
             this.log('prompt', judsonAscii);
-            this.typeLog('response', "Contact Terminal v3.0. Type 'help' for commands.", () => {
+            this.typeLog('response', "Contact Terminal v2.8. Type 'help' for commands.", () => {
                 if (this.inputElement) this.inputElement.disabled = false;
                 if (this.inputElement) this.inputElement.focus();
             });
@@ -2631,6 +2323,28 @@ _           _                     _   _
             }, 25);
         },
 
+        startThinking() {
+            if (!this.outputElement || !this.inputElement) return null;
+            this.inputElement.disabled = true;
+            const line = document.createElement('div');
+            line.className = 'cli-line cli-response';
+            this.outputElement.appendChild(line);
+
+            const spinnerChars = ['|', '/', '-', '\\'];
+            let i = 0;
+            this.thinkingInterval = setInterval(() => {
+                line.textContent = `[${spinnerChars[i % spinnerChars.length]}] Thinking...`;
+                i++;
+            }, 100);
+            return line;
+        },
+
+        stopThinking(line, message, type) {
+            clearInterval(this.thinkingInterval);
+            this.thinkingInterval = null;
+            this.typeLog(type, message);
+        },
+
         handleInput(e) {
             if (this.isTyping || !this.inputElement) return;
             if (e.key === 'Enter' && this.inputElement.value.trim() !== '') {
@@ -2658,30 +2372,51 @@ _           _                     _   _
 
         async executeCommand(value) {
             const [command, ...args] = value.toLowerCase().split(' ');
+            const fullPrompt = args.join(' ');
+
+            const aiIdentityQuestions = ["your name", "who are you", "who made you"];
+            if (command === 'ask' && aiIdentityQuestions.some(q => fullPrompt.includes(q))) {
+                this.typeLog('response', "I am Judson, a helpful AI assistant integrated into this website by Judson Saji.");
+                return;
+            }
 
             const cliCommands = {
-                'help': () => {
+                'help': () => { // Removed async and AI call
                     const helpText = [
                         'Available commands:',
                         '  help      - Show this help message',
-                        '  clear     - Clear the terminal screen',
+                        '  clear     - Clear the terminal screen (resets AI memory)',
                         '  whoami    - Display user information',
                         '  date      - Show the current date and time',
                         '  contact   - Display contact information',
                         '  social    - Show social media links',
                         '  theme     - Toggle between light/dark mode',
                         '  ip        - Show your public IP address',
-                        '  ai        - Open the AI Chatbot for advanced queries',
+                        '  status    - Display current session status (e.g., status uptime, status ai_queries, status theme, status mood)',
+                        '  ask       - Ask the AI a question (e.g., ask what is js)',
+                        '  dream     - Ask AI to interpret a dream (e.g., dream flying over mountains)',
                         '  cmd       - Open the command palette',
                         '  exit      - Close the terminal'
                     ].join('\n');
                     this.typeLog('success', helpText);
                 },
-                'clear': () => { this.showWelcome(); },
-                'whoami': () => { this.typeLog('response', 'You are a curious visitor on my digital domain.'); },
-                'date': () => { this.typeLog('response', new Date().toLocaleString()); },
-                'contact': () => { this.typeLog('response', 'Email: judsonsajim824@gmail.com'); },
-                'social': () => { this.typeLog('response', 'Twitter: https://twitter.com/greyvrita\nGitHub:  https://github.com/Judson-web\nInstagram: https://www.instagram.com/judson_saji'); },
+                'clear': () => {
+                    this.chatHistory = [];
+                    this.aiQueryCount = 0;
+                    this.showWelcome();
+                },
+                'whoami': () => {
+                    this.typeLog('response', 'You are a curious visitor on my digital domain.');
+                },
+                'date': () => {
+                    this.typeLog('response', new Date().toLocaleString());
+                },
+                'contact': () => {
+                    this.typeLog('response', 'Email: judsonsajim824@gmail.com');
+                },
+                'social': () => {
+                    this.typeLog('response', 'Twitter: https://twitter.com/greyvrita\nGitHub:  https://github.com/Judson-web\nInstagram: https://www.instagram.com/judson_saji');
+                },
                 'theme': () => {
                     if (args[0] === 'matrix') {
                         applyTheme('matrix');
@@ -2692,19 +2427,124 @@ _           _                     _   _
                     }
                 },
                 'ip': async () => {
-                    this.typeLog('response', 'Fetching IP... one moment.');
+                    const thinkingLine = this.startThinking();
                     try {
                         const response = await fetch('https://ipinfo.io/json');
                         if (!response.ok) throw new Error('IP API failed');
                         const data = await response.json();
-                        this.typeLog('success', `Your IP address is: ${data.ip}`);
+                        this.stopThinking(thinkingLine, `Your IP address is: ${data.ip}`, 'success');
                     } catch (e) {
-                        this.typeLog('error', 'Could not fetch IP address.');
+                        this.stopThinking(thinkingLine, 'Could not fetch IP address.', 'error');
                     }
                 },
-                'ai': () => { this.typeLog('response', 'Opening AI Chatbot...', () => openModal('chatbot')); },
-                'cmd': () => { this.typeLog('response', 'Opening command palette...', () => openCommandPalette()); },
-                'exit': () => { this.typeLog('response', 'Closing terminal...', () => { setTimeout(() => closeModal(this.outputElement.closest('.modal-overlay')), 500); }); },
+                'cmd': () => {
+                    this.typeLog('response', 'Opening command palette...', () => openCommandPalette());
+                },
+                'exit': () => {
+                    this.typeLog('response', 'Closing terminal...', () => {
+                        setTimeout(() => closeModal(this.outputElement.closest('.modal-overlay')), 500);
+                    });
+                },
+                'status': () => {
+                    if (!args[0]) {
+                        this.typeLog('error', 'Usage: status [uptime | ai_queries | theme | mood]');
+                        return;
+                    }
+                    switch (args[0]) {
+                        case 'uptime':
+                            const uptimeMs = Date.now() - pageLoadTime.getTime();
+                            const uptimeMinutes = Math.floor(uptimeMs / (1000 * 60));
+                            const uptimeHours = Math.floor(uptimeMinutes / 60);
+                            const uptimeDays = Math.floor(uptimeHours / 24);
+                            let uptimeString = '';
+                            if (uptimeDays > 0) uptimeString += `${uptimeDays}d `;
+                            if (uptimeHours % 24 > 0) uptimeString += `${uptimeHours % 24}h `;
+                            if (uptimeMinutes % 60 > 0) uptimeString += `${uptimeMinutes % 60}m `;
+                            if (uptimeString === '') uptimeString = '<1m ';
+                            this.typeLog('response', `Session uptime: ${uptimeString.trim()}`);
+                            break;
+                        case 'ai_queries':
+                            this.typeLog('response', `AI queries made this session: ${this.aiQueryCount}`);
+                            break;
+                        case 'theme':
+                            this.typeLog('response', `Current theme: ${localStorage.getItem('theme') || 'dark'}`);
+                            break;
+                        case 'mood':
+                            let aiMood = "I'm feeling quite analytical and ready to assist.";
+                            if (this.aiQueryCount > 5) {
+                                aiMood = "My circuits are buzzing with recent activity, ready for more!";
+                            } else if (this.aiQueryCount === 0) {
+                                aiMood = "I'm fresh and eager for new questions.";
+                            }
+                            this.typeLog('response', `AI: ${aiMood}`);
+                            break;
+                        default:
+                            this.typeLog('error', `Invalid status option: ${args[0]}. Use uptime, ai_queries, theme, or mood.`);
+                    }
+                },
+                'ask': async () => {
+                    if (!fullPrompt) {
+                        this.typeLog('error', 'Usage: ask [your question]');
+                        return;
+                    }
+                    const thinkingLine = this.startThinking();
+                    try {
+                        this.chatHistory.push({ role: "user", parts: [{ text: fullPrompt }] });
+
+                        const response = await fetch('/.netlify/functions/ask-gemini', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ prompt: fullPrompt, history: this.chatHistory }),
+                        });
+
+                        if (!response.ok) {
+                            const errorData = await response.json();
+                            throw new Error(errorData.message || `API call failed with status: ${response.status}`);
+                        }
+                        const data = await response.json();
+
+                        if (data && data.response) {
+                            this.chatHistory.push({ role: "model", parts: [{ text: data.response }] });
+                            this.aiQueryCount++;
+                            this.stopThinking(thinkingLine, data.response, 'response');
+                        } else {
+                            throw new Error("Unexpected response from AI.");
+                        }
+                    } catch (e) {
+                        console.error("CLI 'ask' error:", e);
+                        this.chatHistory.pop();
+                        this.stopThinking(thinkingLine, `AI Error: ${e.message}`, 'error');
+                    }
+                },
+                'dream': async () => {
+                    if (!fullPrompt) {
+                        this.typeLog('error', 'Usage: dream [your dream description]');
+                        return;
+                    }
+                    const thinkingLine = this.startThinking();
+                    const dreamPrompt = `Interpret the following dream in a creative, whimsical, and non-serious way. Focus on imaginative symbolism rather than psychological analysis. Keep it to 2-3 sentences: "${fullPrompt}"`;
+                    try {
+                        const response = await fetch('/.netlify/functions/ask-gemini', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ prompt: dreamPrompt }),
+                        });
+
+                        if (!response.ok) {
+                            const errorData = await response.json();
+                            throw new Error(errorData.message || `Dream interpretation failed.`);
+                        }
+                        const data = await response.json();
+                        if (data && data.response) {
+                            this.stopThinking(thinkingLine, `AI Dream Interpreter: ${data.response}`, 'response');
+                        } else {
+                            throw new Error("AI could not interpret the dream.");
+                        }
+                    } catch (e) {
+                        console.error("CLI 'dream' error:", e);
+                        this.stopThinking(thinkingLine, `Dream Interpreter Error: ${e.message}`, 'error');
+                    }
+                },
                 'default': () => {
                     this.typeLog('error', `Command not found: ${command}. Type 'help' for a list of commands.`);
                     playSound('C2', 'sawtooth', '16n');
@@ -2716,10 +2556,299 @@ _           _                     _   _
         }
     };
     
-    // --- ANIMATION LOGIC ---
-    // ... (restored and omitted for brevity)
+    document.addEventListener('DOMContentLoaded', () => {
+        cli.setupUI();
+        initializePage();
+    });
 
-    // --- INITIALIZATION & EVENT LISTENERS ---
+    // --- KONAMI CODE EASTER EGG ---
+    const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+    let konamiIndex = 0;
+    let konamiTimeout;
+    document.addEventListener('keydown', e => {
+        if (e.key === konamiCode[konamiIndex]) {
+            konamiIndex++;
+            if (konamiIndex === konamiCode.length) {
+                activateKonami();
+                konamiIndex = 0;
+            }
+            clearTimeout(konamiTimeout);
+            konamiTimeout = setTimeout(() => konamiIndex = 0, 2000);
+        } else {
+            konamiIndex = 0;
+        }
+    });
+
+    let matrixInterval;
+    function activateKonami(silent = false) {
+        const canvas = document.getElementById('konami-canvas');
+        if (!canvas) return;
+        
+        if (matrixInterval) clearInterval(matrixInterval);
+
+        canvas.classList.add('active');
+        if (!silent) {
+            showToast("Konami Code Activated!");
+            playSound('C5', 'sawtooth');
+        }
+        
+        const ctx = canvas.getContext('2d');
+        const fontSize = 16;
+        const columns = Math.floor(canvas.width / fontSize);
+        const drops = Array(columns).fill(1);
+        const chars = 'JudsonSajiCreatorExPoetExMinimalistExThinker'.split('');
+
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.04)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#0F0';
+            ctx.font = `${fontSize}px Fira Code`;
+
+            for (let i = 0; i < drops.length; i++) {
+                const text = chars[Math.floor(Math.random() * chars.length)];
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+        matrixInterval = setInterval(drawMatrix, 33);
+
+        if (!silent) {
+            setTimeout(() => {
+                clearInterval(matrixInterval);
+                canvas.classList.remove('active');
+            }, 10000);
+        }
+    }
+
+
+    // --- ANIMATION LOGIC ---
+    let stars = [];
+    let bubbles = [];
+
+    function initStarfield() {
+        const canvas = document.getElementById('aurora-canvas');
+        if (!canvas) return;
+        stars = [];
+        for (let i = 0; i < 300; i++) {
+            stars.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                radius: Math.random() * 1.5,
+                vx: (Math.random() - 0.5) / 4,
+                vy: (Math.random() - 0.5) / 4,
+                alpha: Math.random() * 0.5 + 0.5
+            });
+        }
+        for (let i = 0; i < 3; i++) {
+             stars.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                radius: Math.random() * 2 + 1,
+                vx: Math.random() * 10 + 5,
+                vy: Math.random() * 10 + 5,
+                alpha: 1,
+                isShooting: true,
+                life: 100
+            });
+        }
+    }
+
+    function animateAurora() {
+        const canvas = document.getElementById('aurora-canvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const influenceRadius = 150;
+        const influenceStrength = 0.005;
+
+        ctx.fillStyle = 'white';
+        stars.forEach(star => {
+            const dx = mouse.x - star.x;
+            const dy = mouse.y - star.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < influenceRadius) {
+                const force = (1 - distance / influenceRadius) * influenceStrength;
+                star.vx -= dx * force;
+                star.vy -= dy * force;
+            }
+
+            star.vx *= 0.99;
+            star.vy *= 0.99;
+
+
+            ctx.globalAlpha = star.alpha;
+            ctx.beginPath();
+            ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+            ctx.fill();
+
+            star.x += star.vx;
+            star.y += star.vy;
+            
+            if(star.isShooting) {
+                star.life--;
+                if(star.life <= 0) {
+                    star.x = Math.random() * canvas.width;
+                    star.y = -20;
+                    star.life = 100;
+                }
+            } else {
+                 if (star.x < 0 || star.x > canvas.width) star.vx = -star.vx;
+                 if (star.y < 0 || star.y > canvas.height) star.vy = -star.vy;
+            }
+        });
+        ctx.globalAlpha = 1;
+        activeAnimationId = requestAnimationFrame(animateAurora);
+    }
+
+    function initBubbles() {
+        const canvas = document.getElementById('day-canvas');
+        if (!canvas) return;
+        bubbles = [];
+        const colors = [getComputedStyle(document.documentElement).getPropertyValue('--glow-color-1'), getComputedStyle(document.documentElement).getPropertyValue('--glow-color-2')];
+        for (let i = 0; i < 25; i++) {
+            bubbles.push({
+                x: Math.random() * canvas.width,
+                y: canvas.height + Math.random() * 100,
+                radius: Math.random() * 20 + 10,
+                speed: Math.random() * 1 + 0.5,
+                color: colors[i % 2]
+            });
+        }
+    }
+
+    function animateDay() {
+        const canvas = document.getElementById('day-canvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const influenceRadiusBubbles = 100;
+        const influenceStrengthBubbles = 0.05;
+
+        bubbles.forEach(bubble => {
+            ctx.beginPath();
+            ctx.arc(bubble.x, bubble.y, bubble.radius, 0, Math.PI * 2);
+            ctx.fillStyle = `${bubble.color}33`;
+            ctx.fill();
+            ctx.strokeStyle = `${bubble.color}80`;
+            ctx.stroke();
+
+            const dx = mouse.x - bubble.x;
+            const dy = mouse.y - bubble.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < influenceRadiusBubbles) {
+                const force = (1 - distance / influenceRadiusBubbles) * influenceStrengthBubbles;
+                bubble.x -= dx * force;
+                bubble.y -= dy * force;
+            }
+
+            bubble.y -= bubble.speed;
+            bubble.x += Math.sin(bubble.y / 50) * 0.5;
+
+            if (bubble.y < -bubble.radius) {
+                bubble.y = canvas.height + bubble.radius;
+                bubble.x = Math.random() * canvas.width;
+            }
+        });
+
+        activeAnimationId = requestAnimationFrame(animateDay);
+    }
+
+    // --- CURSOR TRAIL LOGIC ---
+    const cursorTrailCanvas = document.getElementById('cursor-trail-canvas');
+    let cursorTrailCtx;
+    let trailParticles = [];
+    let trailColor = 'rgba(56, 231, 255, 0.5)';
+    let trailMaxParticles = 50;
+    let trailParticleSize = 2;
+    let trailFadeSpeed = 0.05;
+
+    function initCursorTrail() {
+        if (!cursorTrailCanvas) return;
+        cursorTrailCtx = cursorTrailCanvas.getContext('2d');
+        cursorTrailCanvas.width = window.innerWidth;
+        cursorTrailCanvas.height = window.innerHeight;
+        trailParticles = [];
+    }
+
+    function animateCursorTrail() {
+        if (!cursorTrailCtx) return;
+
+        cursorTrailCtx.clearRect(0, 0, cursorTrailCanvas.width, cursorTrailCanvas.height);
+
+        trailParticles.push({
+            x: mouse.x,
+            y: mouse.y,
+            size: trailParticleSize,
+            alpha: 1,
+            vx: (Math.random() - 0.5) * 2,
+            vy: (Math.random() - 0.5) * 2,
+        });
+
+        if (trailParticles.length > trailMaxParticles) {
+            trailParticles.shift();
+        }
+
+        for (let i = 0; i < trailParticles.length; i++) {
+            let p = trailParticles[i];
+
+            p.x += p.vx;
+            p.y += p.vy;
+            p.alpha -= trailFadeSpeed;
+
+            if (p.alpha <= 0) {
+                trailParticles.splice(i, 1);
+                i--;
+                continue;
+            }
+
+            cursorTrailCtx.fillStyle = trailColor;
+            cursorTrailCtx.globalAlpha = p.alpha;
+            cursorTrailCtx.beginPath();
+            cursorTrailCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            cursorTrailCtx.fill();
+        }
+        cursorTrailCtx.globalAlpha = 1;
+
+        requestAnimationFrame(animateCursorTrail);
+    }
+
+    function updateCursorTrailColor() {
+        const currentTheme = localStorage.getItem('theme') || 'dark';
+        if (currentTheme === 'light') {
+            trailColor = 'rgba(0, 123, 255, 0.5)';
+        } else {
+            trailColor = 'rgba(56, 231, 255, 0.5)';
+        }
+    }
+
+
+    // --- CANVAS RESIZING FUNCTION ---
+    function resizeAllCanvases() {
+        const canvases = document.querySelectorAll('.background-canvas');
+        canvases.forEach(canvas => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+        const generativeArtCanvas = document.getElementById('generative-art-canvas');
+        if (generativeArtCanvas && generativeArtCanvas.offsetParent !== null) {
+            generativeArtCanvas.width = generativeArtCanvas.offsetWidth;
+            generativeArtCanvas.height = generativeArtCanvas.offsetHeight;
+            initGenerativeArt();
+        }
+        if (cursorTrailCanvas) {
+            cursorTrailCanvas.width = window.innerWidth;
+            cursorTrailCanvas.height = window.innerHeight;
+        }
+    }
+    
+    // --- INITIALIZATION ---
     async function initializePage() {
         resizeAllCanvases();
         applyTheme(localStorage.getItem('theme') || 'dark');
@@ -2727,6 +2856,7 @@ _           _                     _   _
         updateWeather();
         updateGitHubStats();
         updateNowPlaying();
+        // Removed renderBlogPosts();
         
         const greetingEl = document.getElementById('greeting');
         const lastVisitTimestamp = localStorage.getItem('lastVisitTimestamp');
@@ -2735,9 +2865,16 @@ _           _                     _   _
         if (lastVisitTimestamp) {
             const timeDiffMs = currentTime - parseInt(lastVisitTimestamp);
             const minutes = Math.floor(timeDiffMs / (1000 * 60));
-            let timeAgoMessage = minutes > 0 ? `${minutes} minute(s) ago` : `just now`;
+            const hours = Math.floor(minutes / 60);
+            const days = Math.floor(hours / 24);
 
-            const promptForAI = `The user is returning. Their last visit was ${timeAgoMessage}. Generate a very short, friendly welcome back message.`;
+            let timeAgoMessage = '';
+            if (days > 0) timeAgoMessage = `${days} day${days > 1 ? 's' : ''} ago`;
+            else if (hours > 0) timeAgoMessage = `${hours} hour${hours > 1 ? 's' : ''} ago`;
+            else if (minutes > 0) timeAgoMessage = `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+            else timeAgoMessage = `just now`;
+
+            const promptForAI = `The user is returning to the website. Their last visit was ${timeAgoMessage}. Generate a very short, friendly, and creative welcome back message (1-2 sentences). You are Judson's AI assistant.`;
             
             try {
                 const response = await fetch('/.netlify/functions/ask-gemini', {
@@ -2747,12 +2884,11 @@ _           _                     _   _
                 });
                 if (response.ok) {
                     const data = await response.json();
-                    if (data && data.response && data.response.parts[0].text) {
-                        greetingEl.textContent = data.response.parts[0].text;
+                    if (data && data.response) {
+                        greetingEl.textContent = data.response;
                     }
                 } else {
-                   const errorData = await response.json();
-                   console.error("Failed to get AI greeting:", errorData.message);
+                    console.error("Failed to get AI greeting:", await response.text());
                 }
             } catch (e) {
                 console.error("Error calling AI for greeting:", e);
@@ -2775,8 +2911,151 @@ _           _                     _   _
         updateCursorTrailColor();
     }
 
-    // --- Event Listeners ---
-    // ... (restored and omitted for brevity)
+    // Event Listeners
+    window.addEventListener("resize", () => {
+      resizeAllCanvases();
+      applyTheme(localStorage.getItem('theme') || 'dark');
+      updateCursorTrailColor();
+    });
+
+    window.addEventListener('mousemove', (e) => {
+        mouse.x = e.clientX;
+        mouse.y = e.clientY;
+        mouseVelocityX = e.clientX - lastMouseX;
+        mouseVelocityY = e.clientY - lastMouseY;
+        lastMouseX = e.clientX;
+        lastMouseY = e.clientY;
+    });
+    
+    // --- NAVIGATION DRAWER LOGIC ---
+    const hamburgerBtn = document.getElementById('hamburger-btn');
+    const mainNavDrawer = document.getElementById('main-nav-drawer');
+    const drawerBackdrop = document.getElementById('drawer-backdrop');
+    const drawerNavLinksContainer = mainNavDrawer ? mainNavDrawer.querySelector('.drawer-nav-links') : null;
+    const drawerCloseBtn = document.getElementById('drawer-close-btn');
+
+    function openDrawer() {
+        if (mainNavDrawer) mainNavDrawer.classList.add('active');
+        if (drawerBackdrop) drawerBackdrop.classList.add('active');
+        populateDrawerLinks();
+        document.body.style.overflow = 'hidden';
+        playSound('A4', 'triangle');
+    }
+
+    function closeDrawer() {
+        if (mainNavDrawer) mainNavDrawer.classList.remove('active');
+        if (drawerBackdrop) drawerBackdrop.classList.remove('active');
+        document.body.style.overflow = '';
+        playSound('C3', 'triangle', '16n');
+    }
+
+    function populateDrawerLinks() {
+        const desktopNavLinks = document.querySelectorAll('#desktop-nav a');
+        if (drawerNavLinksContainer) {
+            drawerNavLinksContainer.innerHTML = '';
+            desktopNavLinks.forEach(link => {
+                const clonedLink = link.cloneNode(true);
+                clonedLink.removeEventListener('click', handleDrawerLinkClick);
+                clonedLink.addEventListener('click', handleDrawerLinkClick);
+                drawerNavLinksContainer.appendChild(clonedLink);
+            });
+            feather.replace();
+        }
+    }
+
+    function handleDrawerLinkClick(event) {
+        event.preventDefault();
+        const modalId = event.currentTarget.dataset.modal;
+        if (modalId) {
+            openModal(modalId);
+        } else if (event.currentTarget.href) {
+            window.open(event.currentTarget.href, event.currentTarget.target || '_self');
+        }
+        closeDrawer();
+    }
+
+
+    if (hamburgerBtn) {
+        hamburgerBtn.addEventListener('click', openDrawer);
+    }
+    if (drawerBackdrop) {
+        drawerBackdrop.addEventListener('click', closeDrawer);
+    }
+    if (drawerCloseBtn) {
+        drawerCloseBtn.addEventListener('click', closeDrawer);
+    }
+    document.addEventListener('DOMContentLoaded', populateDrawerLinks);
+
+    // --- SCROLL ANIMATION LOGIC ---
+    const animateOnScrollElements = document.querySelectorAll('.animate-on-scroll');
+    const observerOptions = {
+        root: null,
+        rootMargin: '0px',
+        threshold: 0.1
+    };
+
+    const observer = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('is-visible');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, observerOptions);
+
+    document.addEventListener('DOMContentLoaded', () => {
+        animateOnScrollElements.forEach(el => {
+            observer.observe(el);
+        });
+    });
+
+
+    // --- CUSTOM CONTEXT MENU LOGIC ---
+    const customContextMenu = document.getElementById('custom-context-menu');
+
+    document.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+
+        customContextMenu.style.top = `${e.clientY}px`;
+        customContextMenu.style.left = `${e.clientX}px`;
+        customContextMenu.style.display = 'flex';
+        feather.replace();
+    });
+
+    document.addEventListener('click', (e) => {
+        if (customContextMenu && customContextMenu.style.display === 'flex' && !customContextMenu.contains(e.target)) {
+            customContextMenu.style.display = 'none';
+        }
+    });
+
+    if (customContextMenu) {
+        customContextMenu.querySelectorAll('.context-menu-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                const action = e.currentTarget.dataset.action;
+                switch (action) {
+                    case 'toggleTheme':
+                        toggleTheme();
+                        break;
+                    case 'openCli':
+                        openModal('contact');
+                        break;
+                    case 'copyUrl':
+                        const dummy = document.createElement('textarea');
+                        document.body.appendChild(dummy);
+                        dummy.value = window.location.href;
+                        dummy.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(dummy);
+                        showToast('Page URL copied!');
+                        break;
+                    default:
+                        console.log(`Context menu action: ${action}`);
+                }
+                customContextMenu.style.display = 'none';
+            });
+        });
+    }
+
 
     document.addEventListener('DOMContentLoaded', () => {
         cli.setupUI();
