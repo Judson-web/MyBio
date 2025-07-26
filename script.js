@@ -1,6 +1,6 @@
 /**
  * Judson AI - Gemini UI Professional Chatbot
- * @version 10.0.0
+ * @version 11.0.0
  * @author Judson Saji
  */
 
@@ -31,10 +31,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 clearChatBtn: document.getElementById('clear-chat-btn'),
                 historyToggleBtn: document.getElementById('history-toggle-btn'),
                 historyBackdrop: document.getElementById('history-backdrop'),
+                cookieBanner: document.getElementById('cookie-banner'),
+                cookieAcceptBtn: document.getElementById('cookie-accept-btn'),
             };
             this.loadConversations();
             this.renderHistoryList();
             this.bindEvents();
+            this.handleCookieConsent();
         },
 
         bindEvents() {
@@ -59,8 +62,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (window.innerWidth <= 768) this.toggleHistoryPanel();
                 }
             });
+            this.DOMElements.cookieAcceptBtn?.addEventListener('click', () => {
+                localStorage.setItem('cookieConsent', 'true');
+                this.DOMElements.cookieBanner.classList.add('hidden');
+            });
         },
         
+        handleCookieConsent() {
+            if (!localStorage.getItem('cookieConsent')) {
+                this.DOMElements.cookieBanner.classList.remove('hidden');
+            }
+        },
+
         autoResizeTextarea(e) {
             e.target.style.height = 'auto';
             e.target.style.height = e.target.scrollHeight + 'px';
@@ -186,25 +199,44 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const messageContent = document.createElement('div');
             messageContent.className = 'message-content';
-            messageContent.innerHTML = marked.parse(text);
+            const messageBubble = document.createElement('div');
+            messageBubble.className = 'message-bubble';
+            messageBubble.innerHTML = marked.parse(text);
+            
+            messageContent.appendChild(messageBubble);
+
+            if (senderClass === 'ai') {
+                const actions = document.createElement('div');
+                actions.className = 'response-actions';
+                const copyButton = document.createElement('button');
+                copyButton.innerHTML = `<i data-feather="copy"></i>`;
+                copyButton.onclick = () => {
+                    navigator.clipboard.writeText(text);
+                    // Optional: Show feedback
+                };
+                actions.appendChild(copyButton);
+                messageContent.appendChild(actions);
+            }
 
             messageContainer.appendChild(avatar);
             messageContainer.appendChild(messageContent);
             this.DOMElements.chatDisplay.appendChild(messageContainer);
             this.DOMElements.chatDisplay.scrollTop = this.DOMElements.chatDisplay.scrollHeight;
 
+            feather.replace();
+
             messageContent.querySelectorAll('pre code').forEach((block) => {
                 hljs.highlightElement(block);
                 const pre = block.parentElement;
-                const copyButton = document.createElement('button');
-                copyButton.className = 'copy-code-btn';
-                copyButton.innerHTML = 'Copy';
-                copyButton.onclick = () => {
+                const copyCodeButton = document.createElement('button');
+                copyCodeButton.className = 'copy-code-btn';
+                copyCodeButton.innerHTML = 'Copy';
+                copyCodeButton.onclick = () => {
                     navigator.clipboard.writeText(block.textContent);
-                    copyButton.innerHTML = 'Copied!';
-                    setTimeout(() => copyButton.innerHTML = 'Copy', 2000);
+                    copyCodeButton.innerHTML = 'Copied!';
+                    setTimeout(() => copyCodeButton.innerHTML = 'Copy', 2000);
                 };
-                pre.appendChild(copyButton);
+                pre.appendChild(copyCodeButton);
             });
         },
 
