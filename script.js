@@ -1,12 +1,13 @@
 /**
  * Judson AI - Gemini UI Professional Chatbot
- * @version 9.0.0
+ * @version 10.0.0
  * @author Judson Saji
  */
 
 document.addEventListener('DOMContentLoaded', () => {
     // --- GLOBAL SETUP ---
     const mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+    const userProfileImageUrl = "https://firebasestorage.googleapis.com/v0/b/crnn-b7d8f.appspot.com/o/files%2FIMG_20250717_215454_617-modified.png?alt=media&token=bea1f0dd-abf1-4cfb-8a83-0d3b603d3fde";
     feather.replace();
 
     // --- CHATBOT & HISTORY CORE LOGIC ---
@@ -29,6 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 newChatBtn: document.getElementById('new-chat-btn'),
                 clearChatBtn: document.getElementById('clear-chat-btn'),
                 historyToggleBtn: document.getElementById('history-toggle-btn'),
+                historyBackdrop: document.getElementById('history-backdrop'),
             };
             this.loadConversations();
             this.renderHistoryList();
@@ -40,6 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
             this.DOMElements.newChatBtn?.addEventListener('click', () => this.startNewConversation());
             this.DOMElements.clearChatBtn?.addEventListener('click', () => this.clearCurrentConversation());
             this.DOMElements.historyToggleBtn?.addEventListener('click', () => this.toggleHistoryPanel());
+            this.DOMElements.historyBackdrop?.addEventListener('click', () => this.toggleHistoryPanel());
             this.DOMElements.chatbotSendBtn?.addEventListener('click', () => this.processUserMessage());
             this.DOMElements.chatbotInput?.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' && !e.shiftKey && !this.state.isThinking) { e.preventDefault(); this.processUserMessage(); }
@@ -63,7 +66,15 @@ document.addEventListener('DOMContentLoaded', () => {
             e.target.style.height = e.target.scrollHeight + 'px';
         },
 
-        toggleHistoryPanel() { this.DOMElements.historyPanel?.classList.toggle('closed'); },
+        toggleHistoryPanel() {
+            const panel = this.DOMElements.historyPanel;
+            if (!panel) return;
+            const isClosed = panel.classList.contains('closed');
+            panel.classList.toggle('closed');
+            if (window.innerWidth <= 768) {
+                this.DOMElements.historyBackdrop.classList.toggle('hidden', !isClosed);
+            }
+        },
         saveConversations() { localStorage.setItem('judson_ai_conversations', JSON.stringify(this.state.conversations)); },
 
         loadConversations() {
@@ -76,7 +87,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     this.loadConversation(this.state.currentConversationId);
                 }
             }
-            if (window.innerWidth <= 768) {
+            if (window.innerWidth > 768) {
+                this.DOMElements.historyPanel?.classList.remove('closed');
+            } else {
                 this.DOMElements.historyPanel?.classList.add('closed');
             }
         },
@@ -85,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
             this.state.currentConversationId = `chat_${Date.now()}`;
             this.state.conversations[this.state.currentConversationId] = {
                 title: "New Chat",
-                messages: [] // Start with an empty history
+                messages: []
             };
             this.loadConversation(this.state.currentConversationId);
             this.renderHistoryList();
@@ -104,7 +117,6 @@ document.addEventListener('DOMContentLoaded', () => {
             this.state.currentConversationId = id;
             const conversation = this.state.conversations[id];
             
-            this.DOMElements.welcomeScreen?.classList.add('hidden');
             this.DOMElements.chatInterface?.classList.remove('hidden');
             this.DOMElements.chatDisplay.innerHTML = '';
             this.DOMElements.chatTitle.textContent = conversation.title;
@@ -129,8 +141,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (keys.length > 0) {
                     this.loadConversation(keys[keys.length - 1]);
                 } else {
-                    this.DOMElements.welcomeScreen?.classList.remove('hidden');
                     this.DOMElements.chatInterface?.classList.add('hidden');
+                    this.DOMElements.welcomeScreen?.classList.remove('hidden');
                     this.state.currentConversationId = null;
                 }
             }
@@ -167,9 +179,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const avatar = document.createElement('div');
             avatar.className = `avatar ${senderClass}`;
             if (senderClass === 'user') {
-                avatar.textContent = 'J'; // Or user's initial
+                avatar.innerHTML = `<img src="${userProfileImageUrl}" alt="User Avatar">`;
             } else {
-                avatar.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gemini-gradient" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#89b3f9;stop-opacity:1" /><stop offset="100%" style="stop-color:#d8b6ff;stop-opacity:1" /></linearGradient></defs><path d="M12 2.75L14.25 9.25L21.25 9.75L15.75 14.75L17.75 21.5L12 17.5L6.25 21.5L8.25 14.75L2.75 9.75L9.75 9.25L12 2.75Z" stroke="url(#gemini-gradient)" stroke-width="1.5" stroke-linejoin="round"/></svg>`;
+                avatar.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gemini-gradient-avatar" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#89b3f9;stop-opacity:1" /><stop offset="100%" style="stop-color:#d8b6ff;stop-opacity:1" /></linearGradient></defs><path d="M12 2.75L14.25 9.25L21.25 9.75L15.75 14.75L17.75 21.5L12 17.5L6.25 21.5L8.25 14.75L2.75 9.75L9.75 9.25L12 2.75Z" stroke="url(#gemini-gradient-avatar)" stroke-width="1.5" stroke-linejoin="round"/></svg>`;
             }
             
             const messageContent = document.createElement('div');
@@ -181,7 +193,6 @@ document.addEventListener('DOMContentLoaded', () => {
             this.DOMElements.chatDisplay.appendChild(messageContainer);
             this.DOMElements.chatDisplay.scrollTop = this.DOMElements.chatDisplay.scrollHeight;
 
-            // Handle code snippets
             messageContent.querySelectorAll('pre code').forEach((block) => {
                 hljs.highlightElement(block);
                 const pre = block.parentElement;
