@@ -599,26 +599,38 @@
         border-radius: 16px;
         border: 1px solid var(--card-border);
         box-shadow: 0 8px 32px 0 var(--card-shadow);
-        padding: 2rem 1.5rem;
+        padding: 0; /* Changed padding to 0 */
         width: 100%;
         max-width: 600px;
         max-height: 90vh;
-        overflow-y: auto;
+        overflow: hidden; /* Changed to hidden */
         transform: scale(0.95); /* Start slightly smaller for subtle zoom */
         transition: transform 0.3s ease, background 0.4s ease, border-color 0.4s ease; /* Adjusted transition */
         position: relative;
+        display: flex; /* Added for layout */
+        flex-direction: column; /* Added for layout */
     }
     .modal-overlay.active .modal-content {
         transform: scale(1);
     }
-    .modal-content h2 {
-        margin-top: 0;
+    .modal-header { /* New class for modal headers */
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--card-border);
+      flex-shrink: 0;
+    }
+    .modal-header h2 {
+        margin: 0;
         font-size: 1.8rem;
         background: linear-gradient(90deg, var(--glow-color-1), var(--glow-color-2));
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
     }
-    .modal-content p {
+    .modal-body { /* New class for modal content area */
+      padding: 1.5rem;
+      overflow-y: auto;
+      flex-grow: 1;
+    }
+    .modal-body p {
         color: var(--dim-text-color);
         line-height: 1.6;
     }
@@ -629,6 +641,7 @@
         cursor: pointer;
         color: var(--dim-text-color);
         transition: color 0.3s, transform 0.3s;
+        z-index: 10;
     }
     .close-modal:hover {
         color: var(--text-color);
@@ -636,18 +649,18 @@
     }
     
     /* --- Custom Scrollbar --- */
-    .modal-content::-webkit-scrollbar {
+    .modal-body::-webkit-scrollbar, #chatbot-display::-webkit-scrollbar {
         width: 8px;
     }
-    .modal-content::-webkit-scrollbar-track {
+    .modal-body::-webkit-scrollbar-track, #chatbot-display::-webkit-scrollbar-track {
         background: rgba(127,127,127,0.1);
         border-radius: 4px;
     }
-    .modal-content::-webkit-scrollbar-thumb {
+    .modal-body::-webkit-scrollbar-thumb, #chatbot-display::-webkit-scrollbar-thumb {
         background: rgba(127,127,127,0.3);
         border-radius: 4px;
     }
-    .modal-content::-webkit-scrollbar-thumb:hover {
+    .modal-body::-webkit-scrollbar-thumb:hover, #chatbot-display::-webkit-scrollbar-thumb:hover {
         background: rgba(127,127,127,0.5);
     }
     
@@ -835,56 +848,88 @@
     }
 
 
-    /* --- Chatbot Modal Styles --- */
+    /* --- Chatbot Modal Styles (ENHANCED) --- */
     #chatbot-modal .modal-content {
         max-width: 500px;
-        max-height: 80vh;
+        height: 85vh; /* Fixed height */
+        max-height: 700px;
+        padding: 0;
+    }
+    .chatbot-header {
         display: flex;
-        flex-direction: column;
-        padding: 1.5rem;
+        align-items: center;
+        gap: 10px;
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid var(--card-border);
+        flex-shrink: 0;
+    }
+    .chatbot-header h2 {
+        margin: 0;
+        font-size: 1.5rem;
+        background: none;
+        -webkit-background-clip: unset;
+        -webkit-text-fill-color: unset;
+        color: var(--text-color);
+    }
+    .chatbot-header i {
+        color: var(--glow-color-1);
     }
     #chatbot-display {
         flex-grow: 1;
         overflow-y: auto;
-        border: 1px solid var(--card-border);
-        border-radius: 8px;
         padding: 1rem;
-        margin-bottom: 1rem;
         background: rgba(0,0,0,0.1);
-        min-height: 200px;
         display: flex;
         flex-direction: column;
-        gap: 0.5rem;
+        gap: 1rem; /* Increased gap */
     }
     .chat-message {
-        padding: 0.5rem 0.8rem;
-        border-radius: 12px;
-        max-width: 80%;
+        padding: 0.75rem 1rem;
+        border-radius: 18px;
+        max-width: 85%;
         word-wrap: break-word;
         line-height: 1.5;
+        position: relative;
     }
     .chat-message.user {
         background: var(--glow-color-1);
         color: #000;
         align-self: flex-end;
-        border-bottom-right-radius: 2px;
+        border-bottom-right-radius: 4px;
     }
     .chat-message.ai {
-        background: var(--card-bg);
+        background: rgba(127,127,127,0.15);
         color: var(--text-color);
         border: 1px solid var(--card-border);
         align-self: flex-start;
-        border-bottom-left-radius: 2px;
+        border-bottom-left-radius: 4px;
+    }
+    /* Message bubble tails */
+    .chat-message.ai::before, .chat-message.user::before {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        width: 0;
+        height: 0;
+        border: 10px solid transparent;
+    }
+    .chat-message.ai::before {
+        left: -10px;
+        border-right-color: var(--card-border);
+        border-right-width: 7px;
+    }
+    .light-theme .chat-message.ai::before {
+      border-right-color: var(--card-border);
+    }
+    .chat-message.user::before {
+        right: -7px;
+        border-left-color: var(--glow-color-1);
     }
     /* Chatbot Markdown Styling */
-    .chat-message p {
-        margin: 0 0 0.5rem 0;
-        color: var(--text-color);
-    }
-    .chat-message.user p { color: #000; }
+    .chat-message p { margin: 0 0 0.5rem 0; color: inherit; }
     .chat-message p:last-child { margin-bottom: 0; }
     .chat-message pre {
-        background: rgba(0,0,0,0.2);
+        background: rgba(0,0,0,0.3);
         border: 1px solid var(--card-border);
         border-radius: 8px;
         padding: 1rem;
@@ -893,7 +938,7 @@
         font-size: 0.9rem;
         white-space: pre-wrap;
         word-wrap: break-word;
-        position: relative; /* For the copy button */
+        position: relative;
     }
     .chat-message code {
         font-family: 'Fira Code', monospace;
@@ -901,10 +946,7 @@
         padding: 0.1rem 0.3rem;
         border-radius: 4px;
     }
-    .chat-message pre code {
-        background: none;
-        padding: 0;
-    }
+    .chat-message pre code { background: none; padding: 0; }
     .chat-message blockquote {
         border-left: 3px solid var(--glow-color-1);
         padding-left: 1rem;
@@ -912,6 +954,8 @@
         font-style: italic;
         color: var(--dim-text-color);
     }
+    .chat-message ul, .chat-message ol { padding-left: 1.5rem; }
+    .chat-message a { color: var(--glow-color-2); text-decoration: underline; }
     .copy-code-btn {
         position: absolute;
         top: 0.5rem;
@@ -925,26 +969,20 @@
         opacity: 0.3;
         transition: opacity 0.2s ease;
         font-size: 0.8rem;
-        display: flex;
-        align-items: center;
-        gap: 4px;
     }
-    .chat-message pre:hover .copy-code-btn {
-        opacity: 1;
-    }
-    .copy-code-btn i {
-        width: 14px;
-        height: 14px;
-    }
+    .chat-message pre:hover .copy-code-btn { opacity: 1; }
     #chatbot-thinking-indicator {
         font-style: italic;
         color: var(--dim-text-color);
-        align-self: flex-start;
-        margin-left: 0.5rem;
+        padding: 0 1.5rem 0.5rem;
+        flex-shrink: 0;
     }
     .chat-input-container {
         display: flex;
         gap: 0.5rem;
+        padding: 1rem 1.5rem;
+        border-top: 1px solid var(--card-border);
+        flex-shrink: 0;
     }
     #chatbot-input {
         flex-grow: 1;
@@ -955,20 +993,42 @@
         color: var(--text-color);
         outline: none;
     }
-    #chatbot-input:focus {
-        border-color: var(--glow-color-1);
-    }
+    #chatbot-input:focus { border-color: var(--glow-color-1); }
     #chatbot-send-btn, #chatbot-clear-btn {
         background: var(--glow-color-2);
         color: #fff;
         border: none;
-        padding: 0.75rem 1rem;
+        padding: 0.75rem;
         border-radius: 8px;
         cursor: pointer;
         transition: background 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
-    #chatbot-send-btn:hover, #chatbot-clear-btn:hover {
-        background: var(--glow-color-1);
+    #chatbot-send-btn:hover, #chatbot-clear-btn:hover { background: var(--glow-color-1); }
+    /* Suggested Actions */
+    #suggested-actions-container {
+        padding: 0 1rem 1rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        justify-content: center;
+    }
+    .suggested-action-btn {
+        background: rgba(127,127,127,0.1);
+        border: 1px solid var(--card-border);
+        color: var(--dim-text-color);
+        padding: 0.5rem 0.8rem;
+        border-radius: 12px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        transition: all 0.2s ease;
+    }
+    .suggested-action-btn:hover {
+        background: rgba(127,127,127,0.2);
+        color: var(--text-color);
+        border-color: var(--glow-color-1);
     }
 
 
@@ -1247,61 +1307,67 @@
   <div id="about-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="about-modal-title">
     <div class="modal-content">
       <i data-feather="x" class="close-modal" aria-label="Close About modal"></i>
-      <h2 id="about-modal-title">About Me</h2>
-      <p>I'm a creator driven by the fusion of technology and art. My background isn't linear; it's a path woven through poetry, the discipline of minimalism, and a deep-seated love for analytical thought. Today, these threads combine in my work as a creative developer.</p>
-      <p>My focus is on generative art, interactive design, and building digital experiences that feel both intelligent and human. This space is my digital sketchbook and a reflection of my ongoing projects. I'm currently exploring how to tell better stories with code. Welcome.</p>
+      <div class="modal-header">
+        <h2 id="about-modal-title">About Me</h2>
+      </div>
+      <div class="modal-body">
+        <p>I'm a creator driven by the fusion of technology and art. My background isn't linear; it's a path woven through poetry, the discipline of minimalism, and a deep-seated love for analytical thought. Today, these threads combine in my work as a creative developer.</p>
+        <p>My focus is on generative art, interactive design, and building digital experiences that feel both intelligent and human. This space is my digital sketchbook and a reflection of my ongoing projects. I'm currently exploring how to tell better stories with code. Welcome.</p>
+      </div>
     </div>
   </div>
    <div id="projects-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="projects-modal-title">
     <div class="modal-content">
       <i data-feather="x" class="close-modal" aria-label="Close Projects modal"></i>
-      <h2 id="projects-modal-title">GitHub Projects</h2>
-      <button id="generate-project-idea-btn" class="ambient-btn glitch-effect" data-text="Generate a Project Idea" aria-label="Generate a new project idea with AI" style="margin-bottom: 1rem; width: 100%;">
-          <!-- Inline SVG for lightbulb icon -->
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-lightbulb" style="width: 18px; height: 18px; stroke: currentColor; margin-right: 5px;">
-              <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1.3.5 2.6 1.5 3.5.8.8 1.3 1.5 1.5 2.5"></path>
-              <path d="M9 18h6"></path>
-              <path d="M10 22h4"></path>
-              <path d="M12 22v-4"></path>
-          </svg>
-          <span>Generate a Project Idea</span>
-      </button>
-      <div id="ai-project-idea-output">
-          <h3 id="ai-project-idea-title"></h3>
-          <p id="ai-project-idea-concept"></p>
+      <div class="modal-header">
+        <h2 id="projects-modal-title">GitHub Projects</h2>
       </div>
-      <div id="projects-list"></div>
+      <div class="modal-body">
+        <button id="generate-project-idea-btn" class="ambient-btn glitch-effect" data-text="Generate a Project Idea" aria-label="Generate a new project idea with AI" style="margin-bottom: 1rem; width: 100%;">
+            <i data-feather="cpu" style="width: 18px; height: 18px; stroke: currentColor; margin-right: 5px;"></i>
+            <span>Generate a Project Idea</span>
+        </button>
+        <div id="ai-project-idea-output">
+            <h3 id="ai-project-idea-title"></h3>
+            <p id="ai-project-idea-concept"></p>
+        </div>
+        <div id="projects-list"></div>
+      </div>
     </div>
   </div>
   <div id="generative-art-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="generative-art-modal-title">
     <div class="modal-content">
       <i data-feather="x" class="close-modal" aria-label="Close Generative Art modal"></i>
-      <h2 id="generative-art-modal-title">Generative Art Lab</h2>
-      <p>Explore a live generative art piece. It reacts to your mouse movement!</p>
-      <canvas id="generative-art-canvas"></canvas>
-      <div id="generative-art-controls">
-        <button id="reset-art-btn" aria-label="Reset generative art to default"><i data-feather="refresh-cw"></i> Reset</button>
-        <button id="change-particle-color-btn" aria-label="Change particle color"><i data-feather="droplet"></i> Particle Color</button>
-        <button id="change-bg-color-btn" aria-label="Change background color"><i data-feather="square"></i> Background Color</button>
-        <button id="toggle-lines-btn" aria-label="Toggle connection lines"><i data-feather="link-2"></i> Lines: ON</button>
-        <button id="pause-play-btn" aria-label="Pause or play animation"><i data-feather="pause"></i> Pause</button>
-        <button id="ai-generate-palette-btn" aria-label="Ask AI to generate a new color palette"><i data-feather="cpu"></i> AI Palette</button>
+      <div class="modal-header">
+        <h2 id="generative-art-modal-title">Generative Art Lab</h2>
+      </div>
+      <div class="modal-body">
+        <p>Explore a live generative art piece. It reacts to your mouse movement!</p>
+        <canvas id="generative-art-canvas"></canvas>
+        <div id="generative-art-controls">
+          <button id="reset-art-btn" aria-label="Reset generative art to default"><i data-feather="refresh-cw"></i> Reset</button>
+          <button id="change-particle-color-btn" aria-label="Change particle color"><i data-feather="droplet"></i> Particle Color</button>
+          <button id="change-bg-color-btn" aria-label="Change background color"><i data-feather="square"></i> Background Color</button>
+          <button id="toggle-lines-btn" aria-label="Toggle connection lines"><i data-feather="link-2"></i> Lines: ON</button>
+          <button id="pause-play-btn" aria-label="Pause or play animation"><i data-feather="pause"></i> Pause</button>
+          <button id="ai-generate-palette-btn" aria-label="Ask AI to generate a new color palette"><i data-feather="cpu"></i> AI Palette</button>
 
-        <div class="control-group">
-            <label for="particle-count-slider">Count</label>
-            <input type="range" id="particle-count-slider" min="50" max="300" value="100" aria-label="Adjust particle count">
-        </div>
-        <div class="control-group">
-            <label for="particle-size-slider">Size</label>
-            <input type="range" id="particle-size-slider" min="0.5" max="5" step="0.1" value="2" aria-label="Adjust particle size">
-        </div>
-        <div class="control-group">
-            <label for="particle-speed-slider">Speed</label>
-            <input type="range" id="particle-speed-slider" min="0.1" max="5" step="0.1" value="2" aria-label="Adjust particle speed">
-        </div>
-        <div class="control-group">
-            <label for="repulsion-strength-slider">Repulsion</label>
-            <input type="range" id="repulsion-strength-slider" min="0.01" max="1" step="0.01" value="0.5" aria-label="Adjust mouse repulsion strength">
+          <div class="control-group">
+              <label for="particle-count-slider">Count</label>
+              <input type="range" id="particle-count-slider" min="50" max="300" value="100" aria-label="Adjust particle count">
+          </div>
+          <div class="control-group">
+              <label for="particle-size-slider">Size</label>
+              <input type="range" id="particle-size-slider" min="0.5" max="5" step="0.1" value="2" aria-label="Adjust particle size">
+          </div>
+          <div class="control-group">
+              <label for="particle-speed-slider">Speed</label>
+              <input type="range" id="particle-speed-slider" min="0.1" max="5" step="0.1" value="2" aria-label="Adjust particle speed">
+          </div>
+          <div class="control-group">
+              <label for="repulsion-strength-slider">Repulsion</label>
+              <input type="range" id="repulsion-strength-slider" min="0.01" max="1" step="0.01" value="0.5" aria-label="Adjust mouse repulsion strength">
+          </div>
         </div>
       </div>
     </div>
@@ -1309,27 +1375,37 @@
   <div id="chatbot-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="chatbot-modal-title">
     <div class="modal-content">
       <i data-feather="x" class="close-modal" aria-label="Close Chatbot modal"></i>
-      <h2 id="chatbot-modal-title">Judson AI Chatbot</h2>
+      <div class="chatbot-header">
+        <i data-feather="cpu"></i>
+        <h2 id="chatbot-modal-title">Judson AI</h2>
+      </div>
       <div id="chatbot-display">
         <!-- Chat history will be rendered here by JS -->
       </div>
+      <div id="suggested-actions-container">
+        <!-- Suggested actions will be rendered here by JS -->
+      </div>
+      <div id="chatbot-thinking-indicator" style="display:none;">AI is thinking...</div>
       <div class="chat-input-container">
         <input type="text" id="chatbot-input" placeholder="Ask me anything..." aria-label="Chatbot message input">
         <button id="chatbot-send-btn" aria-label="Send message"><i data-feather="send"></i></button>
         <button id="chatbot-clear-btn" aria-label="Clear chat history"><i data-feather="trash-2"></i></button>
       </div>
-      <div id="chatbot-thinking-indicator" style="display:none;">AI is thinking...</div>
     </div>
   </div>
   <div id="contact-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="contact-modal-title">
     <div class="modal-content terminal" id="terminal-container">
         <i data-feather="x" class="close-modal" aria-label="Close Contact Terminal modal"></i>
-        <h2 id="contact-modal-title">Contact Terminal</h2>
-        <div id="cli-output" role="log" aria-live="polite" aria-atomic="false"></div>
-        <div class="cli-input-container">
-            <span id="cli-prompt-text">></span>
-            <input type="text" id="cli-input" autofocus autocomplete="off" aria-label="Terminal command input">
-            <div class="blinking-cursor"></div>
+        <div class="modal-header">
+          <h2 id="contact-modal-title">Contact Terminal</h2>
+        </div>
+        <div class="modal-body" style="padding: 10px;">
+          <div id="cli-output" role="log" aria-live="polite" aria-atomic="false"></div>
+          <div class="cli-input-container">
+              <span id="cli-prompt-text">></span>
+              <input type="text" id="cli-input" autofocus autocomplete="off" aria-label="Terminal command input">
+              <div class="blinking-cursor"></div>
+          </div>
         </div>
     </div>
   </div>
@@ -1756,7 +1832,7 @@
                     generateProjectIdeaBtn.disabled = true;
                     generateProjectIdeaBtn.innerHTML = '<i data-feather="loader" class="spin"></i> <span>Generating Idea...</span>';
                     feather.replace();
-                    hide(aiProjectIdeaOutput);
+                    aiProjectIdeaOutput.classList.remove('active');
 
                     const prompt = `Generate a creative and minimalist web project idea for a developer who is an ex-poet, ex-minimalist, ex-thinker, now creator. The idea should combine elements of art, code, and philosophy. Provide the response in JSON format with two keys: 'title' (a concise, catchy title) and 'concept' (a 2-3 sentence concept description).`;
 
@@ -1776,7 +1852,7 @@
                         if (data && data.title && data.concept) {
                             aiProjectIdeaTitle.textContent = data.title;
                             aiProjectIdeaConcept.textContent = data.concept;
-                            show(aiProjectIdeaOutput);
+                            aiProjectIdeaOutput.classList.add('active');
                             showToast('New project idea generated!');
                         } else {
                             showToast('AI could not generate a project idea in the expected format.');
@@ -1788,12 +1864,7 @@
                     } finally {
                         generateProjectIdeaBtn.disabled = false;
                         generateProjectIdeaBtn.innerHTML = `
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-lightbulb" style="width: 18px; height: 18px; stroke: currentColor; margin-right: 5px;">
-                                <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1.3.5 2.6 1.5 3.5.8.8 1.3 1.5 1.5 2.5"></path>
-                                <path d="M9 18h6"></path>
-                                <path d="M10 22h4"></path>
-                                <path d="M12 22v-4"></path>
-                            </svg>
+                            <i data-feather="cpu" style="width: 18px; height: 18px; stroke: currentColor; margin-right: 5px;"></i>
                             <span>Generate a Project Idea</span>
                         `;
                         feather.replace();
@@ -2108,20 +2179,22 @@
         sendButton: null,
         clearButton: null,
         thinkingIndicator: null,
+        suggestedActionsContainer: null,
         chatHistory: [], // Stores conversation objects { role, parts }
         isThinking: false,
         isInitialized: false,
 
         init() {
-            if (this.isInitialized) return; // Prevent re-initialization
+            if (this.isInitialized) return;
             
             this.displayElement = document.getElementById('chatbot-display');
             this.inputElement = document.getElementById('chatbot-input');
             this.sendButton = document.getElementById('chatbot-send-btn');
             this.clearButton = document.getElementById('chatbot-clear-btn');
             this.thinkingIndicator = document.getElementById('chatbot-thinking-indicator');
+            this.suggestedActionsContainer = document.getElementById('suggested-actions-container');
 
-            if (!this.displayElement || !this.inputElement || !this.sendButton || !this.clearButton || !this.thinkingIndicator) {
+            if (!this.displayElement || !this.inputElement || !this.sendButton || !this.clearButton || !this.thinkingIndicator || !this.suggestedActionsContainer) {
                 console.error("Chatbot elements not found. Ensure HTML is correct.");
                 return;
             }
@@ -2145,8 +2218,7 @@
         renderAllMessages() {
             this.displayElement.innerHTML = '';
             if (this.chatHistory.length === 0) {
-                // First time ever, create welcome message
-                const welcomeText = "Hello! I am Judson's AI assistant. I can now understand Markdown. Ask me for a code snippet!\n\nFor example: `Show me a JavaScript function to shuffle an array.`";
+                const welcomeText = "Hello! I am Judson's AI assistant. How can I help you today?";
                 this.chatHistory.push({ role: 'model', parts: [{ text: welcomeText }] });
                 this.saveHistory();
             }
@@ -2154,6 +2226,8 @@
                 const sender = msg.role === 'model' ? 'ai' : 'user';
                 this._createMessageElement(sender, msg.parts[0].text);
             });
+            
+            this.renderSuggestedActions();
             this.displayElement.scrollTop = this.displayElement.scrollHeight;
             feather.replace();
         },
@@ -2161,20 +2235,15 @@
         _createMessageElement(sender, text) {
             const messageDiv = document.createElement('div');
             messageDiv.className = `chat-message ${sender}`;
-            
-            // Use marked.js to parse markdown content
             messageDiv.innerHTML = marked.parse(text);
             this.displayElement.appendChild(messageDiv);
 
-            // After adding the message, find and enhance code blocks
             if (sender === 'ai') {
                 const preElements = messageDiv.querySelectorAll('pre');
                 preElements.forEach(preElement => {
                     const codeBlock = preElement.querySelector('code');
                     if (!codeBlock) return;
-
-                    preElement.style.position = 'relative'; // For positioning the button
-
+                    
                     const copyButton = document.createElement('button');
                     copyButton.innerHTML = '<i data-feather="copy"></i>';
                     copyButton.className = 'copy-code-btn';
@@ -2183,21 +2252,14 @@
                     copyButton.addEventListener('click', (e) => {
                         e.stopPropagation();
                         const codeToCopy = codeBlock.textContent;
-                        const textArea = document.createElement('textarea');
-                        textArea.value = codeToCopy;
-                        document.body.appendChild(textArea);
-                        textArea.select();
-                        try {
-                            document.execCommand('copy');
+                        navigator.clipboard.writeText(codeToCopy).then(() => {
                             showToast('Code copied to clipboard!');
                             playSound('E5', 'sine', '32n');
-                        } catch (err) {
+                        }).catch(err => {
                             showToast('Failed to copy code.');
                             console.error('Failed to copy text: ', err);
-                        }
-                        document.body.removeChild(textArea);
+                        });
                     });
-
                     preElement.appendChild(copyButton);
                 });
             }
@@ -2211,12 +2273,33 @@
             playSound('C4', 'sine', '64n');
         },
 
-        showThinking(show) {
-            if (this.thinkingIndicator) {
-                this.thinkingIndicator.style.display = show ? 'block' : 'none';
+        renderSuggestedActions() {
+            this.suggestedActionsContainer.innerHTML = '';
+            // Only show suggestions if it's a new chat
+            if (this.chatHistory.length <= 1) {
+                const suggestions = [
+                    "What is this site built with?",
+                    "Tell me a joke about code.",
+                    "Suggest a color palette.",
+                    "Explain generative art."
+                ];
+                suggestions.forEach(text => {
+                    const button = document.createElement('button');
+                    button.className = 'suggested-action-btn';
+                    button.textContent = text;
+                    button.onclick = () => {
+                        this.inputElement.value = text;
+                        this.sendMessage();
+                    };
+                    this.suggestedActionsContainer.appendChild(button);
+                });
             }
-            if (this.inputElement) this.inputElement.disabled = show;
-            if (this.sendButton) this.sendButton.disabled = show;
+        },
+
+        showThinking(show) {
+            this.thinkingIndicator.style.display = show ? 'block' : 'none';
+            this.inputElement.disabled = show;
+            this.sendButton.disabled = show;
             this.isThinking = show;
         },
 
@@ -2224,6 +2307,7 @@
             const userMessage = this.inputElement.value.trim();
             if (!userMessage || this.isThinking) return;
 
+            this.suggestedActionsContainer.innerHTML = ''; // Clear suggestions
             this.addNewMessage('user', userMessage);
             this.chatHistory.push({ role: "user", parts: [{ text: userMessage }] });
             this.saveHistory();
@@ -2235,7 +2319,7 @@
                 const response = await fetch('/.netlify/functions/ask-gemini', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ prompt: userMessage, history: this.chatHistory.slice(0, -1) }), // Send history *before* this message
+                    body: JSON.stringify({ prompt: userMessage, history: this.chatHistory.slice(0, -1) }),
                 });
 
                 if (!response.ok) {
@@ -2249,14 +2333,10 @@
                     this.chatHistory.push({ role: "model", parts: [{ text: data.response }] });
                     this.saveHistory();
                 } else {
-                    const errorText = "I'm sorry, I couldn't generate a response.";
-                    this.addNewMessage('ai', errorText);
-                    console.error("Unexpected AI response:", data);
+                    this.addNewMessage('ai', "I'm sorry, I couldn't generate a response.");
                 }
             } catch (error) {
-                const errorText = `Error: ${error.message}`;
-                this.addNewMessage('ai', errorText);
-                console.error("Chatbot AI error:", error);
+                this.addNewMessage('ai', `Error: ${error.message}`);
             } finally {
                 this.showThinking(false);
                 this.inputElement.focus();
@@ -2266,7 +2346,7 @@
         clearChat() {
             this.chatHistory = [];
             this.saveHistory();
-            this.renderAllMessages(); // Will show the new welcome message
+            this.renderAllMessages();
             playSound('C3', 'sine', '16n');
         },
 
@@ -3188,13 +3268,9 @@ _           _                     _   _
                         openModal('contact');
                         break;
                     case 'copyUrl':
-                        const dummy = document.createElement('textarea');
-                        document.body.appendChild(dummy);
-                        dummy.value = window.location.href;
-                        dummy.select();
-                        document.execCommand('copy');
-                        document.body.removeChild(dummy);
-                        showToast('Page URL copied!');
+                        navigator.clipboard.writeText(window.location.href).then(() => {
+                            showToast('Page URL copied!');
+                        });
                         break;
                     default:
                         console.log(`Context menu action: ${action}`);
