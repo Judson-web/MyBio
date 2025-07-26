@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <title>Judson AI - A Personal Chatbot Experience</title>
-    <meta name="description" content="An intelligent, personal AI assistant designed by Judson Saji." />
+    <meta name="description" content="An intelligent, personal AI assistant designed by Judson Saji, with a UI inspired by Gemini." />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" href="https://firebasestorage.googleapis.com/v0/b/crnn-b7d8f.appspot.com/o/files%2FIMG_20250717_215454_617-modified.png?alt=media&token=bea1f0dd-abf1-4cfb-8a83-0d3b603d3fde" />
 
@@ -29,7 +29,7 @@
         <!-- History Side Panel -->
         <aside id="history-panel">
             <div class="history-header">
-                <a href="/" class="header-logo" aria-label="Judson Saji - Home">Judson Saji</a>
+                <a href="/" class="header-logo" aria-label="Judson Saji - Home">Judson AI</a>
                 <button id="new-chat-btn" aria-label="Start New Chat"><i data-feather="plus-square"></i></button>
             </div>
             <div id="history-list"></div>
@@ -37,32 +37,38 @@
 
         <!-- Main Chatbot Container -->
         <main id="chatbot-container">
-            <div id="welcome-screen">
-                <div class="logo-container">
-                    <img class="profile-img" src="https://firebasestorage.googleapis.com/v0/b/crnn-b7d8f.appspot.com/o/files%2FIMG_20250717_215454_617-modified.png?alt=media&token=bea1f0dd-abf1-4cfb-8a83-0d3b603d3fde" alt="Judson Saji Profile Picture"/>
+            <header class="chat-header">
+                <button id="history-toggle-btn" aria-label="Toggle History"><i data-feather="menu"></i></button>
+                <h2 id="chat-title">New Chat</h2>
+                <button id="clear-chat-btn" aria-label="Clear Current Chat"><i data-feather="refresh-cw"></i></button>
+            </header>
+
+            <div id="chat-wrapper">
+                <div id="welcome-screen">
+                    <div class="logo-container">
+                         <svg width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="gemini-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#38e7ff;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#ff73fa;stop-opacity:1" />
+                                </linearGradient>
+                            </defs>
+                            <path d="M12 2.75L14.25 9.25L21.25 9.75L15.75 14.75L17.75 21.5L12 17.5L6.25 21.5L8.25 14.75L2.75 9.75L9.75 9.25L12 2.75Z" stroke="url(#gemini-gradient)" stroke-width="1.5" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h1>How can I help you today?</h1>
                 </div>
-                <h1>Judson AI</h1>
-                <p>Your personal AI assistant. How can I help you today?</p>
-                <button id="start-chat-btn">Start Chatting</button>
+
+                <div id="chat-display"></div>
             </div>
 
-            <div id="chat-interface" class="hidden">
-                <header class="chat-header">
-                    <button id="history-toggle-btn" aria-label="Toggle History"><i data-feather="menu"></i></button>
-                    <h2 id="chat-title">New Chat</h2>
-                    <button id="clear-chat-btn" aria-label="Clear Current Chat"><i data-feather="trash-2"></i></button>
-                </header>
-                <div id="chat-display"></div>
-                <footer class="chat-input-area">
-                    <div id="thinking-indicator" class="hidden">
-                        <div class="dot-flashing"></div>
-                    </div>
-                    <div class="input-wrapper">
-                        <textarea id="chatbot-input" placeholder="Ask me anything..." rows="1"></textarea>
-                        <button id="chatbot-send-btn" aria-label="Send Message"><i data-feather="send"></i></button>
-                    </div>
-                </footer>
-            </div>
+            <footer class="chat-input-area">
+                <div class="input-wrapper">
+                    <textarea id="chatbot-input" placeholder="Enter a prompt here" rows="1"></textarea>
+                    <button id="chatbot-send-btn" aria-label="Send Message"><i data-feather="arrow-up"></i></button>
+                </div>
+                <p class="disclaimer">Judson AI may display inaccurate info, including about people, so double-check its responses.</p>
+            </footer>
         </main>
     </div>
     
