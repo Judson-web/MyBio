@@ -3,7 +3,7 @@
   --bg-color: #0a0a0f;
   --text-color: #e0e0e0;
   --dim-text-color: #a0a0a0;
-  --card-bg: rgba(22, 24, 34, 0.5); /* Slightly more opaque */
+  --card-bg: rgba(255, 255, 255, 0.05); /* Adjusted to match original */
   --card-border: rgba(255, 255, 255, 0.1);
   --header-bg: rgba(10, 10, 15, 0.5);
   --input-bg: rgba(0, 0, 0, 0.2);
@@ -86,13 +86,14 @@ html, body {
     align-items: center;
     text-align: center;
     background: var(--card-bg);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
+    backdrop-filter: blur(15px); /* Adjusted to match original */
+    -webkit-backdrop-filter: blur(15px);
     border: 1px solid var(--card-border);
     border-radius: 20px;
     padding: 2.5rem;
     max-width: 550px;
     width: 100%;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
     animation: fadeIn 0.5s ease-out;
 }
 
@@ -164,8 +165,8 @@ html, body {
   height: 90vh;
   max-height: 800px;
   background: var(--card-bg);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(15px); /* Adjusted to match original */
+  -webkit-backdrop-filter: blur(15px);
   border: 1px solid var(--card-border);
   border-radius: 16px;
   display: flex;
