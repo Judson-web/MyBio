@@ -2,7 +2,7 @@
  * Judson AI Chatbot
  * A complete refactor of the original portfolio into a dedicated chatbot application.
  *
- * @version 2.0.2
+ * @version 3.0.0 - With Tool-Calling Support
  * @author Judson Saji
  */
 
@@ -38,10 +38,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- HELPER & UTILITY FUNCTIONS ---
 
-    /**
-     * Shows a short-lived notification message.
-     * @param {string} message The message to display.
-     */
     const showToast = (message) => {
         if (!DOMElements.toast) return;
         DOMElements.toast.textContent = message;
@@ -49,18 +45,11 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => DOMElements.toast.classList.remove('show'), 3000);
     };
 
-    /**
-     * Switches the application between 'dark' and 'light' themes.
-     */
     const toggleTheme = () => {
         state.currentTheme = state.currentTheme === 'dark' ? 'light' : 'dark';
         applyTheme(state.currentTheme);
     };
 
-    /**
-     * Applies a specified theme to the document body.
-     * @param {string} theme The theme to apply ('dark' or 'light').
-     */
     const applyTheme = (theme) => {
         document.body.classList.toggle('light-theme', theme === 'light');
         localStorage.setItem('theme', theme);
@@ -75,9 +64,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- CHATBOT CORE LOGIC ---
 
     const chatbot = {
-        /**
-         * Initializes the chatbot, setting up event listeners and the initial state.
-         */
         init() {
             // Event Listeners
             DOMElements.startChatBtn?.addEventListener('click', () => this.startChatSession());
@@ -88,15 +74,19 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             DOMElements.themeToggleBtn?.addEventListener('click', toggleTheme);
             DOMElements.clearChatBtn?.addEventListener('click', () => this.clearChat());
-            DOMElements.chatbotSendBtn?.addEventListener('click', () => this.sendMessage());
+            DOMElements.chatbotSendBtn?.addEventListener('click', () => this.processUserMessage());
             DOMElements.chatbotInput?.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' && !state.isThinking) {
                     e.preventDefault();
-                    this.sendMessage();
+                    this.processUserMessage();
                 }
             });
 
-            // Restore chat history from localStorage if it exists
+            // Restore chat history
+            this.loadHistory();
+        },
+
+        loadHistory() {
             const savedHistory = localStorage.getItem('judson_ai_history');
             if(savedHistory) {
                 try {
@@ -105,9 +95,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         state.chatHistory = parsedHistory;
                         this.startChatSession();
                         state.chatHistory.forEach(msg => {
-                            // Ensure message part exists before adding to DOM
-                            if (msg.parts && msg.parts[0] && msg.parts[0].text) {
-                                this.addMessageToDOM(msg.role, msg.parts[0].text, false)
+                            if (msg.role === 'user' && msg.parts[0].text) {
+                                this.addMessageToDOM('user', msg.parts[0].text, false);
+                            } else if (msg.role === 'model' && msg.parts[0].text) {
+                                this.addMessageToDOM('model', msg.parts[0].text, false);
                             }
                         });
                     }
@@ -118,28 +109,18 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         },
 
-        /**
-         * Transitions from the welcome screen to the main chat interface.
-         */
         startChatSession() {
             DOMElements.welcomeScreen?.classList.add('hidden');
             DOMElements.chatInterface?.classList.remove('hidden');
             DOMElements.chatbotInput?.focus();
         },
 
-        /**
-         * Starts a chat session with a predefined prompt.
-         * @param {string} promptText The text of the suggested prompt.
-         */
         startChatWithPrompt(promptText) {
             this.startChatSession();
             DOMElements.chatbotInput.value = promptText;
-            this.sendMessage();
+            this.processUserMessage();
         },
 
-        /**
-         * Clears the chat history and resets the display.
-         */
         clearChat() {
             state.chatHistory = [];
             localStorage.removeItem('judson_ai_history');
@@ -148,10 +129,6 @@ document.addEventListener('DOMContentLoaded', () => {
             showToast('Chat cleared!');
         },
 
-        /**
-         * Toggles the visibility of the "AI is thinking" indicator.
-         * @param {boolean} show Whether to show or hide the indicator.
-         */
         showThinking(show) {
             state.isThinking = show;
             DOMElements.thinkingIndicator?.classList.toggle('hidden', !show);
@@ -159,29 +136,17 @@ document.addEventListener('DOMContentLoaded', () => {
             if (DOMElements.chatbotSendBtn) DOMElements.chatbotSendBtn.disabled = show;
         },
 
-        /**
-         * Adds a message to the chat display.
-         * @param {string} sender 'user' or 'model'.
-         * @param {string} text The message content.
-         * @param {boolean} [animate=true] Whether to animate the message appearance.
-         */
         addMessageToDOM(sender, text, animate = true) {
             const messageDiv = document.createElement('div');
-            // Use 'model' role for AI for consistency with API
-            const senderClass = sender === 'model' ? 'ai' : 'user';
+            const senderClass = sender === 'model' ? 'ai' : sender;
             messageDiv.className = `chat-message ${senderClass}`;
-            
-            // Use marked to parse markdown for AI responses
             messageDiv.innerHTML = senderClass === 'ai' ? marked.parse(text) : text;
             if (!animate) messageDiv.style.animation = 'none';
             DOMElements.chatDisplay.appendChild(messageDiv);
             DOMElements.chatDisplay.scrollTop = DOMElements.chatDisplay.scrollHeight;
         },
 
-        /**
-         * Sends the user's message to the AI and processes the response.
-         */
-        async sendMessage() {
+        async processUserMessage() {
             const userMessage = DOMElements.chatbotInput.value.trim();
             if (!userMessage || state.isThinking) return;
 
@@ -190,12 +155,15 @@ document.addEventListener('DOMContentLoaded', () => {
             DOMElements.chatbotInput.value = '';
             this.showThinking(true);
 
+            await this.getAIResponse();
+        },
+
+        async getAIResponse() {
             try {
-                // NOTE: Assumes a Netlify function at this endpoint
                 const response = await fetch('/.netlify/functions/ask-gemini', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ history: state.chatHistory }), // Send full history
+                    body: JSON.stringify({ history: state.chatHistory }),
                 });
 
                 if (!response.ok) {
@@ -203,43 +171,74 @@ document.addEventListener('DOMContentLoaded', () => {
                     throw new Error(errorData.message || `API error: ${response.status}`);
                 }
                 const data = await response.json();
-
-                // *** FINAL BUG FIX STARTS HERE ***
-                // The AI response is nested. We need to safely access it.
-                // The correct path is data.response.parts[0].text
                 const aiResponseObject = data.response;
-                let responseText;
 
-                if (aiResponseObject && Array.isArray(aiResponseObject.parts) && aiResponseObject.parts.length > 0 && aiResponseObject.parts[0].text) {
-                    responseText = aiResponseObject.parts[0].text;
-                    
-                    // Add the valid response to the DOM and history
-                    this.addMessageToDOM('model', responseText);
-                    state.chatHistory.push({ role: "model", parts: [{ text: responseText }] });
+                // Add the raw model response to history for context
+                state.chatHistory.push(aiResponseObject);
 
+                const part = aiResponseObject.parts[0];
+
+                if (part.functionCall) {
+                    // AI wants to use a tool
+                    await this.handleFunctionCall(part.functionCall);
+                } else if (part.text) {
+                    // AI responded with text
+                    this.addMessageToDOM('model', part.text);
+                    this.showThinking(false);
                 } else {
-                    // Handle cases where the response structure is not what we expect
-                    console.error("Unrecognized AI response format:", aiResponseObject);
-                    this.addMessageToDOM('model', "Sorry, I received a response I couldn't understand.");
+                    throw new Error("Invalid response format from AI.");
                 }
-                // *** FINAL BUG FIX ENDS HERE ***
 
             } catch (error) {
                 console.error("Chatbot AI error:", error);
                 this.addMessageToDOM('model', `Sorry, an error occurred: ${error.message}`);
-                // Optional: Remove the last user message from history if the API call failed
-                state.chatHistory.pop();
-            } finally {
                 this.showThinking(false);
+            } finally {
                 DOMElements.chatbotInput.focus();
-                // Save history after each interaction
                 localStorage.setItem('judson_ai_history', JSON.stringify(state.chatHistory));
             }
         },
+
+        async handleFunctionCall(functionCall) {
+            this.addMessageToDOM('ai', `*Using tool: \`${functionCall.name}\`...*`);
+
+            try {
+                const toolResponse = await fetch('/.netlify/functions/chatbot-tools', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        toolName: functionCall.name,
+                        args: functionCall.args
+                    }),
+                });
+
+                if (!toolResponse.ok) throw new Error("Tool execution failed.");
+
+                const toolResult = await toolResponse.json();
+
+                // Add the tool's result to the history
+                state.chatHistory.push({
+                    role: "tool",
+                    parts: [{
+                        functionResponse: {
+                            name: functionCall.name,
+                            response: toolResult
+                        }
+                    }]
+                });
+
+                // Call the AI again with the tool's result to get a final text response
+                await this.getAIResponse();
+
+            } catch (error) {
+                console.error("Tool execution error:", error);
+                this.addMessageToDOM('model', `Error using tool: ${error.message}`);
+                this.showThinking(false);
+            }
+        }
     };
 
     // --- ANIMATION & VISUAL EFFECTS ---
-
     const animation = {
         stars: [],
         auroraCtx: DOMElements.auroraCanvas.getContext('2d'),
@@ -326,9 +325,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    /**
-     * Updates the cursor trail color based on the current theme.
-     */
     function updateCursorTrailColor() {
         if (animation.trailColor) {
             animation.trailColor = state.currentTheme === 'light'
