@@ -51,12 +51,12 @@ html, body {
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
-    transform: translateX(-100%);
+    transform: translateX(0);
     transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-    position: absolute;
-    left: 0; top: 0; z-index: 1000;
+    position: relative;
+    z-index: 900;
 }
-#history-panel.open { transform: translateX(0); }
+#history-panel.closed { transform: translateX(-100%); }
 
 .history-header {
     padding: 1.25rem 1.5rem;
@@ -93,13 +93,6 @@ html, body {
   display: flex; align-items: center; justify-content: center;
   flex-grow: 1;
   padding: 1.5rem;
-  transition: margin-left 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-}
-
-@media (min-width: 769px) {
-    #history-panel.open + #chatbot-container {
-        margin-left: 280px;
-    }
 }
 
 #welcome-screen, #chat-interface {
@@ -119,7 +112,7 @@ html, body {
 #start-chat-btn { background: rgba(127, 127, 127, 0.1); border: 1px solid rgba(127, 127, 127, 0.2); color: var(--text-color); padding: 0.8rem 1.5rem; border-radius: 8px; cursor: pointer; font-size: 1rem; font-weight: 500; transition: all 0.2s ease; }
 #start-chat-btn:hover { background: rgba(127, 127, 127, 0.2); border-color: var(--glow-color-1); }
 
-#chat-interface { width: 100%; max-width: 900px; height: 100%; display: flex; flex-direction: column; overflow: hidden; }
+#chat-interface { width: 100%; height: 100%; display: flex; flex-direction: column; overflow: hidden; }
 
 /* Chat Header (Glassmorphism) */
 .chat-header {
@@ -151,8 +144,7 @@ html, body {
 #chatbot-send-btn { background: var(--glow-color-1); color: #000; border: none; padding: 0.8rem; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
 @media (max-width: 768px) {
-    #history-panel { width: 100%; }
-    #chatbot-container { margin-left: 0 !important; padding: 0.5rem; padding-top: 5rem; }
-    #chat-interface { height: calc(100vh - 5.5rem); }
+    #history-panel { position: absolute; }
+    #history-panel:not(.open) { transform: translateX(-100%); }
     #history-toggle-btn { display: flex; }
 }
