@@ -12,10 +12,12 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://unpkg.com">
   <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
 
   <link rel="preload" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fira+Code:wght@400&display=swap" as="style">
   <link rel="preload" href="https://unpkg.com/feather-icons" as="script">
   <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js" as="script">
+  <link rel="preload" href="https://cdn.jsdelivr.net/npm/marked/marked.min.js" as="script">
 
   <!-- Social Media Meta Tags -->
   <meta property="og:title" content="Judson Saji - Creator" />
@@ -31,6 +33,7 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fira+Code:wght@400&display=swap" rel="stylesheet" />
   <script src="https://unpkg.com/feather-icons"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   
   <!-- SEO Structured Data -->
   <script type="application/ld+json">
@@ -832,55 +835,154 @@
     }
 
 
-    /* --- Chatbot Modal Styles --- */
+    /* --- Chatbot Modal Styles (ENHANCED) --- */
     #chatbot-modal .modal-content {
         max-width: 500px;
-        max-height: 80vh;
+        height: 85vh; /* Fixed height */
+        max-height: 700px;
+        padding: 0;
+    }
+    .chatbot-header {
         display: flex;
-        flex-direction: column;
-        padding: 1.5rem;
+        align-items: center;
+        gap: 10px;
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid var(--card-border);
+        flex-shrink: 0;
+        position: relative; /* For close button positioning */
+    }
+    .chatbot-header h2 {
+        margin: 0;
+        font-size: 1.5rem;
+        background: none;
+        -webkit-background-clip: unset;
+        -webkit-text-fill-color: unset;
+        color: var(--text-color);
+    }
+    .chatbot-header i {
+        color: var(--glow-color-1);
+    }
+    #chatbot-speech-toggle {
+        background: none; border: none; cursor: pointer;
+        color: var(--dim-text-color);
+        margin-left: auto; padding: 0.25rem;
+        transition: color 0.2s;
+    }
+    #chatbot-speech-toggle.active { color: var(--glow-color-1); }
+    /* FIX: Make sure close button in chatbot header doesn't overlap */
+    #chatbot-modal .close-modal {
+        position: static; /* Override absolute positioning */
+        margin-left: 0.5rem;
     }
     #chatbot-display {
         flex-grow: 1;
         overflow-y: auto;
-        border: 1px solid var(--card-border);
-        border-radius: 8px;
         padding: 1rem;
-        margin-bottom: 1rem;
         background: rgba(0,0,0,0.1);
-        min-height: 200px;
         display: flex;
         flex-direction: column;
-        gap: 0.5rem;
+        gap: 1rem; /* Increased gap */
     }
     .chat-message {
-        padding: 0.5rem 0.8rem;
-        border-radius: 12px;
-        max-width: 80%;
+        padding: 0.75rem 1rem;
+        border-radius: 18px;
+        max-width: 85%;
         word-wrap: break-word;
+        line-height: 1.5;
+        position: relative;
     }
     .chat-message.user {
         background: var(--glow-color-1);
         color: #000;
         align-self: flex-end;
-        border-bottom-right-radius: 2px;
+        border-bottom-right-radius: 4px;
     }
     .chat-message.ai {
-        background: var(--card-bg);
+        background: rgba(127,127,127,0.15);
         color: var(--text-color);
         border: 1px solid var(--card-border);
         align-self: flex-start;
-        border-bottom-left-radius: 2px;
+        border-bottom-left-radius: 4px;
     }
+    /* Message bubble tails */
+    .chat-message.ai::before, .chat-message.user::before {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        width: 0;
+        height: 0;
+        border: 10px solid transparent;
+    }
+    .chat-message.ai::before {
+        left: -10px;
+        border-right-color: var(--card-border);
+        border-right-width: 7px;
+    }
+    .light-theme .chat-message.ai::before {
+      border-right-color: var(--card-border);
+    }
+    .chat-message.user::before {
+        right: -7px;
+        border-left-color: var(--glow-color-1);
+    }
+    /* Chatbot Markdown Styling */
+    .chat-message p { margin: 0 0 0.5rem 0; color: inherit; }
+    .chat-message p:last-child { margin-bottom: 0; }
+    .chat-message pre {
+        background: rgba(0,0,0,0.3);
+        border: 1px solid var(--card-border);
+        border-radius: 8px;
+        padding: 1rem;
+        margin: 0.5rem 0;
+        font-family: 'Fira Code', monospace;
+        font-size: 0.9rem;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        position: relative;
+    }
+    .chat-message code {
+        font-family: 'Fira Code', monospace;
+        background: rgba(127,127,127,0.2);
+        padding: 0.1rem 0.3rem;
+        border-radius: 4px;
+    }
+    .chat-message pre code { background: none; padding: 0; }
+    .chat-message blockquote {
+        border-left: 3px solid var(--glow-color-1);
+        padding-left: 1rem;
+        margin-left: 0;
+        font-style: italic;
+        color: var(--dim-text-color);
+    }
+    .chat-message ul, .chat-message ol { padding-left: 1.5rem; }
+    .chat-message a { color: var(--glow-color-2); text-decoration: underline; }
+    .copy-code-btn {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: var(--text-color);
+        padding: 0.25rem 0.5rem;
+        border-radius: 6px;
+        cursor: pointer;
+        opacity: 0.3;
+        transition: opacity 0.2s ease;
+        font-size: 0.8rem;
+    }
+    .chat-message pre:hover .copy-code-btn { opacity: 1; }
     #chatbot-thinking-indicator {
         font-style: italic;
         color: var(--dim-text-color);
-        align-self: flex-start;
-        margin-left: 0.5rem;
+        padding: 0 1.5rem 0.5rem;
+        flex-shrink: 0;
     }
     .chat-input-container {
         display: flex;
         gap: 0.5rem;
+        padding: 1rem 1.5rem;
+        border-top: 1px solid var(--card-border);
+        flex-shrink: 0;
     }
     #chatbot-input {
         flex-grow: 1;
@@ -891,20 +993,51 @@
         color: var(--text-color);
         outline: none;
     }
-    #chatbot-input:focus {
-        border-color: var(--glow-color-1);
-    }
-    #chatbot-send-btn, #chatbot-clear-btn {
+    #chatbot-input:focus { border-color: var(--glow-color-1); }
+    #chatbot-send-btn, #chatbot-clear-btn, #chatbot-mic-btn {
         background: var(--glow-color-2);
         color: #fff;
         border: none;
-        padding: 0.75rem 1rem;
+        padding: 0.75rem;
         border-radius: 8px;
         cursor: pointer;
         transition: background 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
-    #chatbot-send-btn:hover, #chatbot-clear-btn:hover {
-        background: var(--glow-color-1);
+    #chatbot-send-btn:hover, #chatbot-clear-btn:hover, #chatbot-mic-btn:hover { background: var(--glow-color-1); }
+    #chatbot-mic-btn.listening {
+        background: var(--error-color);
+        animation: pulse-red 1.5s infinite;
+    }
+    @keyframes pulse-red {
+        0% { box-shadow: 0 0 0 0 rgba(255, 85, 85, 0.7); }
+        70% { box-shadow: 0 0 0 10px rgba(255, 85, 85, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(255, 85, 85, 0); }
+    }
+    /* Suggested Actions */
+    #suggested-actions-container {
+        padding: 0 1rem 1rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        justify-content: center;
+    }
+    .suggested-action-btn {
+        background: rgba(127,127,127,0.1);
+        border: 1px solid var(--card-border);
+        color: var(--dim-text-color);
+        padding: 0.5rem 0.8rem;
+        border-radius: 12px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        transition: all 0.2s ease;
+    }
+    .suggested-action-btn:hover {
+        background: rgba(127,127,127,0.2);
+        color: var(--text-color);
+        border-color: var(--glow-color-1);
     }
 
 
@@ -955,13 +1088,10 @@
     }
 
     #cli-output {
-        height: 250px;
+        height: 100%; /* Fill modal body */
         overflow-y: auto;
-        padding: 10px;
         font-family: 'Fira Code', monospace;
         font-size: 0.9rem;
-        border: 1px solid var(--card-border);
-        border-radius: 8px;
         background: var(--terminal-bg);
         color: var(--terminal-text);
         transition: background 0.3s, color 0.3s;
@@ -2037,7 +2167,7 @@
     }
 
 
-    // --- CHATBOT AI LOGIC ---
+    // --- CHATBOT AI LOGIC (ENHANCED) ---
     const chatbot = {
         displayElement: null,
         inputElement: null,
@@ -2856,7 +2986,6 @@ _           _                     _   _
         updateWeather();
         updateGitHubStats();
         updateNowPlaying();
-        // Removed renderBlogPosts();
         
         const greetingEl = document.getElementById('greeting');
         const lastVisitTimestamp = localStorage.getItem('lastVisitTimestamp');
@@ -2865,16 +2994,9 @@ _           _                     _   _
         if (lastVisitTimestamp) {
             const timeDiffMs = currentTime - parseInt(lastVisitTimestamp);
             const minutes = Math.floor(timeDiffMs / (1000 * 60));
-            const hours = Math.floor(minutes / 60);
-            const days = Math.floor(hours / 24);
+            let timeAgoMessage = minutes > 0 ? `${minutes} minute(s) ago` : `just now`;
 
-            let timeAgoMessage = '';
-            if (days > 0) timeAgoMessage = `${days} day${days > 1 ? 's' : ''} ago`;
-            else if (hours > 0) timeAgoMessage = `${hours} hour${hours > 1 ? 's' : ''} ago`;
-            else if (minutes > 0) timeAgoMessage = `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
-            else timeAgoMessage = `just now`;
-
-            const promptForAI = `The user is returning to the website. Their last visit was ${timeAgoMessage}. Generate a very short, friendly, and creative welcome back message (1-2 sentences). You are Judson's AI assistant.`;
+            const promptForAI = `The user is returning. Their last visit was ${timeAgoMessage}. Generate a very short, friendly welcome back message.`;
             
             try {
                 const response = await fetch('/.netlify/functions/ask-gemini', {
@@ -2888,7 +3010,8 @@ _           _                     _   _
                         greetingEl.textContent = data.response;
                     }
                 } else {
-                    console.error("Failed to get AI greeting:", await response.text());
+                   const errorData = await response.json();
+                   console.error("Failed to get AI greeting:", errorData.message);
                 }
             } catch (e) {
                 console.error("Error calling AI for greeting:", e);
@@ -2911,7 +3034,7 @@ _           _                     _   _
         updateCursorTrailColor();
     }
 
-    // Event Listeners
+    // --- Event Listeners ---
     window.addEventListener("resize", () => {
       resizeAllCanvases();
       applyTheme(localStorage.getItem('theme') || 'dark');
@@ -2955,7 +3078,6 @@ _           _                     _   _
             drawerNavLinksContainer.innerHTML = '';
             desktopNavLinks.forEach(link => {
                 const clonedLink = link.cloneNode(true);
-                clonedLink.removeEventListener('click', handleDrawerLinkClick);
                 clonedLink.addEventListener('click', handleDrawerLinkClick);
                 drawerNavLinksContainer.appendChild(clonedLink);
             });
@@ -3032,24 +3154,40 @@ _           _                     _   _
         customContextMenu.querySelectorAll('.context-menu-item').forEach(item => {
             item.addEventListener('click', (e) => {
                 const action = e.currentTarget.dataset.action;
-                switch (action) {
-                    case 'toggleTheme':
-                        toggleTheme();
-                        break;
-                    case 'openCli':
-                        openModal('contact');
-                        break;
-                    case 'copyUrl':
-                        const dummy = document.createElement('textarea');
-                        document.body.appendChild(dummy);
-                        dummy.value = window.location.href;
-                        dummy.select();
-                        document.execCommand('copy');
-                        document.body.removeChild(dummy);
-                        showToast('Page URL copied!');
-                        break;
-                    default:
-                        console.log(`Context menu action: ${action}`);
+                try {
+                    switch (action) {
+                        case 'copy':
+                            document.execCommand('copy');
+                            showToast('Copied!');
+                            break;
+                        case 'cut':
+                            document.execCommand('cut');
+                            showToast('Cut!');
+                            break;
+                        case 'paste':
+                            navigator.clipboard.readText().then(text => {
+                                const activeEl = document.activeElement;
+                                if (activeEl && (activeEl.isContentEditable || activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA')) {
+                                    activeEl.value += text;
+                                }
+                            });
+                            showToast('Pasted!');
+                            break;
+                        case 'toggleTheme':
+                            toggleTheme();
+                            break;
+                        case 'openCli':
+                            openModal('contact');
+                            break;
+                        case 'copyUrl':
+                            navigator.clipboard.writeText(window.location.href).then(() => {
+                                showToast('Page URL copied!');
+                            });
+                            break;
+                    }
+                } catch (err) {
+                    console.error(`Context menu action '${action}' failed:`, err);
+                    showToast(`Action '${action}' failed.`);
                 }
                 customContextMenu.style.display = 'none';
             });
