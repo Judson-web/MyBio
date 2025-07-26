@@ -1,6 +1,6 @@
 /**
- * Judson AI - Chatbot with History & Glassmorphism
- * @version 7.0.0
+ * Judson AI - Professional Chatbot Experience
+ * @version 8.0.0
  * @author Judson Saji
  */
 
@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         init() {
             this.DOMElements = {
+                appContainer: document.getElementById('app-container'),
                 welcomeScreen: document.getElementById('welcome-screen'),
                 chatInterface: document.getElementById('chat-interface'),
                 startChatBtn: document.getElementById('start-chat-btn'),
@@ -42,8 +43,12 @@ document.addEventListener('DOMContentLoaded', () => {
             this.DOMElements.historyToggleBtn?.addEventListener('click', () => this.toggleHistoryPanel());
             this.DOMElements.chatbotSendBtn?.addEventListener('click', () => this.processUserMessage());
             this.DOMElements.chatbotInput?.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' && !this.state.isThinking) { e.preventDefault(); this.processUserMessage(); }
+                if (e.key === 'Enter' && !e.shiftKey && !this.state.isThinking) { 
+                    e.preventDefault(); 
+                    this.processUserMessage(); 
+                }
             });
+            this.DOMElements.chatbotInput?.addEventListener('input', this.autoResizeTextarea);
             this.DOMElements.historyList?.addEventListener('click', (e) => {
                 const item = e.target.closest('.history-item');
                 if (!item) return;
@@ -52,11 +57,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     this.deleteConversation(conversationId);
                 } else {
                     this.loadConversation(conversationId);
-                    if (window.innerWidth <= 768) this.toggleHistoryPanel(); // Close panel on mobile
+                    if (window.innerWidth <= 768) this.toggleHistoryPanel();
                 }
             });
         },
         
+        autoResizeTextarea(e) {
+            e.target.style.height = 'auto';
+            e.target.style.height = e.target.scrollHeight + 'px';
+        },
+
         toggleHistoryPanel() { this.DOMElements.historyPanel?.classList.toggle('closed'); },
         saveConversations() { localStorage.setItem('judson_ai_conversations', JSON.stringify(this.state.conversations)); },
 
@@ -70,7 +80,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     this.loadConversation(this.state.currentConversationId);
                 }
             }
-             // On desktop, the panel is open by default. On mobile, it's closed.
             if (window.innerWidth <= 768) {
                 this.DOMElements.historyPanel?.classList.add('closed');
             }
@@ -89,7 +98,6 @@ document.addEventListener('DOMContentLoaded', () => {
         
         clearCurrentConversation() {
             if (!this.state.currentConversationId) return;
-            // Reset messages but keep the conversation entry and title
             this.state.conversations[this.state.currentConversationId].messages = [
                  { role: 'model', parts: [{ text: "Chat cleared. How can I help you now?" }] }
             ];
@@ -153,11 +161,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
         addMessageToDOM(sender, text) {
             const senderClass = sender === 'model' ? 'ai' : sender;
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `chat-message ${senderClass}`;
-            messageDiv.innerHTML = senderClass === 'ai' ? marked.parse(text) : text;
-            this.DOMElements.chatDisplay.appendChild(messageDiv);
+            const messageContainer = document.createElement('div');
+            messageContainer.className = `chat-message ${senderClass}`;
+            
+            const bubble = document.createElement('div');
+            bubble.className = 'message-bubble';
+            bubble.innerHTML = marked.parse(text);
+
+            messageContainer.appendChild(bubble);
+            this.DOMElements.chatDisplay.appendChild(messageContainer);
             this.DOMElements.chatDisplay.scrollTop = this.DOMElements.chatDisplay.scrollHeight;
+
+            // Handle code snippets
+            bubble.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightElement(block);
+                const pre = block.parentElement;
+                const copyButton = document.createElement('button');
+                copyButton.className = 'copy-code-btn';
+                copyButton.innerHTML = 'Copy';
+                copyButton.onclick = () => {
+                    navigator.clipboard.writeText(block.textContent);
+                    copyButton.innerHTML = 'Copied!';
+                    setTimeout(() => copyButton.innerHTML = 'Copy', 2000);
+                };
+                pre.appendChild(copyButton);
+            });
         },
 
         async processUserMessage() {
@@ -169,6 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
             conversation.messages.push({ role: "user", parts: [{ text: userMessage }] });
             this.addMessageToDOM('user', userMessage);
             this.DOMElements.chatbotInput.value = '';
+            this.autoResizeTextarea({target: this.DOMElements.chatbotInput});
             this.showThinking(true);
             
             await this.getAIResponse();
