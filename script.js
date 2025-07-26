@@ -2,7 +2,7 @@
  * Judson AI Chatbot
  * A complete refactor of the original portfolio into a dedicated chatbot application.
  *
- * @version 2.0.0
+ * @version 2.0.1
  * @author Judson Saji
  */
 
@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
          */
         init() {
             // Event Listeners
-            DOMElements.startChatBtn?.addEventListener('click', this.startChatSession);
+            DOMElements.startChatBtn?.addEventListener('click', () => this.startChatSession());
             DOMElements.suggestedPrompts?.addEventListener('click', (e) => {
                 if (e.target.classList.contains('prompt-btn')) {
                     this.startChatWithPrompt(e.target.textContent.replace(/"/g, ''));
@@ -144,8 +144,8 @@ document.addEventListener('DOMContentLoaded', () => {
         showThinking(show) {
             state.isThinking = show;
             DOMElements.thinkingIndicator?.classList.toggle('hidden', !show);
-            DOMElements.chatbotInput.disabled = show;
-            DOMElements.chatbotSendBtn.disabled = show;
+            if (DOMElements.chatbotInput) DOMElements.chatbotInput.disabled = show;
+            if (DOMElements.chatbotSendBtn) DOMElements.chatbotSendBtn.disabled = show;
         },
 
         /**
@@ -191,8 +191,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await response.json();
 
                 if (data && data.response) {
-                    this.addMessageToDOM('ai', data.response);
-                    state.chatHistory.push({ role: "model", parts: [{ text: data.response }] });
+                    // *** BUG FIX STARTS HERE ***
+                    // The error "marked(): input parameter is of type [object Object]" means
+                    // data.response is not a string. We must safely extract the text.
+                    let responseText = "Sorry, I couldn't process the response format."; // Default error message
+                    
+                    if (typeof data.response === 'string') {
+                        // If the response is already a string, use it directly.
+                        responseText = data.response;
+                    } else {
+                        // Fallback for any other unexpected format.
+                        console.error("Unrecognized AI response format:", data.response);
+                    }
+
+                    this.addMessageToDOM('ai', responseText);
+                    state.chatHistory.push({ role: "model", parts: [{ text: responseText }] });
+                    // *** BUG FIX ENDS HERE ***
+
                 } else {
                     throw new Error("Received an empty response from the AI.");
                 }
@@ -244,8 +259,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const starCount = window.innerWidth < 768 ? 100 : 300;
             for (let i = 0; i < starCount; i++) {
                 this.stars.push({
-                    x: Math.random() * this.auroraCtx.canvas.width,
-                    y: Math.random() * this.auroraCtx.canvas.height,
+                    x: Math.random() * DOMElements.auroraCanvas.width,
+                    y: Math.random() * DOMElements.auroraCanvas.height,
                     radius: Math.random() * 1.5,
                     vx: (Math.random() - 0.5) / 4,
                     vy: (Math.random() - 0.5) / 4,
@@ -310,3 +325,4 @@ document.addEventListener('DOMContentLoaded', () => {
     animation.init();
 });
 
+.
