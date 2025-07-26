@@ -599,26 +599,41 @@
         border-radius: 16px;
         border: 1px solid var(--card-border);
         box-shadow: 0 8px 32px 0 var(--card-shadow);
-        padding: 2rem 1.5rem;
+        padding: 0; /* Changed padding to 0 */
         width: 100%;
         max-width: 600px;
         max-height: 90vh;
-        overflow-y: auto;
+        overflow: hidden; /* Changed to hidden */
         transform: scale(0.95); /* Start slightly smaller for subtle zoom */
         transition: transform 0.3s ease, background 0.4s ease, border-color 0.4s ease; /* Adjusted transition */
         position: relative;
+        display: flex; /* Added for layout */
+        flex-direction: column; /* Added for layout */
     }
     .modal-overlay.active .modal-content {
         transform: scale(1);
     }
-    .modal-content h2 {
-        margin-top: 0;
+    .modal-header { /* New class for modal headers */
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--card-border);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .modal-header h2 {
+        margin: 0;
         font-size: 1.8rem;
         background: linear-gradient(90deg, var(--glow-color-1), var(--glow-color-2));
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
     }
-    .modal-content p {
+    .modal-body { /* New class for modal content area */
+      padding: 1.5rem;
+      overflow-y: auto;
+      flex-grow: 1;
+    }
+    .modal-body p {
         color: var(--dim-text-color);
         line-height: 1.6;
     }
@@ -629,6 +644,7 @@
         cursor: pointer;
         color: var(--dim-text-color);
         transition: color 0.3s, transform 0.3s;
+        z-index: 10;
     }
     .close-modal:hover {
         color: var(--text-color);
@@ -636,18 +652,18 @@
     }
     
     /* --- Custom Scrollbar --- */
-    .modal-content::-webkit-scrollbar {
+    .modal-body::-webkit-scrollbar, #chatbot-display::-webkit-scrollbar {
         width: 8px;
     }
-    .modal-content::-webkit-scrollbar-track {
+    .modal-body::-webkit-scrollbar-track, #chatbot-display::-webkit-scrollbar-track {
         background: rgba(127,127,127,0.1);
         border-radius: 4px;
     }
-    .modal-content::-webkit-scrollbar-thumb {
+    .modal-body::-webkit-scrollbar-thumb, #chatbot-display::-webkit-scrollbar-thumb {
         background: rgba(127,127,127,0.3);
         border-radius: 4px;
     }
-    .modal-content::-webkit-scrollbar-thumb:hover {
+    .modal-body::-webkit-scrollbar-thumb:hover, #chatbot-display::-webkit-scrollbar-thumb:hover {
         background: rgba(127,127,127,0.5);
     }
     
@@ -744,6 +760,23 @@
         font-size: 0.9rem;
         color: var(--dim-text-color);
     }
+    /* NEW: AI Feature Suggestions styling */
+    .ai-feature-suggestions {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--card-border);
+    }
+    .ai-feature-suggestions h4 {
+        margin: 0 0 0.5rem 0;
+        font-size: 0.9rem;
+        color: var(--glow-color-2);
+    }
+    .ai-feature-suggestions ul {
+        padding-left: 1.2rem;
+        margin: 0;
+        font-size: 0.9rem;
+        color: var(--dim-text-color);
+    }
 
 
     /* Generative Art Modal Specific Styles */
@@ -835,55 +868,156 @@
     }
 
 
-    /* --- Chatbot Modal Styles --- */
+    /* --- Chatbot Modal Styles (ENHANCED) --- */
     #chatbot-modal .modal-content {
         max-width: 500px;
-        max-height: 80vh;
+        height: 85vh; /* Fixed height */
+        max-height: 700px;
+        padding: 0;
         display: flex;
         flex-direction: column;
-        padding: 1.5rem;
+    }
+    .chatbot-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid var(--card-border);
+        flex-shrink: 0;
+        position: relative; /* For close button positioning */
+    }
+    .chatbot-header h2 {
+        margin: 0;
+        font-size: 1.5rem;
+        background: none;
+        -webkit-background-clip: unset;
+        -webkit-text-fill-color: unset;
+        color: var(--text-color);
+    }
+    .chatbot-header i {
+        color: var(--glow-color-1);
+    }
+    #chatbot-speech-toggle {
+        background: none; border: none; cursor: pointer;
+        color: var(--dim-text-color);
+        margin-left: auto; padding: 0.25rem;
+        transition: color 0.2s;
+    }
+    #chatbot-speech-toggle.active { color: var(--glow-color-1); }
+    /* FIX: Make sure close button in chatbot header doesn't overlap */
+    #chatbot-modal .close-modal {
+        position: static; /* Override absolute positioning */
+        margin-left: 0.5rem;
     }
     #chatbot-display {
         flex-grow: 1;
         overflow-y: auto;
-        border: 1px solid var(--card-border);
-        border-radius: 8px;
         padding: 1rem;
-        margin-bottom: 1rem;
         background: rgba(0,0,0,0.1);
-        min-height: 200px;
         display: flex;
         flex-direction: column;
-        gap: 0.5rem;
+        gap: 1rem; /* Increased gap */
     }
     .chat-message {
-        padding: 0.5rem 0.8rem;
-        border-radius: 12px;
-        max-width: 80%;
+        padding: 0.75rem 1rem;
+        border-radius: 18px;
+        max-width: 85%;
         word-wrap: break-word;
+        line-height: 1.5;
+        position: relative;
     }
     .chat-message.user {
         background: var(--glow-color-1);
         color: #000;
         align-self: flex-end;
-        border-bottom-right-radius: 2px;
+        border-bottom-right-radius: 4px;
     }
     .chat-message.ai {
-        background: var(--card-bg);
+        background: rgba(127,127,127,0.15);
         color: var(--text-color);
         border: 1px solid var(--card-border);
         align-self: flex-start;
-        border-bottom-left-radius: 2px;
+        border-bottom-left-radius: 4px;
     }
+    /* Message bubble tails */
+    .chat-message.ai::before, .chat-message.user::before {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        width: 0;
+        height: 0;
+        border: 10px solid transparent;
+    }
+    .chat-message.ai::before {
+        left: -10px;
+        border-right-color: var(--card-border);
+        border-right-width: 7px;
+    }
+    .light-theme .chat-message.ai::before {
+      border-right-color: var(--card-border);
+    }
+    .chat-message.user::before {
+        right: -7px;
+        border-left-color: var(--glow-color-1);
+    }
+    /* Chatbot Markdown Styling */
+    .chat-message p { margin: 0 0 0.5rem 0; color: inherit; }
+    .chat-message p:last-child { margin-bottom: 0; }
+    .chat-message pre {
+        background: rgba(0,0,0,0.3);
+        border: 1px solid var(--card-border);
+        border-radius: 8px;
+        padding: 1rem;
+        margin: 0.5rem 0;
+        font-family: 'Fira Code', monospace;
+        font-size: 0.9rem;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        position: relative;
+    }
+    .chat-message code {
+        font-family: 'Fira Code', monospace;
+        background: rgba(127,127,127,0.2);
+        padding: 0.1rem 0.3rem;
+        border-radius: 4px;
+    }
+    .chat-message pre code { background: none; padding: 0; }
+    .chat-message blockquote {
+        border-left: 3px solid var(--glow-color-1);
+        padding-left: 1rem;
+        margin-left: 0;
+        font-style: italic;
+        color: var(--dim-text-color);
+    }
+    .chat-message ul, .chat-message ol { padding-left: 1.5rem; }
+    .chat-message a { color: var(--glow-color-2); text-decoration: underline; }
+    .copy-code-btn {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: var(--text-color);
+        padding: 0.25rem 0.5rem;
+        border-radius: 6px;
+        cursor: pointer;
+        opacity: 0.3;
+        transition: opacity 0.2s ease;
+        font-size: 0.8rem;
+    }
+    .chat-message pre:hover .copy-code-btn { opacity: 1; }
     #chatbot-thinking-indicator {
         font-style: italic;
         color: var(--dim-text-color);
-        align-self: flex-start;
-        margin-left: 0.5rem;
+        padding: 0 1.5rem 0.5rem;
+        flex-shrink: 0;
     }
     .chat-input-container {
         display: flex;
         gap: 0.5rem;
+        padding: 1rem 1.5rem;
+        border-top: 1px solid var(--card-border);
+        flex-shrink: 0;
     }
     #chatbot-input {
         flex-grow: 1;
@@ -894,20 +1028,51 @@
         color: var(--text-color);
         outline: none;
     }
-    #chatbot-input:focus {
-        border-color: var(--glow-color-1);
-    }
-    #chatbot-send-btn, #chatbot-clear-btn {
+    #chatbot-input:focus { border-color: var(--glow-color-1); }
+    #chatbot-send-btn, #chatbot-clear-btn, #chatbot-mic-btn {
         background: var(--glow-color-2);
         color: #fff;
         border: none;
-        padding: 0.75rem 1rem;
+        padding: 0.75rem;
         border-radius: 8px;
         cursor: pointer;
         transition: background 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
-    #chatbot-send-btn:hover, #chatbot-clear-btn:hover {
-        background: var(--glow-color-1);
+    #chatbot-send-btn:hover, #chatbot-clear-btn:hover, #chatbot-mic-btn:hover { background: var(--glow-color-1); }
+    #chatbot-mic-btn.listening {
+        background: var(--error-color);
+        animation: pulse-red 1.5s infinite;
+    }
+    @keyframes pulse-red {
+        0% { box-shadow: 0 0 0 0 rgba(255, 85, 85, 0.7); }
+        70% { box-shadow: 0 0 0 10px rgba(255, 85, 85, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(255, 85, 85, 0); }
+    }
+    /* Suggested Actions */
+    #suggested-actions-container {
+        padding: 0 1rem 1rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        justify-content: center;
+    }
+    .suggested-action-btn {
+        background: rgba(127,127,127,0.1);
+        border: 1px solid var(--card-border);
+        color: var(--dim-text-color);
+        padding: 0.5rem 0.8rem;
+        border-radius: 12px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        transition: all 0.2s ease;
+    }
+    .suggested-action-btn:hover {
+        background: rgba(127,127,127,0.2);
+        color: var(--text-color);
+        border-color: var(--glow-color-1);
     }
 
 
@@ -958,13 +1123,10 @@
     }
 
     #cli-output {
-        height: 250px;
+        height: 100%; /* Fill modal body */
         overflow-y: auto;
-        padding: 10px;
         font-family: 'Fira Code', monospace;
         font-size: 0.9rem;
-        border: 1px solid var(--card-border);
-        border-radius: 8px;
         background: var(--terminal-bg);
         color: var(--terminal-text);
         transition: background 0.3s, color 0.3s;
@@ -2814,8 +2976,8 @@ _           _                     _   _
             cursorTrailCtx.fillStyle = trailColor;
             cursorTrailCtx.globalAlpha = p.alpha;
             cursorTrailCtx.beginPath();
-            cursorTrailCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-            cursorTrailCtx.fill();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fill();
         }
         cursorTrailCtx.globalAlpha = 1;
 
