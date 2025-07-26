@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         },
         
-        toggleHistoryPanel() { this.DOMElements.historyPanel?.classList.toggle('open'); },
+        toggleHistoryPanel() { this.DOMElements.historyPanel?.classList.toggle('closed'); },
         saveConversations() { localStorage.setItem('judson_ai_conversations', JSON.stringify(this.state.conversations)); },
 
         loadConversations() {
@@ -69,6 +69,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     this.state.currentConversationId = keys[keys.length - 1];
                     this.loadConversation(this.state.currentConversationId);
                 }
+            }
+             // On desktop, the panel is open by default. On mobile, it's closed.
+            if (window.innerWidth <= 768) {
+                this.DOMElements.historyPanel?.classList.add('closed');
             }
         },
         
@@ -120,6 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else {
                     this.DOMElements.welcomeScreen?.classList.remove('hidden');
                     this.DOMElements.chatInterface?.classList.add('hidden');
+                    this.state.currentConversationId = null;
                 }
             }
         },
