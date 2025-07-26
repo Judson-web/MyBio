@@ -1,6 +1,6 @@
 /**
- * Judson AI - Chatbot with History
- * @version 6.0.0
+ * Judson AI - Chatbot with History & Glassmorphism
+ * @version 7.0.0
  * @author Judson Saji
  */
 
@@ -9,42 +9,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
     feather.replace();
 
-    // --- MODAL & NAVIGATION LOGIC ---
-    const openModal = (modalId) => {
-        const modal = document.getElementById(`${modalId}-modal`);
-        if (modal) modal.classList.add('active');
-        closeDrawer();
-    };
-    const closeModal = (modal) => {
-        if (modal) modal.classList.remove('active');
-    };
-    document.querySelectorAll('[data-modal]').forEach(el => {
-        el.addEventListener('click', (e) => { e.preventDefault(); openModal(el.getAttribute('data-modal')); });
-    });
-    document.querySelectorAll('.modal-overlay').forEach(el => {
-        el.addEventListener('click', (e) => { if (e.target === el) closeModal(el); });
-        el.querySelector('.close-modal')?.addEventListener('click', () => closeModal(el));
-    });
-
-    // Mobile Drawer
-    const hamburgerBtn = document.getElementById('hamburger-btn');
-    const mainNavDrawer = document.getElementById('main-nav-drawer');
-    const drawerBackdrop = document.getElementById('drawer-backdrop');
-    const drawerCloseBtn = document.getElementById('drawer-close-btn');
-    const openDrawer = () => { mainNavDrawer?.classList.add('active'); drawerBackdrop?.classList.add('active'); };
-    const closeDrawer = () => { mainNavDrawer?.classList.remove('active'); drawerBackdrop?.classList.remove('active'); };
-    hamburgerBtn?.addEventListener('click', openDrawer);
-    drawerBackdrop?.addEventListener('click', closeDrawer);
-    drawerCloseBtn?.addEventListener('click', closeDrawer);
-
     // --- CHATBOT & HISTORY CORE LOGIC ---
     const chatbot = {
         DOMElements: {},
-        state: {
-            conversations: {},
-            currentConversationId: null,
-            isThinking: false
-        },
+        state: { conversations: {}, currentConversationId: null, isThinking: false },
 
         init() {
             this.DOMElements = {
@@ -52,14 +20,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 chatInterface: document.getElementById('chat-interface'),
                 startChatBtn: document.getElementById('start-chat-btn'),
                 chatDisplay: document.getElementById('chat-display'),
+                chatTitle: document.getElementById('chat-title'),
                 thinkingIndicator: document.getElementById('thinking-indicator'),
                 chatbotInput: document.getElementById('chatbot-input'),
                 chatbotSendBtn: document.getElementById('chatbot-send-btn'),
                 historyPanel: document.getElementById('history-panel'),
                 historyList: document.getElementById('history-list'),
                 newChatBtn: document.getElementById('new-chat-btn'),
-                historyBtnDesktop: document.getElementById('history-btn-desktop'),
-                historyBtnMobile: document.getElementById('history-btn-mobile'),
+                clearChatBtn: document.getElementById('clear-chat-btn'),
+                historyToggleBtn: document.getElementById('history-toggle-btn'),
             };
             this.loadConversations();
             this.renderHistoryList();
@@ -69,12 +38,12 @@ document.addEventListener('DOMContentLoaded', () => {
         bindEvents() {
             this.DOMElements.startChatBtn?.addEventListener('click', () => this.startNewConversation());
             this.DOMElements.newChatBtn?.addEventListener('click', () => this.startNewConversation());
+            this.DOMElements.clearChatBtn?.addEventListener('click', () => this.clearCurrentConversation());
+            this.DOMElements.historyToggleBtn?.addEventListener('click', () => this.toggleHistoryPanel());
             this.DOMElements.chatbotSendBtn?.addEventListener('click', () => this.processUserMessage());
             this.DOMElements.chatbotInput?.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' && !this.state.isThinking) { e.preventDefault(); this.processUserMessage(); }
             });
-            this.DOMElements.historyBtnDesktop?.addEventListener('click', (e) => { e.preventDefault(); this.toggleHistoryPanel(); });
-            this.DOMElements.historyBtnMobile?.addEventListener('click', (e) => { e.preventDefault(); this.toggleHistoryPanel(); closeDrawer(); });
             this.DOMElements.historyList?.addEventListener('click', (e) => {
                 const item = e.target.closest('.history-item');
                 if (!item) return;
@@ -83,17 +52,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     this.deleteConversation(conversationId);
                 } else {
                     this.loadConversation(conversationId);
+                    if (window.innerWidth <= 768) this.toggleHistoryPanel(); // Close panel on mobile
                 }
             });
         },
         
-        toggleHistoryPanel() {
-            this.DOMElements.historyPanel?.classList.toggle('open');
-        },
-
-        saveConversations() {
-            localStorage.setItem('judson_ai_conversations', JSON.stringify(this.state.conversations));
-        },
+        toggleHistoryPanel() { this.DOMElements.historyPanel?.classList.toggle('open'); },
+        saveConversations() { localStorage.setItem('judson_ai_conversations', JSON.stringify(this.state.conversations)); },
 
         loadConversations() {
             const saved = localStorage.getItem('judson_ai_conversations');
@@ -101,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.state.conversations = JSON.parse(saved);
                 const keys = Object.keys(this.state.conversations);
                 if (keys.length > 0) {
-                    this.state.currentConversationId = keys[keys.length - 1]; // Load the last one
+                    this.state.currentConversationId = keys[keys.length - 1];
                     this.loadConversation(this.state.currentConversationId);
                 }
             }
@@ -117,6 +82,16 @@ document.addEventListener('DOMContentLoaded', () => {
             this.renderHistoryList();
             this.saveConversations();
         },
+        
+        clearCurrentConversation() {
+            if (!this.state.currentConversationId) return;
+            // Reset messages but keep the conversation entry and title
+            this.state.conversations[this.state.currentConversationId].messages = [
+                 { role: 'model', parts: [{ text: "Chat cleared. How can I help you now?" }] }
+            ];
+            this.loadConversation(this.state.currentConversationId);
+            this.saveConversations();
+        },
 
         loadConversation(id) {
             if (!this.state.conversations[id]) return;
@@ -126,21 +101,26 @@ document.addEventListener('DOMContentLoaded', () => {
             this.DOMElements.welcomeScreen?.classList.add('hidden');
             this.DOMElements.chatInterface?.classList.remove('hidden');
             this.DOMElements.chatDisplay.innerHTML = '';
+            this.DOMElements.chatTitle.textContent = conversation.title;
             
             conversation.messages.forEach(msg => {
                 this.addMessageToDOM(msg.role, msg.parts[0].text);
             });
-            this.renderHistoryList(); // To update the 'active' class
+            this.renderHistoryList();
         },
         
         deleteConversation(id) {
-            if (!this.state.conversations[id]) return;
             delete this.state.conversations[id];
             this.saveConversations();
             this.renderHistoryList();
-            // If we deleted the current chat, start a new one
             if (this.state.currentConversationId === id) {
-                this.startNewConversation();
+                const keys = Object.keys(this.state.conversations);
+                if (keys.length > 0) {
+                    this.loadConversation(keys[keys.length - 1]);
+                } else {
+                    this.DOMElements.welcomeScreen?.classList.remove('hidden');
+                    this.DOMElements.chatInterface?.classList.add('hidden');
+                }
             }
         },
 
@@ -151,14 +131,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const conversation = this.state.conversations[id];
                 const item = document.createElement('div');
                 item.className = 'history-item';
-                if (id === this.state.currentConversationId) {
-                    item.classList.add('active');
-                }
+                if (id === this.state.currentConversationId) item.classList.add('active');
                 item.dataset.id = id;
-                item.innerHTML = `
-                    <span>${conversation.title}</span>
-                    <button class="delete-history-btn" aria-label="Delete"><i data-feather="trash-2"></i></button>
-                `;
+                item.innerHTML = `<span>${conversation.title}</span><button class="delete-history-btn"><i data-feather="trash-2"></i></button>`;
                 this.DOMElements.historyList.appendChild(item);
             });
             feather.replace();
@@ -181,56 +156,41 @@ document.addEventListener('DOMContentLoaded', () => {
         },
 
         async processUserMessage() {
-            if (!this.state.currentConversationId) {
-                this.startNewConversation();
-            }
+            if (!this.state.currentConversationId) this.startNewConversation();
             const userMessage = this.DOMElements.chatbotInput.value.trim();
             if (!userMessage || this.state.isThinking) return;
 
             const conversation = this.state.conversations[this.state.currentConversationId];
-            const userMessageObject = { role: "user", parts: [{ text: userMessage }] };
-            conversation.messages.push(userMessageObject);
+            conversation.messages.push({ role: "user", parts: [{ text: userMessage }] });
             this.addMessageToDOM('user', userMessage);
             this.DOMElements.chatbotInput.value = '';
             this.showThinking(true);
             
             await this.getAIResponse();
             
-            // Generate title after 2 user messages
             const userMessages = conversation.messages.filter(m => m.role === 'user').length;
-            if (userMessages === 2) {
-                this.generateTitleForConversation(this.state.currentConversationId);
-            }
+            if (userMessages === 1) this.generateTitleForConversation(this.state.currentConversationId);
         },
 
         async getAIResponse() {
             const conversation = this.state.conversations[this.state.currentConversationId];
             try {
                 const response = await fetch('/.netlify/functions/ask-gemini', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ history: conversation.messages }),
+                    method: 'POST', body: JSON.stringify({ history: conversation.messages }),
                 });
                 if (!response.ok) throw new Error((await response.json()).message);
-
                 const data = await response.json();
                 const aiResponseObject = data.response;
                 conversation.messages.push(aiResponseObject);
 
                 const part = aiResponseObject.parts[0];
-                if (part.functionCall) {
-                    await this.handleFunctionCall(part.functionCall);
-                } else if (part.text) {
-                    this.addMessageToDOM('model', part.text);
-                    this.showThinking(false);
-                } else { throw new Error("Invalid AI response format."); }
-
+                if (part.functionCall) await this.handleFunctionCall(part.functionCall);
+                else if (part.text) { this.addMessageToDOM('model', part.text); this.showThinking(false); }
+                else throw new Error("Invalid AI response format.");
             } catch (error) {
                 this.addMessageToDOM('model', `Error: ${error.message}`);
                 this.showThinking(false);
-            } finally {
-                this.saveConversations();
-            }
+            } finally { this.saveConversations(); }
         },
         
         async handleFunctionCall(functionCall) {
@@ -238,8 +198,7 @@ document.addEventListener('DOMContentLoaded', () => {
             this.addMessageToDOM('tool', `*Using tool: \`${functionCall.name}\`...*`);
             try {
                 const toolResponse = await fetch('/.netlify/functions/chatbot-tools', {
-                    method: 'POST',
-                    body: JSON.stringify({ toolName: functionCall.name, args: functionCall.args }),
+                    method: 'POST', body: JSON.stringify({ toolName: functionCall.name, args: functionCall.args }),
                 });
                 if (!toolResponse.ok) throw new Error("Tool execution failed.");
                 const toolResult = await toolResponse.json();
@@ -260,9 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const titlePrompt = `Based on the following conversation, create a very short, concise title (3-5 words max).\n\nConversation:\n${conversation.messages.map(m => `${m.role}: ${m.parts[0].text}`).join('\n')}`;
             try {
                  const response = await fetch('/.netlify/functions/ask-gemini', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ prompt: titlePrompt }), // Send a simple prompt for title
+                    method: 'POST', body: JSON.stringify({ prompt: titlePrompt }),
                 });
                 if (!response.ok) return;
                 const data = await response.json();
@@ -270,6 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     conversation.title = data.response.parts[0].text.replace(/"/g, '');
                     this.saveConversations();
                     this.renderHistoryList();
+                    this.DOMElements.chatTitle.textContent = conversation.title;
                 }
             } catch (e) { console.error("Could not generate title:", e); }
         }
