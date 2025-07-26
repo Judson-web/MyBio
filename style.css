@@ -130,9 +130,20 @@ html, body {
 .avatar { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-weight: 500; overflow: hidden; }
 .avatar.user img { width: 100%; height: 100%; object-fit: cover; }
 .avatar.ai svg { width: 24px; height: 24px; }
-.message-content { padding-top: 0.5rem; }
+.message-content { padding-top: 0.5rem; width: 100%; }
 .message-bubble { line-height: 1.7; }
 .chat-message.tool .message-bubble { font-style: italic; color: var(--dim-text-color); }
+
+.response-actions {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 0.5rem;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+.chat-message:hover .response-actions { opacity: 1; }
+.response-actions button { background: none; border: none; color: var(--dim-text-color); padding: 0.5rem; border-radius: 50%; cursor: pointer; display: flex; }
+.response-actions button:hover { background: var(--surface-hover); color: var(--text-color); }
 
 /* Code Snippet Styling */
 .message-bubble pre { margin: 1rem 0; background: var(--surface-color); border: 1px solid var(--border-color); border-radius: 8px; position: relative; }
@@ -191,8 +202,35 @@ html, body {
     opacity: 0;
     transition: opacity 0.4s ease;
 }
-#history-backdrop:not(.hidden) {
-    opacity: 1;
+#history-backdrop:not(.hidden) { opacity: 1; }
+
+/* Cookie Banner */
+#cookie-banner {
+    position: fixed;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--surface-color);
+    color: var(--text-color);
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    z-index: 2000;
+    animation: slideUp 0.5s ease-out;
+}
+@keyframes slideUp { from { transform: translate(-50%, 150%); } to { transform: translate(-50%, 0); } }
+#cookie-banner p { margin: 0; font-size: 0.9rem; }
+#cookie-accept-btn {
+    background: var(--glow-color-1);
+    color: #000;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
 }
 
 @media (max-width: 768px) {
@@ -201,5 +239,6 @@ html, body {
     #history-toggle-btn { display: flex; }
     #chatbot-container { padding: 0; }
     #chat-wrapper, .chat-input-area { padding: 1rem; }
+    #cookie-banner { flex-direction: column; text-align: center; bottom: 0; left: 0; right: 0; transform: none; border-radius: 0; border-left: none; border-right: none; }
 }
 
