@@ -11,12 +11,13 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fira+Code:wght@400&display=swap" as="style">
-    <link rel="preload" href="https://unpkg.com/feather-icons" as="script">
-    <link rel="preload" href="https://cdn.jsdelivr.net/npm/marked/marked.min.js" as="script">
     
     <!-- Styles and Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fira+Code:wght@400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    
+    <!-- Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
 </head>
 <body>
     <!-- Backgrounds -->
@@ -37,7 +38,9 @@
         <!-- Main Chatbot Container -->
         <main id="chatbot-container">
             <div id="welcome-screen">
-                <img class="profile-img" src="https://firebasestorage.googleapis.com/v0/b/crnn-b7d8f.appspot.com/o/files%2FIMG_20250717_215454_617-modified.png?alt=media&token=bea1f0dd-abf1-4cfb-8a83-0d3b603d3fde" alt="Judson Saji Profile Picture"/>
+                <div class="logo-container">
+                    <img class="profile-img" src="https://firebasestorage.googleapis.com/v0/b/crnn-b7d8f.appspot.com/o/files%2FIMG_20250717_215454_617-modified.png?alt=media&token=bea1f0dd-abf1-4cfb-8a83-0d3b603d3fde" alt="Judson Saji Profile Picture"/>
+                </div>
                 <h1>Judson AI</h1>
                 <p>Your personal AI assistant. How can I help you today?</p>
                 <button id="start-chat-btn">Start Chatting</button>
@@ -55,7 +58,7 @@
                         <div class="dot-flashing"></div>
                     </div>
                     <div class="input-wrapper">
-                        <input type="text" id="chatbot-input" placeholder="Ask me anything..." autocomplete="off">
+                        <textarea id="chatbot-input" placeholder="Ask me anything..." rows="1"></textarea>
                         <button id="chatbot-send-btn" aria-label="Send Message"><i data-feather="send"></i></button>
                     </div>
                 </footer>
@@ -66,6 +69,7 @@
     <!-- Core Scripts -->
     <script src="https://unpkg.com/feather-icons"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
