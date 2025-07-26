@@ -50,7 +50,7 @@ html, body {
     transform: translateX(0);
     transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
     position: relative;
-    z-index: 1001; /* Above backdrop */
+    z-index: 1001;
 }
 #history-panel.closed { transform: translateX(-100%); }
 
@@ -118,7 +118,7 @@ html, body {
     display: flex; flex-direction: column; align-items: center; text-align: center;
     justify-content: center;
     flex-grow: 1;
-    margin-bottom: 5rem; /* Push it up a bit */
+    margin-bottom: 5rem;
 }
 .logo-container { margin-bottom: 1.5rem; }
 #welcome-screen h1 { font-size: 2.5rem; font-weight: 500; margin: 0 0 1rem 0; color: #c4c7c5; }
@@ -202,3 +202,4 @@ html, body {
     #chatbot-container { padding: 0; }
     #chat-wrapper, .chat-input-area { padding: 1rem; }
 }
+
