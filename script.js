@@ -324,5 +324,3 @@ document.addEventListener('DOMContentLoaded', () => {
     chatbot.init();
     animation.init();
 });
-
-.
