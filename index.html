@@ -17,59 +17,25 @@
     <!-- Styles and Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fira+Code:wght@400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-
-    <!-- Social Media Meta Tags -->
-    <meta property="og:title" content="Judson AI - Chatbot" />
-    <meta property="og:description" content="An intelligent AI assistant by Judson Saji." />
-    <meta property="og:image" content="https://firebasestorage.googleapis.com/v0/b/crnn-b7d8f.appspot.com/o/files%2FIMG_20250717_215454_617-modified.png?alt=media&token=bea1f0dd-abf1-4cfb-8a83-0d3b603d3fde" />
-    <meta property="og:url" content="https://judsonsaji.netlify.app/" />
-    <meta property="og:type" content="website" />
 </head>
 <body>
     <!-- Backgrounds -->
     <canvas id="aurora-canvas" class="background-canvas"></canvas>
     <canvas id="cursor-trail-canvas"></canvas>
 
-    <!-- Header with History Button -->
-    <header class="site-header">
-        <a href="/" class="header-logo" aria-label="Judson Saji - Home">Judson Saji</a>
-        <nav class="site-nav" id="desktop-nav">
-            <a id="history-btn-desktop" href="#" aria-label="View Chat History">History</a>
-            <a data-modal="about" aria-label="About Me">About Me</a>
-        </nav>
-        <button id="hamburger-btn" aria-label="Open navigation menu">
-            <i data-feather="menu"></i>
-        </button>
-    </header>
-
-    <!-- Mobile Navigation Drawer -->
-    <div id="main-nav-drawer">
-        <div class="drawer-header">
-            <a href="/" class="header-logo" aria-label="Judson Saji - Home">Judson Saji</a>
-            <button id="drawer-close-btn" aria-label="Close navigation menu">
-                <i data-feather="x"></i>
-            </button>
-        </div>
-        <div class="drawer-nav-links">
-            <a id="history-btn-mobile" href="#">History</a>
-            <a data-modal="about">About Me</a>
-        </div>
-    </div>
-    <div id="drawer-backdrop"></div>
-
     <!-- Main App Container -->
     <div id="app-container">
-        <!-- History Side Panel (Initially Hidden) -->
+        <!-- History Side Panel -->
         <aside id="history-panel">
             <div class="history-header">
-                <h3>History</h3>
-                <button id="new-chat-btn" aria-label="Start New Chat"><i data-feather="plus-square"></i> New Chat</button>
+                <a href="/" class="header-logo" aria-label="Judson Saji - Home">Judson Saji</a>
+                <button id="new-chat-btn" aria-label="Start New Chat"><i data-feather="plus-square"></i></button>
             </div>
             <div id="history-list"></div>
         </aside>
 
         <!-- Main Chatbot Container -->
-        <div id="chatbot-container">
+        <main id="chatbot-container">
             <div id="welcome-screen">
                 <img class="profile-img" src="https://firebasestorage.googleapis.com/v0/b/crnn-b7d8f.appspot.com/o/files%2FIMG_20250717_215454_617-modified.png?alt=media&token=bea1f0dd-abf1-4cfb-8a83-0d3b603d3fde" alt="Judson Saji Profile Picture"/>
                 <h1>Judson AI</h1>
@@ -78,7 +44,12 @@
             </div>
 
             <div id="chat-interface" class="hidden">
-                <main id="chat-display"></main>
+                <header class="chat-header">
+                    <button id="history-toggle-btn" aria-label="Toggle History"><i data-feather="menu"></i></button>
+                    <h2 id="chat-title">New Chat</h2>
+                    <button id="clear-chat-btn" aria-label="Clear Current Chat"><i data-feather="trash-2"></i></button>
+                </header>
+                <div id="chat-display"></div>
                 <footer class="chat-input-area">
                     <div id="thinking-indicator" class="hidden">
                         <div class="dot-flashing"></div>
@@ -89,19 +60,9 @@
                     </div>
                 </footer>
             </div>
-        </div>
+        </main>
     </div>
     
-    <!-- About Me Modal -->
-    <div id="about-modal" class="modal-overlay">
-        <div class="modal-content">
-            <i data-feather="x" class="close-modal"></i>
-            <h2>About Me</h2>
-            <p>I'm a creator driven by the fusion of technology and art. My background isn't linear; it's a path woven through poetry, the discipline of minimalism, and a deep-seated love for analytical thought. Today, these threads combine in my work as a creative developer.</p>
-            <p>My focus is on generative art, interactive design, and building digital experiences that feel both intelligent and human. This space is my digital sketchbook and a reflection of my ongoing projects. I'm currently exploring how to tell better stories with code. Welcome.</p>
-        </div>
-    </div>
-
     <!-- Core Scripts -->
     <script src="https://unpkg.com/feather-icons"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
