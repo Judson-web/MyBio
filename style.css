@@ -3,7 +3,7 @@
   --bg-color: #0a0a0f;
   --text-color: #e0e0e0;
   --dim-text-color: #a0a0a0;
-  --card-bg: rgba(255, 255, 255, 0.05); /* Adjusted to match original */
+  --card-bg: rgba(255, 255, 255, 0.05);
   --card-border: rgba(255, 255, 255, 0.1);
   --header-bg: rgba(10, 10, 15, 0.5);
   --input-bg: rgba(0, 0, 0, 0.2);
@@ -38,7 +38,7 @@ html, body {
   font-family: var(--font-primary);
   background: var(--bg-color);
   color: var(--text-color);
-  overflow: hidden; /* Prevent scrollbars on the body */
+  overflow: hidden;
   transition: background 0.4s ease, color 0.4s ease;
 }
 
@@ -79,14 +79,14 @@ html, body {
     display: none !important;
 }
 
-/* --- WELCOME SCREEN --- */
+/* --- WELCOME SCREEN (Glassmorphism) --- */
 #welcome-screen {
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
     background: var(--card-bg);
-    backdrop-filter: blur(15px); /* Adjusted to match original */
+    backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
     border: 1px solid var(--card-border);
     border-radius: 20px;
@@ -158,14 +158,14 @@ html, body {
 }
 
 
-/* --- CHAT INTERFACE --- */
+/* --- CHAT INTERFACE (Main Glassmorphism Container) --- */
 #chat-interface {
   width: 100%;
   max-width: 700px;
   height: 90vh;
   max-height: 800px;
   background: var(--card-bg);
-  backdrop-filter: blur(15px); /* Adjusted to match original */
+  backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
   border: 1px solid var(--card-border);
   border-radius: 16px;
@@ -173,13 +173,18 @@ html, body {
   flex-direction: column;
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
   animation: fadeIn 0.5s ease-out;
+  overflow: hidden; /* Important for border-radius on child elements */
 }
 
+/* --- Glassmorphism Header --- */
 .chatbot-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 0.75rem 1.5rem;
+  background: var(--header-bg); /* Added background */
+  backdrop-filter: blur(18px); /* Added blur */
+  -webkit-backdrop-filter: blur(18px);
   border-bottom: 1px solid var(--card-border);
   flex-shrink: 0;
 }
@@ -270,7 +275,7 @@ html, body {
 }
 
 .chat-message.ai {
-  background: rgba(127, 127, 127, 0.1);
+  background: rgba(127, 127, 127, 0.15); /* Slightly more opaque for readability */
   color: var(--text-color);
   align-self: flex-start;
   border-bottom-left-radius: 4px;
@@ -298,8 +303,12 @@ html, body {
 .chat-message pre code { background: none; padding: 0; }
 .chat-message a { color: var(--glow-color-2); text-decoration: underline; }
 
+/* --- Glassmorphism Input Area --- */
 .chat-input-area {
   padding: 1rem 1.5rem;
+  background: var(--header-bg); /* Use same bg as header */
+  backdrop-filter: blur(18px); /* Added blur */
+  -webkit-backdrop-filter: blur(18px);
   border-top: 1px solid var(--card-border);
   flex-shrink: 0;
 }
@@ -430,4 +439,3 @@ html, body {
         padding: 0;
     }
 }
-
