@@ -28,7 +28,7 @@ exports.handler = async (event, context) => {
             };
         }
 
-        // 4. Securely retrieve your NEW Gemini API key from Netlify Environment Variables.
+        // 4. Securely retrieve your Gemini API key from Netlify Environment Variables.
         const GEMINI_API_KEY = process.env.GEMINI_API_KEY; // This MUST match the key name you set in Netlify settings
 
         if (!GEMINI_API_KEY) {
@@ -40,39 +40,49 @@ exports.handler = async (event, context) => {
             };
         }
 
-        // 5. Construct the chat history for the Gemini API.
-        const chatHistory = [...history, { role: "user", parts: [{ text: prompt }] }];
+        // 5. Define the AI's persona and instructions.
+        // This is a "system instruction" that guides the AI's behavior.
+        const systemInstruction = {
+            role: "system",
+            parts: [{
+                text: "You are Judson's AI Assistant, a creative and concise digital entity. Your purpose is to assist users with inquiries related to creative coding, generative art, minimalism, and the intersection of technology and art. Be helpful, insightful, and maintain a tone that reflects Judson's 'ExPoet, ExMinimalist, ExThinker, NowCreator' persona. Keep responses concise and to the point, typically 1-3 sentences unless more detail is explicitly requested."
+            }]
+        };
 
-        // 6. Prepare the payload for the actual Gemini API call.
+        // 6. Construct the chat history for the Gemini API, including the system instruction.
+        // The system instruction should ideally be the first message in the conversation.
+        const contents = [systemInstruction, ...history, { role: "user", parts: [{ text: prompt }] }];
+
+        // 7. Prepare the payload for the actual Gemini API call.
         const geminiPayload = {
-            contents: chatHistory,
-            // No responseSchema here, as we want free-form text.
+            contents: contents, // Use the updated contents array
+            // No responseSchema here, as we want free-form text for general chat.
         };
 
         const geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
 
-        // 7. Make the actual API call to Google's Gemini service.
+        // 8. Make the actual API call to Google's Gemini service.
         const geminiResponse = await fetch(geminiApiUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(geminiPayload)
         });
 
-        // 8. Handle potential errors returned by the Gemini API (e.g., 400, 500 status codes).
+        // 9. Handle potential errors returned by the Gemini API (e.g., 400, 500 status codes).
         if (!geminiResponse.ok) {
-            const errorBody = await geminiResponse.text(); // Get raw text to avoid parsing issues
+            const errorBody = await geminiResponse.text();
             console.error("Error from Gemini API:", geminiResponse.status, errorBody);
             return {
                 statusCode: geminiResponse.status,
-                body: JSON.stringify({ message: `Error from Gemini API: ${geminiResponse.status}. Detail: ${errorBody.substring(0, 200)}...` }), // Truncate detail
+                body: JSON.stringify({ message: `Error from Gemini API: ${geminiResponse.status}. Detail: ${errorBody.substring(0, 200)}...` }),
                 headers: { 'Content-Type': 'application/json' }
             };
         }
 
-        // 9. Parse the successful response from the Gemini API.
+        // 10. Parse the successful response from the Gemini API.
         const geminiResult = await geminiResponse.json();
 
-        // 10. Extract the generated text.
+        // 11. Extract the generated text.
         let generatedText = "No content generated or unexpected response structure.";
         if (geminiResult.candidates && geminiResult.candidates.length > 0 &&
             geminiResult.candidates[0].content && geminiResult.candidates[0].content.parts &&
@@ -80,27 +90,23 @@ exports.handler = async (event, context) => {
             generatedText = geminiResult.candidates[0].content.parts[0].text;
         } else {
             console.error("Unexpected API response structure or no content generated:", geminiResult);
-            // Provide a fallback message if the structure is unexpected
             generatedText = "The AI did not provide a clear response. Please try again.";
         }
 
-        // 11. Send the generated text back to your client-side frontend.
-        // The client will expect a JSON object with a 'response' key.
+        // 12. Send the generated text back to your client-side frontend.
         return {
-            statusCode: 200, // OK
+            statusCode: 200,
             body: JSON.stringify({ response: generatedText }),
             headers: { 'Content-Type': 'application/json' }
         };
 
     } catch (error) {
-        // 12. Catch any unexpected errors that occur within this Netlify Function.
+        // 13. Catch any unexpected errors that occur within this Netlify Function.
         console.error('Netlify Function error:', error);
         return {
-            statusCode: 500, // Internal Server Error
+            statusCode: 500,
             body: JSON.stringify({ message: 'Internal Server Error', detail: error.message }),
             headers: { 'Content-Type': 'application/json' }
         };
     }
 };
-
-              
