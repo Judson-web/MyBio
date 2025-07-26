@@ -30,10 +30,11 @@
     <canvas id="aurora-canvas" class="background-canvas"></canvas>
     <canvas id="cursor-trail-canvas"></canvas>
 
-    <!-- Original Header -->
+    <!-- Header with History Button -->
     <header class="site-header">
         <a href="/" class="header-logo" aria-label="Judson Saji - Home">Judson Saji</a>
         <nav class="site-nav" id="desktop-nav">
+            <a id="history-btn-desktop" href="#" aria-label="View Chat History">History</a>
             <a data-modal="about" aria-label="About Me">About Me</a>
         </nav>
         <button id="hamburger-btn" aria-label="Open navigation menu">
@@ -50,33 +51,44 @@
             </button>
         </div>
         <div class="drawer-nav-links">
-            <a data-modal="about" aria-label="About Me">About Me</a>
+            <a id="history-btn-mobile" href="#">History</a>
+            <a data-modal="about">About Me</a>
         </div>
     </div>
     <div id="drawer-backdrop"></div>
 
-    <!-- Main Chatbot Container -->
-    <div id="chatbot-container">
-        <!-- Welcome screen -->
-        <div id="welcome-screen">
-            <img class="profile-img" src="https://firebasestorage.googleapis.com/v0/b/crnn-b7d8f.appspot.com/o/files%2FIMG_20250717_215454_617-modified.png?alt=media&token=bea1f0dd-abf1-4cfb-8a83-0d3b603d3fde" alt="Judson Saji Profile Picture"/>
-            <h1>Judson AI</h1>
-            <p>Your personal AI assistant. How can I help you today?</p>
-            <button id="start-chat-btn">Start Chatting</button>
-        </div>
+    <!-- Main App Container -->
+    <div id="app-container">
+        <!-- History Side Panel (Initially Hidden) -->
+        <aside id="history-panel">
+            <div class="history-header">
+                <h3>History</h3>
+                <button id="new-chat-btn" aria-label="Start New Chat"><i data-feather="plus-square"></i> New Chat</button>
+            </div>
+            <div id="history-list"></div>
+        </aside>
 
-        <!-- Main chat interface -->
-        <div id="chat-interface" class="hidden">
-            <main id="chat-display"></main>
-            <footer class="chat-input-area">
-                <div id="thinking-indicator" class="hidden">
-                    <div class="dot-flashing"></div>
-                </div>
-                <div class="input-wrapper">
-                    <input type="text" id="chatbot-input" placeholder="Ask me anything..." autocomplete="off">
-                    <button id="chatbot-send-btn" aria-label="Send Message"><i data-feather="send"></i></button>
-                </div>
-            </footer>
+        <!-- Main Chatbot Container -->
+        <div id="chatbot-container">
+            <div id="welcome-screen">
+                <img class="profile-img" src="https://firebasestorage.googleapis.com/v0/b/crnn-b7d8f.appspot.com/o/files%2FIMG_20250717_215454_617-modified.png?alt=media&token=bea1f0dd-abf1-4cfb-8a83-0d3b603d3fde" alt="Judson Saji Profile Picture"/>
+                <h1>Judson AI</h1>
+                <p>Your personal AI assistant. How can I help you today?</p>
+                <button id="start-chat-btn">Start Chatting</button>
+            </div>
+
+            <div id="chat-interface" class="hidden">
+                <main id="chat-display"></main>
+                <footer class="chat-input-area">
+                    <div id="thinking-indicator" class="hidden">
+                        <div class="dot-flashing"></div>
+                    </div>
+                    <div class="input-wrapper">
+                        <input type="text" id="chatbot-input" placeholder="Ask me anything..." autocomplete="off">
+                        <button id="chatbot-send-btn" aria-label="Send Message"><i data-feather="send"></i></button>
+                    </div>
+                </footer>
+            </div>
         </div>
     </div>
     
