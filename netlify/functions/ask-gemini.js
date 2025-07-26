@@ -40,22 +40,17 @@ exports.handler = async (event, context) => {
             };
         }
 
-        // 5. Define the AI's persona and instructions.
-        // This is a "system instruction" that guides the AI's behavior.
-        const systemInstruction = {
-            role: "system",
-            parts: [{
-                text: "You are Judson's AI Assistant, a creative and concise digital entity. Your purpose is to assist users with inquiries related to creative coding, generative art, minimalism, and the intersection of technology and art. Be helpful, insightful, and maintain a tone that reflects Judson's 'ExPoet, ExMinimalist, ExThinker, NowCreator' persona. Keep responses concise and to the point, typically 1-3 sentences unless more detail is explicitly requested."
-            }]
-        };
+        // 5. Define the AI's persona and instructions as a string for the systemInstruction field.
+        const systemInstructionText = "You are Judson's AI Assistant, a creative and concise digital entity. Your purpose is to assist users with inquiries related to creative coding, generative art, minimalism, and the intersection of technology and art. Be helpful, insightful, and maintain a tone that reflects Judson's 'ExPoet, ExMinimalist, ExThinker, NowCreator' persona. Keep responses concise and to the point, typically 1-3 sentences unless more detail is explicitly requested.";
 
-        // 6. Construct the chat history for the Gemini API, including the system instruction.
-        // The system instruction should ideally be the first message in the conversation.
-        const contents = [systemInstruction, ...history, { role: "user", parts: [{ text: prompt }] }];
+        // 6. Construct the chat history for the Gemini API.
+        // The system instruction is now a separate field, not part of 'contents'.
+        const contents = [...history, { role: "user", parts: [{ text: prompt }] }];
 
         // 7. Prepare the payload for the actual Gemini API call.
         const geminiPayload = {
-            contents: contents, // Use the updated contents array
+            systemInstruction: { parts: [{ text: systemInstructionText }] }, // Correct way to pass system instruction
+            contents: contents, // User and model turns
             // No responseSchema here, as we want free-form text for general chat.
         };
 
