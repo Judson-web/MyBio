@@ -12,10 +12,12 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://unpkg.com">
   <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
 
   <link rel="preload" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fira+Code:wght@400&display=swap" as="style">
   <link rel="preload" href="https://unpkg.com/feather-icons" as="script">
   <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js" as="script">
+  <link rel="preload" href="https://cdn.jsdelivr.net/npm/marked/marked.min.js" as="script">
 
   <!-- Social Media Meta Tags -->
   <meta property="og:title" content="Judson Saji - Creator" />
@@ -31,6 +33,7 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fira+Code:wght@400&display=swap" rel="stylesheet" />
   <script src="https://unpkg.com/feather-icons"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   
   <!-- SEO Structured Data -->
   <script type="application/ld+json">
@@ -858,6 +861,7 @@
         border-radius: 12px;
         max-width: 80%;
         word-wrap: break-word;
+        line-height: 1.5;
     }
     .chat-message.user {
         background: var(--glow-color-1);
@@ -871,6 +875,66 @@
         border: 1px solid var(--card-border);
         align-self: flex-start;
         border-bottom-left-radius: 2px;
+    }
+    /* Chatbot Markdown Styling */
+    .chat-message p {
+        margin: 0 0 0.5rem 0;
+        color: var(--text-color);
+    }
+    .chat-message.user p { color: #000; }
+    .chat-message p:last-child { margin-bottom: 0; }
+    .chat-message pre {
+        background: rgba(0,0,0,0.2);
+        border: 1px solid var(--card-border);
+        border-radius: 8px;
+        padding: 1rem;
+        margin: 0.5rem 0;
+        font-family: 'Fira Code', monospace;
+        font-size: 0.9rem;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        position: relative; /* For the copy button */
+    }
+    .chat-message code {
+        font-family: 'Fira Code', monospace;
+        background: rgba(127,127,127,0.2);
+        padding: 0.1rem 0.3rem;
+        border-radius: 4px;
+    }
+    .chat-message pre code {
+        background: none;
+        padding: 0;
+    }
+    .chat-message blockquote {
+        border-left: 3px solid var(--glow-color-1);
+        padding-left: 1rem;
+        margin-left: 0;
+        font-style: italic;
+        color: var(--dim-text-color);
+    }
+    .copy-code-btn {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: var(--text-color);
+        padding: 0.25rem 0.5rem;
+        border-radius: 6px;
+        cursor: pointer;
+        opacity: 0.3;
+        transition: opacity 0.2s ease;
+        font-size: 0.8rem;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .chat-message pre:hover .copy-code-btn {
+        opacity: 1;
+    }
+    .copy-code-btn i {
+        width: 14px;
+        height: 14px;
     }
     #chatbot-thinking-indicator {
         font-style: italic;
@@ -1247,7 +1311,7 @@
       <i data-feather="x" class="close-modal" aria-label="Close Chatbot modal"></i>
       <h2 id="chatbot-modal-title">Judson AI Chatbot</h2>
       <div id="chatbot-display">
-        <!-- Initial greeting will be added by JS, not duplicated here -->
+        <!-- Chat history will be rendered here by JS -->
       </div>
       <div class="chat-input-container">
         <input type="text" id="chatbot-input" placeholder="Ask me anything..." aria-label="Chatbot message input">
@@ -2037,17 +2101,20 @@
     }
 
 
-    // --- CHATBOT AI LOGIC ---
+    // --- CHATBOT AI LOGIC (ENHANCED) ---
     const chatbot = {
         displayElement: null,
         inputElement: null,
         sendButton: null,
         clearButton: null,
         thinkingIndicator: null,
-        chatHistory: [], // Stores conversation for AI context
+        chatHistory: [], // Stores conversation objects { role, parts }
         isThinking: false,
+        isInitialized: false,
 
         init() {
+            if (this.isInitialized) return; // Prevent re-initialization
+            
             this.displayElement = document.getElementById('chatbot-display');
             this.inputElement = document.getElementById('chatbot-input');
             this.sendButton = document.getElementById('chatbot-send-btn');
@@ -2059,29 +2126,88 @@
                 return;
             }
 
-            // Only add initial greeting if chat is empty
-            if (this.chatHistory.length === 0) {
-                 this.addMessage('ai', "Hello! I am Judson's AI assistant. How can I help you today?");
-            }
-           
+            this.loadHistory();
+            this.renderAllMessages();
 
             this.sendButton.onclick = () => this.sendMessage();
             this.inputElement.onkeydown = (e) => {
                 if (e.key === 'Enter' && !this.isThinking) {
+                    e.preventDefault();
                     this.sendMessage();
                 }
             };
             this.clearButton.onclick = () => this.clearChat();
 
             this.inputElement.focus();
+            this.isInitialized = true;
         },
 
-        addMessage(sender, text) {
+        renderAllMessages() {
+            this.displayElement.innerHTML = '';
+            if (this.chatHistory.length === 0) {
+                // First time ever, create welcome message
+                const welcomeText = "Hello! I am Judson's AI assistant. I can now understand Markdown. Ask me for a code snippet!\n\nFor example: `Show me a JavaScript function to shuffle an array.`";
+                this.chatHistory.push({ role: 'model', parts: [{ text: welcomeText }] });
+                this.saveHistory();
+            }
+            this.chatHistory.forEach(msg => {
+                const sender = msg.role === 'model' ? 'ai' : 'user';
+                this._createMessageElement(sender, msg.parts[0].text);
+            });
+            this.displayElement.scrollTop = this.displayElement.scrollHeight;
+            feather.replace();
+        },
+
+        _createMessageElement(sender, text) {
             const messageDiv = document.createElement('div');
             messageDiv.className = `chat-message ${sender}`;
-            messageDiv.textContent = text;
+            
+            // Use marked.js to parse markdown content
+            messageDiv.innerHTML = marked.parse(text);
             this.displayElement.appendChild(messageDiv);
+
+            // After adding the message, find and enhance code blocks
+            if (sender === 'ai') {
+                const preElements = messageDiv.querySelectorAll('pre');
+                preElements.forEach(preElement => {
+                    const codeBlock = preElement.querySelector('code');
+                    if (!codeBlock) return;
+
+                    preElement.style.position = 'relative'; // For positioning the button
+
+                    const copyButton = document.createElement('button');
+                    copyButton.innerHTML = '<i data-feather="copy"></i>';
+                    copyButton.className = 'copy-code-btn';
+                    copyButton.title = 'Copy code';
+                    
+                    copyButton.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const codeToCopy = codeBlock.textContent;
+                        const textArea = document.createElement('textarea');
+                        textArea.value = codeToCopy;
+                        document.body.appendChild(textArea);
+                        textArea.select();
+                        try {
+                            document.execCommand('copy');
+                            showToast('Code copied to clipboard!');
+                            playSound('E5', 'sine', '32n');
+                        } catch (err) {
+                            showToast('Failed to copy code.');
+                            console.error('Failed to copy text: ', err);
+                        }
+                        document.body.removeChild(textArea);
+                    });
+
+                    preElement.appendChild(copyButton);
+                });
+            }
+            return messageDiv;
+        },
+        
+        addNewMessage(sender, text) {
+            this._createMessageElement(sender, text);
             this.displayElement.scrollTop = this.displayElement.scrollHeight;
+            feather.replace();
             playSound('C4', 'sine', '64n');
         },
 
@@ -2091,25 +2217,25 @@
             }
             if (this.inputElement) this.inputElement.disabled = show;
             if (this.sendButton) this.sendButton.disabled = show;
-            if (this.clearButton) this.clearButton.disabled = show;
             this.isThinking = show;
         },
 
         async sendMessage() {
             const userMessage = this.inputElement.value.trim();
-            if (!userMessage) return;
+            if (!userMessage || this.isThinking) return;
 
-            this.addMessage('user', userMessage);
+            this.addNewMessage('user', userMessage);
+            this.chatHistory.push({ role: "user", parts: [{ text: userMessage }] });
+            this.saveHistory();
+            
             this.inputElement.value = '';
             this.showThinking(true);
-
-            this.chatHistory.push({ role: "user", parts: [{ text: userMessage }] });
 
             try {
                 const response = await fetch('/.netlify/functions/ask-gemini', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ prompt: userMessage, history: this.chatHistory }),
+                    body: JSON.stringify({ prompt: userMessage, history: this.chatHistory.slice(0, -1) }), // Send history *before* this message
                 });
 
                 if (!response.ok) {
@@ -2119,27 +2245,49 @@
                 const data = await response.json();
 
                 if (data && data.response) {
-                    this.addMessage('ai', data.response);
+                    this.addNewMessage('ai', data.response);
                     this.chatHistory.push({ role: "model", parts: [{ text: data.response }] });
+                    this.saveHistory();
                 } else {
-                    this.addMessage('ai', "I'm sorry, I couldn't generate a response.");
+                    const errorText = "I'm sorry, I couldn't generate a response.";
+                    this.addNewMessage('ai', errorText);
                     console.error("Unexpected AI response:", data);
                 }
             } catch (error) {
-                this.addMessage('ai', `Error: ${error.message}`);
+                const errorText = `Error: ${error.message}`;
+                this.addNewMessage('ai', errorText);
                 console.error("Chatbot AI error:", error);
             } finally {
                 this.showThinking(false);
+                this.inputElement.focus();
             }
         },
 
         clearChat() {
-            if (this.displayElement) {
-                this.displayElement.innerHTML = '';
-            }
             this.chatHistory = [];
-            this.addMessage('ai', "Chat cleared. How can I help you now?");
+            this.saveHistory();
+            this.renderAllMessages(); // Will show the new welcome message
             playSound('C3', 'sine', '16n');
+        },
+
+        saveHistory() {
+            try {
+                localStorage.setItem('chatbotHistory', JSON.stringify(this.chatHistory));
+            } catch (e) {
+                console.error("Could not save chat history to localStorage:", e);
+            }
+        },
+
+        loadHistory() {
+            try {
+                const savedHistory = localStorage.getItem('chatbotHistory');
+                if (savedHistory) {
+                    this.chatHistory = JSON.parse(savedHistory);
+                }
+            } catch (e) {
+                console.error("Could not load or parse chat history from localStorage:", e);
+                this.chatHistory = [];
+            }
         }
     };
 
