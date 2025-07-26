@@ -202,7 +202,9 @@ html, body {
     opacity: 0;
     transition: opacity 0.4s ease;
 }
-#history-backdrop:not(.hidden) { opacity: 1; }
+#history-backdrop:not(.hidden) {
+    opacity: 1;
+}
 
 /* Cookie Banner */
 #cookie-banner {
