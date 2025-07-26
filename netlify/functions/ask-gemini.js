@@ -15,13 +15,19 @@ exports.handler = async (event) => {
     }
 
     try {
-        const { history } = JSON.parse(event.body);
-        if (!history) {
+        // The frontend can send either a `prompt` (for simple cases like the greeting)
+        // or a full `history` array. We handle both now.
+        const { history, prompt } = JSON.parse(event.body);
+
+        if (!history && !prompt) {
             return {
                 statusCode: 400,
-                body: JSON.stringify({ message: 'Chat history is required.' })
+                body: JSON.stringify({ message: 'Request body must contain either "history" or "prompt".' })
             };
         }
+
+        // If only a prompt is provided, create a history array from it.
+        const chatHistory = history || [{ role: 'user', parts: [{ text: prompt }] }];
 
         const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
         if (!GEMINI_API_KEY) {
@@ -31,8 +37,8 @@ exports.handler = async (event) => {
             };
         }
 
+        // CORRECTED: The system instruction is a top-level field, not part of the contents array.
         const systemInstruction = {
-            role: "system",
             parts: [{
                 text: "You are Judson's AI Assistant. You are creative, concise, and helpful. You can use tools to get real-time information. When a user asks for information that requires a tool, call the appropriate function. For general conversation, respond directly."
             }]
@@ -69,8 +75,10 @@ exports.handler = async (event) => {
             ]
         }];
 
+        // CORRECTED: Payload structure is now valid.
         const geminiPayload = {
-            contents: [systemInstruction, ...history],
+            systemInstruction: systemInstruction,
+            contents: chatHistory, // Use the history directly
             tools: tools
         };
 
