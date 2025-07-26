@@ -1,6 +1,6 @@
 /**
- * Judson AI - Professional Chatbot Experience
- * @version 8.0.0
+ * Judson AI - Gemini UI Professional Chatbot
+ * @version 9.0.0
  * @author Judson Saji
  */
 
@@ -16,7 +16,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         init() {
             this.DOMElements = {
-                appContainer: document.getElementById('app-container'),
                 welcomeScreen: document.getElementById('welcome-screen'),
                 chatInterface: document.getElementById('chat-interface'),
                 startChatBtn: document.getElementById('start-chat-btn'),
@@ -43,10 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
             this.DOMElements.historyToggleBtn?.addEventListener('click', () => this.toggleHistoryPanel());
             this.DOMElements.chatbotSendBtn?.addEventListener('click', () => this.processUserMessage());
             this.DOMElements.chatbotInput?.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' && !e.shiftKey && !this.state.isThinking) { 
-                    e.preventDefault(); 
-                    this.processUserMessage(); 
-                }
+                if (e.key === 'Enter' && !e.shiftKey && !this.state.isThinking) { e.preventDefault(); this.processUserMessage(); }
             });
             this.DOMElements.chatbotInput?.addEventListener('input', this.autoResizeTextarea);
             this.DOMElements.historyList?.addEventListener('click', (e) => {
@@ -89,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
             this.state.currentConversationId = `chat_${Date.now()}`;
             this.state.conversations[this.state.currentConversationId] = {
                 title: "New Chat",
-                messages: [{ role: 'model', parts: [{ text: "Hello! I am Judson's AI assistant. How can I help you today?" }] }]
+                messages: [] // Start with an empty history
             };
             this.loadConversation(this.state.currentConversationId);
             this.renderHistoryList();
@@ -98,9 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         clearCurrentConversation() {
             if (!this.state.currentConversationId) return;
-            this.state.conversations[this.state.currentConversationId].messages = [
-                 { role: 'model', parts: [{ text: "Chat cleared. How can I help you now?" }] }
-            ];
+            this.state.conversations[this.state.currentConversationId].messages = [];
             this.loadConversation(this.state.currentConversationId);
             this.saveConversations();
         },
@@ -115,9 +109,14 @@ document.addEventListener('DOMContentLoaded', () => {
             this.DOMElements.chatDisplay.innerHTML = '';
             this.DOMElements.chatTitle.textContent = conversation.title;
             
-            conversation.messages.forEach(msg => {
-                this.addMessageToDOM(msg.role, msg.parts[0].text);
-            });
+            if (conversation.messages.length === 0) {
+                 this.DOMElements.welcomeScreen?.classList.remove('hidden');
+            } else {
+                this.DOMElements.welcomeScreen?.classList.add('hidden');
+                conversation.messages.forEach(msg => {
+                    this.addMessageToDOM(msg.role, msg.parts[0].text);
+                });
+            }
             this.renderHistoryList();
         },
         
@@ -160,20 +159,30 @@ document.addEventListener('DOMContentLoaded', () => {
         },
 
         addMessageToDOM(sender, text) {
+            this.DOMElements.welcomeScreen?.classList.add('hidden');
             const senderClass = sender === 'model' ? 'ai' : sender;
             const messageContainer = document.createElement('div');
             messageContainer.className = `chat-message ${senderClass}`;
-            
-            const bubble = document.createElement('div');
-            bubble.className = 'message-bubble';
-            bubble.innerHTML = marked.parse(text);
 
-            messageContainer.appendChild(bubble);
+            const avatar = document.createElement('div');
+            avatar.className = `avatar ${senderClass}`;
+            if (senderClass === 'user') {
+                avatar.textContent = 'J'; // Or user's initial
+            } else {
+                avatar.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gemini-gradient" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#89b3f9;stop-opacity:1" /><stop offset="100%" style="stop-color:#d8b6ff;stop-opacity:1" /></linearGradient></defs><path d="M12 2.75L14.25 9.25L21.25 9.75L15.75 14.75L17.75 21.5L12 17.5L6.25 21.5L8.25 14.75L2.75 9.75L9.75 9.25L12 2.75Z" stroke="url(#gemini-gradient)" stroke-width="1.5" stroke-linejoin="round"/></svg>`;
+            }
+            
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+            messageContent.innerHTML = marked.parse(text);
+
+            messageContainer.appendChild(avatar);
+            messageContainer.appendChild(messageContent);
             this.DOMElements.chatDisplay.appendChild(messageContainer);
             this.DOMElements.chatDisplay.scrollTop = this.DOMElements.chatDisplay.scrollHeight;
 
             // Handle code snippets
-            bubble.querySelectorAll('pre code').forEach((block) => {
+            messageContent.querySelectorAll('pre code').forEach((block) => {
                 hljs.highlightElement(block);
                 const pre = block.parentElement;
                 const copyButton = document.createElement('button');
@@ -258,7 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!response.ok) return;
                 const data = await response.json();
                 if(data.response && data.response.parts[0].text) {
-                    conversation.title = data.response.parts[0].text.replace(/"/g, '');
+                    conversation.title = data.response.parts[0].text.replace(/"/g, '').replace(/\./g, '');
                     this.saveConversations();
                     this.renderHistoryList();
                     this.DOMElements.chatTitle.textContent = conversation.title;
@@ -294,7 +303,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (p.alpha <= 0) this.trailParticles.splice(i, 1);
                 else {
                     this.cursorTrailCtx.globalAlpha = p.alpha;
-                    this.cursorTrailCtx.fillStyle = 'rgba(56, 231, 255, 0.5)';
+                    this.cursorTrailCtx.fillStyle = 'rgba(137, 179, 249, 0.5)';
                     this.cursorTrailCtx.beginPath();
                     this.cursorTrailCtx.arc(p.x, p.y, 2, 0, Math.PI * 2);
                     this.cursorTrailCtx.fill();
