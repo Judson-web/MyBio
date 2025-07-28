@@ -110,7 +110,7 @@
           flex-grow: 1;
           height: 100vh;
           max-width: 100%;
-          overflow: hidden; /* Prevent container from overflowing */
+          overflow: hidden;
         }
 
         /* Chat Header */
@@ -311,6 +311,9 @@
             </div>
 
             <footer class="chat-input-area">
+                <div id="thinking-indicator" class="hidden">
+                    <div class="dot-flashing"></div>
+                </div>
                 <div class="input-wrapper">
                     <textarea id="chatbot-input" placeholder="Enter a prompt here" rows="1"></textarea>
                     <button id="chatbot-send-btn" aria-label="Send Message"><i data-feather="arrow-up"></i></button>
