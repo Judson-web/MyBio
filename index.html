@@ -445,7 +445,7 @@
                     conversation.messages.splice(lastUserMessageIndex + 1);
                     const messagesOnScreen = this.DOMElements.chatDisplay.querySelectorAll('.chat-message');
                     // BUG FIX: Corrected index calculation
-                    for (let i = messagesOnScreen.length - 1; i > lastUserMessageIndex; i--) { messagesOnScreen[i].remove(); }
+                    for (let i = messagesOnScreen.length - 1; i > lastUserMessageIndex + 1; i--) { messagesOnScreen[i].remove(); }
                     this.showThinking(true);
                     await this.getAIResponse();
                 },
@@ -494,26 +494,21 @@
                         });
                         if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
                         
-                        const reader = response.body.getReader();
-                        const decoder = new TextDecoder();
-
-                        while (true) {
-                            const { value, done } = await reader.read();
-                            if (done) break;
-                            const chunk = decoder.decode(value);
-                            fullResponse += chunk;
-                            messageBubble.innerHTML = marked.parse(fullResponse + '<span class="cursor-blink">|</span>');
-                            this.DOMElements.chatDisplay.scrollTop = this.DOMElements.chatDisplay.scrollHeight;
+                        // BUG FIX: Reverted to simple JSON response handling
+                        const data = await response.json();
+                        if (data.response) {
+                            fullResponse = data.response.parts[0].text || "";
+                            messageBubble.innerHTML = marked.parse(fullResponse);
+                            conversation.messages.push(data.response);
+                        } else {
+                            throw new Error("Invalid response structure from API.");
                         }
-                        
-                        messageBubble.innerHTML = marked.parse(fullResponse);
-                        // BUG FIX: Do not push a duplicate message to the history. The backend function will do this.
-                        // conversation.messages.push({ role: "model", parts: [{ text: fullResponse }] });
+
                     } catch (err) {
                         error = err;
                         if (error.name === 'AbortError') {
                             messageBubble.innerHTML += "<br><small>(Stopped by user)</small>";
-                            conversation.messages.push({ role: "model", parts: [{ text: fullResponse + "\n(Stopped by user)"}] });
+                            // No need to push here as the full response wasn't received
                         } else {
                             messageBubble.innerHTML = `Oops! Something went wrong. Please try again. <br><small>(${error.message})</small>`;
                         }
