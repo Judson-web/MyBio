@@ -444,7 +444,8 @@
                     if (lastUserMessageIndex === -1) return;
                     conversation.messages.splice(lastUserMessageIndex + 1);
                     const messagesOnScreen = this.DOMElements.chatDisplay.querySelectorAll('.chat-message');
-                    for (let i = messagesOnScreen.length - 1; i > lastUserMessageIndex + 1; i--) { messagesOnScreen[i].remove(); } // Corrected index
+                    // BUG FIX: Corrected index calculation
+                    for (let i = messagesOnScreen.length - 1; i > lastUserMessageIndex; i--) { messagesOnScreen[i].remove(); }
                     this.showThinking(true);
                     await this.getAIResponse();
                 },
@@ -453,13 +454,12 @@
                     if (this.state.isThinking) return;
                     const userMessage = this.DOMElements.chatbotInput.value.trim();
                     if (!userMessage) return;
-                    if (!this.state.currentConversationId) { this.startNewConversation(false); } // BUG FIX: Don't save, just setup
+                    if (!this.state.currentConversationId) { this.startNewConversation(false); }
                     const conversation = this.state.conversations[this.state.currentConversationId];
                     
                     this.addMessageToDOM('user', userMessage);
                     this.DOMElements.chatbotInput.value = '';
                     
-                    // BUG FIX: Critical logic correction. Push user message to state BEFORE making API call.
                     conversation.messages.push({ role: "user", parts: [{ text: userMessage }] });
 
                     const dateRequestRegex = /(what is|what's|tell me|current)\s+(the\s+)?date/i;
@@ -509,7 +509,7 @@
                         messageBubble.innerHTML = marked.parse(fullResponse);
                         conversation.messages.push({ role: "model", parts: [{ text: fullResponse }] });
                     } catch (err) {
-                        error = err; // Capture the error to use in finally block
+                        error = err;
                         if (error.name === 'AbortError') {
                             messageBubble.innerHTML += "<br><small>(Stopped by user)</small>";
                             conversation.messages.push({ role: "model", parts: [{ text: fullResponse + "\n(Stopped by user)"}] });
@@ -537,7 +537,6 @@
                             conversation.title = newTitle;
                             document.title = `${newTitle} - Judson AI`;
                             this.saveConversations();
-                            // TWEAK: Live update the title in the history pop-up if it's open
                             if(this.DOMElements.historyPopup.classList.contains('show')) {
                                 this.renderHistoryList();
                             }
@@ -546,6 +545,7 @@
                 }
             };
             
+            // BUG FIX: Critical initialization order changed.
             chatbot.init();
         });
     </script>
