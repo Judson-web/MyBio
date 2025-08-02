@@ -1,5 +1,4 @@
 // netlify/functions/ask-gemini.js
-const { Readable } = require('stream');
 
 exports.handler = async (event) => {
     if (event.httpMethod !== 'POST') {
@@ -11,6 +10,7 @@ exports.handler = async (event) => {
         const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
         if (!GEMINI_API_KEY) {
+            console.error("GEMINI_API_KEY environment variable not set.");
             return { statusCode: 500, body: 'API key not found.' };
         }
 
@@ -25,7 +25,8 @@ exports.handler = async (event) => {
             tools: tools
         };
         
-        const geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:streamGenerateContent?key=${GEMINI_API_KEY}&alt=sse`;
+        // BUG FIX: Reverted to the stable, non-streaming generateContent endpoint
+        const geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_API_KEY}`;
 
         const geminiResponse = await fetch(geminiApiUrl, {
             method: 'POST',
@@ -39,37 +40,21 @@ exports.handler = async (event) => {
             return { statusCode: geminiResponse.status, body: `Error from Gemini API: ${errorBody}` };
         }
         
-        const readable = new Readable({
-            async read() {
-                const reader = geminiResponse.body.getReader();
-                try {
-                    while (true) {
-                        const { done, value } = await reader.read();
-                        if (done) { this.push(null); break; }
-                        
-                        const chunk = new TextDecoder().decode(value);
-                        const lines = chunk.split('\n');
-                        for (const line of lines) {
-                            if (line.startsWith('data: ')) {
-                                const jsonStr = line.substring(6);
-                                try {
-                                    const parsed = JSON.parse(jsonStr);
-                                    const text = parsed.candidates[0]?.content?.parts[0]?.text;
-                                    if (text) { this.push(text); }
-                                } catch (e) { /* Ignore non-JSON lines */ }
-                            }
-                        }
-                    }
-                } catch (error) { this.destroy(error);
-                } finally { reader.releaseLock(); }
-            }
-        });
+        const geminiResult = await geminiResponse.json();
 
+        if (!geminiResult.candidates || geminiResult.candidates.length === 0) {
+            return {
+                statusCode: 200,
+                body: JSON.stringify({ response: { role: 'model', parts: [{ text: "I'm sorry, I couldn't generate a response." }] } })
+            };
+        }
+        
+        const modelResponse = geminiResult.candidates[0].content;
+        
         return {
             statusCode: 200,
-            headers: { 'Content-Type': 'text/plain; charset=UTF-8' },
-            isBase64Encoded: false,
-            body: readable,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ response: modelResponse })
         };
 
     } catch (error) {
