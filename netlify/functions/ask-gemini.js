@@ -1,6 +1,4 @@
 // netlify/functions/ask-gemini.js
-
-// This is required for streaming responses in Netlify Functions
 const { Readable } = require('stream');
 
 exports.handler = async (event) => {
@@ -27,7 +25,6 @@ exports.handler = async (event) => {
             tools: tools
         };
         
-        // IMPORTANT: The endpoint is now streamGenerateContent
         const geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:streamGenerateContent?key=${GEMINI_API_KEY}&alt=sse`;
 
         const geminiResponse = await fetch(geminiApiUrl, {
@@ -42,19 +39,14 @@ exports.handler = async (event) => {
             return { statusCode: geminiResponse.status, body: `Error from Gemini API: ${errorBody}` };
         }
         
-        // This sets up the streaming response back to the client
         const readable = new Readable({
             async read() {
                 const reader = geminiResponse.body.getReader();
                 try {
                     while (true) {
                         const { done, value } = await reader.read();
-                        if (done) {
-                            this.push(null); // End the stream
-                            break;
-                        }
+                        if (done) { this.push(null); break; }
                         
-                        // Process Server-Sent Events (SSE) from Gemini
                         const chunk = new TextDecoder().decode(value);
                         const lines = chunk.split('\n');
                         for (const line of lines) {
@@ -63,20 +55,13 @@ exports.handler = async (event) => {
                                 try {
                                     const parsed = JSON.parse(jsonStr);
                                     const text = parsed.candidates[0]?.content?.parts[0]?.text;
-                                    if (text) {
-                                        this.push(text); // Push only the text content to the client
-                                    }
-                                } catch (e) {
-                                    // Ignore lines that are not valid JSON
-                                }
+                                    if (text) { this.push(text); }
+                                } catch (e) { /* Ignore non-JSON lines */ }
                             }
                         }
                     }
-                } catch (error) {
-                    this.destroy(error);
-                } finally {
-                    reader.releaseLock();
-                }
+                } catch (error) { this.destroy(error);
+                } finally { reader.releaseLock(); }
             }
         });
 
