@@ -25,6 +25,7 @@
           --border-color: #3c4043;
           --glow-color-1: #89b3f9;
           --glow-color-2: #d8b6ff;
+          --user-bubble-color: #2a2f4c; /* IMPROVEMENT: User bubble color variable */
           --font-primary: "DM Sans", "Google Sans", sans-serif;
           --font-mono: "Fira Code", monospace;
         }
@@ -32,29 +33,12 @@
         *, *::before, *::after { box-sizing: border-box; }
 
         html, body {
-          margin: 0;
-          padding: 0;
-          font-family: var(--font-primary);
-          background: var(--bg-color);
-          color: var(--text-color);
-          overflow: hidden;
+          margin: 0; padding: 0; font-family: var(--font-primary);
+          background: var(--bg-color); color: var(--text-color); overflow: hidden;
         }
 
-        #app-container {
-            display: flex;
-            height: 100vh;
-            width: 100%;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .background-canvas {
-          position: fixed;
-          top: 0; left: 0;
-          width: 100%; height: 100%;
-          z-index: -1; pointer-events: none; opacity: 0.1;
-        }
-
+        #app-container { display: flex; height: 100vh; width: 100%; overflow: hidden; position: relative; }
+        .background-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; opacity: 0.1; }
         .hidden { display: none !important; }
         
         ::-webkit-scrollbar { width: 8px; }
@@ -63,90 +47,73 @@
         ::-webkit-scrollbar-thumb:hover { background: #555; }
 
         #history-panel {
-            width: 280px;
-            height: 100%;
-            background: var(--surface-color);
-            flex-shrink: 0;
-            display: flex;
-            flex-direction: column;
-            transform: translateX(0);
+            width: 280px; height: 100%; background: var(--surface-color); flex-shrink: 0;
+            display: flex; flex-direction: column; transform: translateX(0);
             transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-            position: relative;
-            z-index: 1001;
-            border-right: 1px solid var(--border-color);
+            position: relative; z-index: 1001; border-right: 1px solid var(--border-color);
         }
         #history-panel.closed { transform: translateX(-100%); }
 
-        .history-header {
-            padding: 1.25rem 1.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-shrink: 0;
-        }
+        .history-header { padding: 1.25rem 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
         .header-logo { font-size: 1.3rem; font-weight: 700; color: var(--text-color); text-decoration: none; }
         #new-chat-btn { background: none; border: none; color: var(--dim-text-color); padding: 0.5rem; border-radius: 50%; cursor: pointer; display: flex; transition: all 0.2s ease; }
         #new-chat-btn:hover { background: var(--surface-hover); color: var(--text-color); }
-
         #history-list { flex-grow: 1; overflow-y: auto; padding: 0 1rem 1rem 1rem; }
         .history-item { padding: 0.75rem 1rem; margin-bottom: 0.5rem; border-radius: 8px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: background 0.2s ease; display: flex; justify-content: space-between; align-items: center; }
         .history-item:hover { background: var(--surface-hover); }
         .history-item.active { background: var(--glow-color-1); color: #000; font-weight: 500; }
-        .delete-history-btn { background: none; border: none; color: var(--dim-text-color); padding: 0.25rem; display: none; }
+        .delete-history-btn { display: none; background: none; border: none; color: var(--dim-text-color); padding: 0.25rem; }
         .history-item:hover .delete-history-btn { display: block; }
         .history-item.active .delete-history-btn { color: #000; opacity: 0.7; }
         .delete-history-btn:hover { color: var(--text-color); }
 
         #chatbot-container { display: flex; flex-direction: column; flex-grow: 1; height: 100vh; max-width: 100%; overflow: hidden; }
-
         .chat-header { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1.5rem; flex-shrink: 0; }
         #chat-title { font-size: 1.1rem; font-weight: 500; margin: 0; }
         .chat-header button { background: none; border: none; color: var(--dim-text-color); padding: 0.5rem; border-radius: 50%; cursor: pointer; display: flex; transition: all 0.2s ease; }
         .chat-header button:hover { background: var(--surface-hover); color: var(--text-color); }
         #history-toggle-btn { display: none; }
 
-        #chat-wrapper { flex-grow: 1; width: 100%; max-width: 900px; margin: 0 auto; overflow-y: auto; padding: 1rem 2rem; display: flex; flex-direction: column; scroll-behavior: smooth; }
-
+        #chat-wrapper { flex-grow: 1; width: 100%; max-width: 900px; margin: 0 auto; overflow-y: auto; padding: 2rem; display: flex; flex-direction: column; scroll-behavior: smooth; }
         #welcome-screen { display: flex; flex-direction: column; align-items: center; text-align: center; justify-content: center; flex-grow: 1; margin-bottom: 5rem; }
         .logo-container { margin-bottom: 1.5rem; }
         #welcome-screen h1 { font-size: 2.5rem; font-weight: 500; margin: 0 0 1rem 0; color: #c4c7c5; }
+        #chat-display { display: flex; flex-direction: column; gap: 0.5rem; }
 
-        #chat-display { display: flex; flex-direction: column; gap: 2rem; }
-        .chat-message { display: flex; max-width: 100%; gap: 1rem; }
-        .chat-message.user { justify-content: flex-end; }
-        .chat-message.user .message-content { align-items: flex-end; }
-        .chat-message.ai, .chat-message.tool { justify-content: flex-start; }
+        /* --- IMPROVEMENT: Redesigned Chat Bubbles & Actions --- */
+        .chat-message { display: flex; max-width: 100%; gap: 1rem; align-items: flex-start; position: relative; padding: 0.5rem 0;}
+        .chat-message.user { flex-direction: row-reverse; }
 
-        .avatar { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-weight: 500; overflow: hidden; margin-top: 4px;}
+        .avatar { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; overflow: hidden; margin-top: 4px; }
         .avatar.user img { width: 100%; height: 100%; object-fit: cover; }
-        .avatar.ai svg { width: 24px; height: 24px; }
-        
-        .message-content { display: flex; flex-direction: column; width: 100%; max-width: 80%; }
-        .message-bubble { line-height: 1.7; width: fit-content; }
-        .chat-message.user .message-bubble { align-self: flex-end; }
-        .chat-message.ai .message-bubble { align-self: flex-start; }
-        .chat-message.tool .message-bubble { font-style: italic; color: var(--dim-text-color); }
+        .avatar.ai svg { width: 24px; height: 24px; margin: 4px; }
 
-        .response-actions { display: flex; justify-content: flex-end; padding-top: 0.5rem; opacity: 0; transition: opacity 0.2s ease; }
-        .chat-message:hover .response-actions { opacity: 1; }
-        .response-actions button { background: none; border: none; color: var(--dim-text-color); padding: 0.5rem; border-radius: 50%; cursor: pointer; display: flex; }
+        .message-content { display: flex; flex-direction: column; max-width: 85%; }
+        .message-bubble { 
+            padding: 0.75rem 1rem;
+            line-height: 1.7; 
+            border-radius: 18px;
+            width: fit-content;
+        }
+        .chat-message.ai .message-bubble { background: var(--surface-hover); border-top-left-radius: 4px; }
+        .chat-message.user .message-bubble { background: var(--user-bubble-color); border-top-right-radius: 4px; align-self: flex-end; }
+        .chat-message.tool .message-bubble { font-style: italic; color: var(--dim-text-color); background: none; }
+
+        .response-actions { 
+            opacity: 0; transition: opacity 0.2s ease;
+            position: absolute; right: -36px; top: 50%; transform: translateY(-50%);
+        }
+        .chat-message.user .response-actions { left: -36px; right: auto; }
+        .chat-message.ai:hover .response-actions { opacity: 1; }
+        .response-actions button { background: none; border: none; color: var(--dim-text-color); padding: 0.25rem; cursor: pointer; display: flex; border-radius: 50%; }
         .response-actions button:hover { background: var(--surface-hover); color: var(--text-color); }
 
-        /* --- IMPROVEMENT: Code Snippet Overflow Fix --- */
-        .message-bubble pre { 
-            margin: 1rem 0;
-            background: var(--surface-color); 
-            border: 1px solid var(--border-color); 
-            border-radius: 8px; 
-            position: relative;
-            overflow-x: auto; /* Adds horizontal scroll on mobile for wide code blocks */
-            max-width: 100%;
-        }
+        .message-bubble pre { overflow-x: auto; max-width: 100%; margin: 1rem 0; background: var(--surface-color); border: 1px solid var(--border-color); border-radius: 8px; position: relative; }
         .message-bubble pre code.hljs { padding: 1rem; border-radius: 8px; font-family: var(--font-mono); font-size: 0.9rem; }
         .copy-code-btn { position: absolute; top: 0.5rem; right: 0.5rem; background: var(--surface-hover); border: 1px solid var(--border-color); color: var(--dim-text-color); padding: 0.25rem 0.5rem; border-radius: 6px; cursor: pointer; opacity: 0; transition: opacity 0.2s; font-size: 0.8rem; }
         .message-bubble pre:hover .copy-code-btn { opacity: 1; }
         .copy-code-btn:hover { background: #3c4043; color: var(--text-color); }
-
+        
         .chat-input-area { padding: 1rem 2rem; flex-shrink: 0; width: 100%; max-width: 900px; margin: 0 auto; }
         .input-wrapper { display: flex; gap: 1rem; align-items: flex-end; background: var(--surface-color); border-radius: 28px; padding: 0.5rem 0.5rem 0.5rem 1.25rem; border: 1px solid var(--border-color); transition: border-color 0.2s ease, box-shadow 0.2s ease; }
         .input-wrapper:focus-within { border-color: var(--glow-color-1); box-shadow: 0 0 8px -2px var(--glow-color-1); }
@@ -167,14 +134,12 @@
             #history-panel { position: absolute; border-right: none; }
             #history-panel.closed { transform: translateX(-100%); }
             #history-toggle-btn { display: flex; }
-            #chatbot-container { padding: 0; }
             #chat-wrapper, .chat-input-area { padding: 1rem; }
             #cookie-banner { flex-direction: column; text-align: center; bottom: 1rem; left: 1rem; right: 1rem; transform: none; width: auto; }
         }
     </style>
 </head>
 <body>
-    <canvas id="aurora-canvas" class="background-canvas"></canvas>
     <div id="app-container">
         <aside id="history-panel">
             <div class="history-header">
@@ -224,9 +189,8 @@
     </div>
     
     <div id="history-backdrop" class="hidden"></div>
-
     <div id="cookie-banner" class="hidden">
-        <p>This site uses `localStorage` to save your chat history on your browser. This data is not shared. By continuing to use the site, you agree to this functionality.</p>
+        <p>This site uses `localStorage` to save your chat history. By continuing, you agree to this.</p>
         <button id="cookie-accept-btn">Accept</button>
     </div>
 
@@ -237,16 +201,13 @@
     <script>
         /**
          * Judson AI - Gemini UI Professional Chatbot
-         * @version 12.2.0
+         * @version 12.3.0
          * @author Judson Saji
          */
-
         document.addEventListener('DOMContentLoaded', () => {
-            // --- GLOBAL SETUP ---
             const userProfileImageUrl = "https://firebasestorage.googleapis.com/v0/b/crnn-b7d8f.appspot.com/o/files%2FIMG_20250717_215454_617-modified.png?alt=media&token=bea1f0dd-abf1-4cfb-8a83-0d3b603d3fde";
             feather.replace();
 
-            // --- CHATBOT & HISTORY CORE LOGIC ---
             const chatbot = {
                 DOMElements: {},
                 state: { conversations: {}, currentConversationId: null, isThinking: false },
@@ -334,7 +295,7 @@
                                 this.loadConversation(this.state.currentConversationId);
                             }
                         } catch (e) {
-                            console.error("Failed to parse conversations from localStorage, clearing data:", e);
+                            console.error("Failed to parse conversations, clearing data:", e);
                             localStorage.removeItem('judson_ai_conversations');
                         }
                     }
@@ -374,23 +335,20 @@
                         this.DOMElements.welcomeScreen?.classList.add('hidden');
                         conversation.messages.forEach(msg => {
                             if (!msg || !msg.parts || !msg.parts[0]) return;
-
                             let textToShow = '';
                             let role = msg.role;
                             const part = msg.parts[0];
 
-                            if (part.text) {
-                                textToShow = part.text;
-                            } else if (part.functionCall) {
-                                textToShow = `*Using tool: \`${part.functionCall.name}\`...*`;
-                                role = 'tool';
-                            } else if (part.functionResponse) {
-                                return;
-                            }
+                            if (part.text) { textToShow = part.text; } 
+                            else if (part.functionCall) {
+                                // IMPROVEMENT: Conditionally hide "Using tool..." message
+                                if(part.functionCall.name !== 'get_current_time') {
+                                    textToShow = `*Using tool: \`${part.functionCall.name}\`...*`;
+                                    role = 'tool';
+                                }
+                            } else if (part.functionResponse) { return; }
                             
-                            if (textToShow) {
-                                this.addMessageToDOM(role, textToShow);
-                            }
+                            if (textToShow) { this.addMessageToDOM(role, textToShow); }
                         });
                     }
                     this.renderHistoryList();
@@ -407,7 +365,7 @@
                         } else {
                             this.DOMElements.welcomeScreen?.classList.remove('hidden');
                             this.state.currentConversationId = null;
-                             this.DOMElements.chatTitle.textContent = "New Chat";
+                            this.DOMElements.chatTitle.textContent = "New Chat";
                         }
                     }
                 },
@@ -439,21 +397,18 @@
                     const senderClass = sender === 'model' ? 'ai' : sender;
                     const messageContainer = document.createElement('div');
                     messageContainer.className = `chat-message ${senderClass}`;
+                    
                     const avatar = document.createElement('div');
                     avatar.className = `avatar ${senderClass}`;
-
-                    if (senderClass === 'user') {
-                        messageContainer.innerHTML = `<div class="message-content"><div class="message-bubble"></div></div>`;
-                        avatar.innerHTML = `<img src="${userProfileImageUrl}" alt="User Avatar">`;
-                        messageContainer.appendChild(avatar);
-                    } else {
-                        avatar.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gemini-gradient-avatar" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#89b3f9;stop-opacity:1" /><stop offset="100%" style="stop-color:#d8b6ff;stop-opacity:1" /></linearGradient></defs><path d="M12 2.75L14.25 9.25L21.25 9.75L15.75 14.75L17.75 21.5L12 17.5L6.25 21.5L8.25 14.75L2.75 9.75L9.75 9.25L12 2.75Z" stroke="url(#gemini-gradient-avatar)" stroke-width="1.5" stroke-linejoin="round"/></svg>`;
-                        messageContainer.appendChild(avatar);
-                        messageContainer.innerHTML += `<div class="message-content"><div class="message-bubble"></div></div>`;
-                    }
+                    if (senderClass === 'user') { avatar.innerHTML = `<img src="${userProfileImageUrl}" alt="User Avatar">`;
+                    } else { avatar.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gemini-gradient-avatar" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#89b3f9;stop-opacity:1" /><stop offset="100%" style="stop-color:#d8b6ff;stop-opacity:1" /></linearGradient></defs><path d="M12 2.75L14.25 9.25L21.25 9.75L15.75 14.75L17.75 21.5L12 17.5L6.25 21.5L8.25 14.75L2.75 9.75L9.75 9.25L12 2.75Z" stroke="url(#gemini-gradient-avatar)" stroke-width="1.5" stroke-linejoin="round"/></svg>`; }
                     
-                    const messageBubble = messageContainer.querySelector('.message-bubble');
+                    const messageContent = document.createElement('div');
+                    messageContent.className = 'message-content';
+                    const messageBubble = document.createElement('div');
+                    messageBubble.className = 'message-bubble';
                     messageBubble.innerHTML = marked.parse(text);
+                    messageContent.appendChild(messageBubble);
 
                     if (senderClass === 'ai') {
                         const actions = document.createElement('div');
@@ -462,9 +417,17 @@
                         copyButton.innerHTML = `<i data-feather="copy"></i>`;
                         copyButton.onclick = () => navigator.clipboard.writeText(text);
                         actions.appendChild(copyButton);
-                        messageContainer.querySelector('.message-content').appendChild(actions);
+                        messageContainer.appendChild(actions);
                     }
                     
+                    if (senderClass === 'user') {
+                        messageContainer.appendChild(messageContent);
+                        messageContainer.appendChild(avatar);
+                    } else {
+                        messageContainer.appendChild(avatar);
+                        messageContainer.appendChild(messageContent);
+                    }
+
                     this.DOMElements.chatDisplay.appendChild(messageContainer);
                     this.DOMElements.chatDisplay.scrollTop = this.DOMElements.chatDisplay.scrollHeight;
                     feather.replace();
@@ -514,9 +477,14 @@
                         conversation.messages.push(aiResponseObject);
 
                         const part = aiResponseObject.parts[0];
-                        if (part.functionCall) await this.handleFunctionCall(part.functionCall);
-                        else if (part.text) { this.addMessageToDOM('model', part.text); this.showThinking(false); }
-                        else throw new Error("Invalid AI response format.");
+                        if (part.functionCall) {
+                            await this.handleFunctionCall(part.functionCall);
+                        } else if (part.text) { 
+                            this.addMessageToDOM('model', part.text); 
+                            this.showThinking(false); 
+                        } else { 
+                            throw new Error("Invalid AI response format.");
+                        }
                     } catch (error) {
                         this.addMessageToDOM('model', `Error: ${error.message}`);
                         this.showThinking(false);
@@ -525,27 +493,22 @@
                 
                 async handleFunctionCall(functionCall) {
                     const conversation = this.state.conversations[this.state.currentConversationId];
-                    this.addMessageToDOM('tool', `*Using tool: \`${functionCall.name}\`...*`);
+                    // IMPROVEMENT: Conditionally show "Using tool..." message
+                    if(functionCall.name !== 'get_current_time') {
+                        this.addMessageToDOM('tool', `*Using tool: \`${functionCall.name}\`...*`);
+                    }
                     try {
                         const functionUrl = `/.netlify/functions/${functionCall.name}`;
                         const hasArgs = functionCall.args && Object.keys(functionCall.args).length > 0;
-                        
                         const fetchOptions = {
                             method: hasArgs ? 'POST' : 'GET',
                             headers: { 'Content-Type': 'application/json' }
                         };
-                
-                        if (hasArgs) {
-                            fetchOptions.body = JSON.stringify(functionCall.args);
-                        }
-                
+                        if (hasArgs) { fetchOptions.body = JSON.stringify(functionCall.args); }
                         const toolResponse = await fetch(functionUrl, fetchOptions);
-                
                         if (!toolResponse.ok) {
-                            const errorText = await toolResponse.text();
-                            throw new Error(`Tool execution failed: ${errorText}`);
+                            throw new Error(`Tool execution failed: ${await toolResponse.text()}`);
                         }
-                        
                         const toolResult = await toolResponse.json();
                         conversation.messages.push({
                             role: "tool",
@@ -558,21 +521,17 @@
                     }
                 },
                 
-                /* --- HARDENED: This function is now more defensive to prevent the reported error --- */
                 async generateTitleForConversation(id) {
                     const conversation = this.state.conversations[id];
                     if (!conversation || conversation.messages.length < 1) return;
-                    
                     const titlePrompt = `Based on the following conversation, create a very short, concise title (3-5 words max).\n\nConversation:\n${
                         conversation.messages.map(m => {
                             if (!m || !m.parts || !m.parts[0]) return '';
                             const part = m.parts[0];
-                            // Safely access text property
                             const text = part.text || (part.functionCall ? 'tool call' : 'AI action');
                             return `${m.role}: ${text}`;
                         }).join('\n')
                     }`;
-
                     try {
                          const response = await fetch('/.netlify/functions/ask-gemini', {
                             method: 'POST', body: JSON.stringify({ prompt: titlePrompt }),
@@ -588,10 +547,7 @@
                     } catch (e) { console.error("Could not generate title:", e); }
                 }
             };
-
-            // --- REMOVED: Animation object for cursor trail is no longer needed ---
             
-            // --- PAGE INITIALIZATION ---
             chatbot.init();
         });
     </script>
