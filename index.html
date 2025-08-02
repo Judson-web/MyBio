@@ -7,15 +7,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" href="https://firebasestorage.googleapis.com/v0/b/crnn-b7d8f.appspot.com/o/files%2FIMG_20250717_215454_617-modified.png?alt=media&token=bea1f0dd-abf1-4cfb-8a83-0d3b603d3fde" />
 
-    <!-- Pre-connect and Preload -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fira+Code:wght@400&display=swap" as="style">
     
-    <!-- Styles and Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fira+Code:wght@400&display=swap" rel="stylesheet">
     
-    <!-- Syntax Highlighting -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
 
     <style>
@@ -37,7 +34,8 @@
         *, *::before, *::after { box-sizing: border-box; }
 
         html, body {
-          margin: 0; padding: 0;
+          margin: 0;
+          padding: 0;
           font-family: var(--font-primary);
           background: var(--bg-color);
           color: var(--text-color);
@@ -53,7 +51,8 @@
         }
 
         .background-canvas, #cursor-trail-canvas {
-          position: fixed; top: 0; left: 0;
+          position: fixed;
+          top: 0; left: 0;
           width: 100%; height: 100%;
           z-index: -1; pointer-events: none; opacity: 0.1;
         }
@@ -83,19 +82,22 @@
             flex-shrink: 0;
         }
         .header-logo {
-          font-size: 1.3rem; font-weight: 700;
+          font-size: 1.3rem;
+          font-weight: 700;
           color: var(--text-color);
           text-decoration: none;
         }
         #new-chat-btn {
-            background: none; border: none; color: var(--dim-text-color);
+            background: none;
+            border: none; color: var(--dim-text-color);
             padding: 0.5rem; border-radius: 50%; cursor: pointer;
             display: flex; transition: all 0.2s ease;
         }
         #new-chat-btn:hover { background: var(--surface-hover); color: var(--text-color); }
 
         #history-list { flex-grow: 1; overflow-y: auto; padding: 1rem; }
-        .history-item { padding: 0.75rem 1rem; margin-bottom: 0.5rem; border-radius: 8px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: background 0.2s ease; display: flex; justify-content: space-between; align-items: center; }
+        .history-item { padding: 0.75rem 1rem; margin-bottom: 0.5rem; border-radius: 8px; cursor: pointer;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: background 0.2s ease; display: flex; justify-content: space-between; align-items: center; }
         .history-item:hover { background: var(--surface-hover); }
         .history-item.active { background: var(--glow-color-1); color: #000; font-weight: 500; }
         .delete-history-btn { background: none; border: none; color: var(--dim-text-color); padding: 0.25rem; display: none; }
@@ -115,12 +117,15 @@
 
         /* Chat Header */
         .chat-header {
-            display: flex; justify-content: space-between; align-items: center;
+            display: flex;
+            justify-content: space-between; align-items: center;
             padding: 0.75rem 1.5rem;
             flex-shrink: 0;
         }
         #chat-title { font-size: 1.1rem; font-weight: 500; margin: 0; }
-        .chat-header button { background: none; border: none; color: var(--dim-text-color); padding: 0.5rem; border-radius: 50%; cursor: pointer; display: flex; transition: all 0.2s ease; }
+        .chat-header button { background: none; border: none;
+            color: var(--dim-text-color); padding: 0.5rem; border-radius: 50%; cursor: pointer; display: flex; transition: all 0.2s ease;
+        }
         .chat-header button:hover { background: var(--surface-hover); color: var(--text-color); }
         #history-toggle-btn { display: none; }
 
@@ -137,19 +142,22 @@
         }
 
         #welcome-screen {
-            display: flex; flex-direction: column; align-items: center; text-align: center;
+            display: flex;
+            flex-direction: column; align-items: center; text-align: center;
             justify-content: center;
             flex-grow: 1;
             margin-bottom: 5rem;
         }
         .logo-container { margin-bottom: 1.5rem; }
-        #welcome-screen h1 { font-size: 2.5rem; font-weight: 500; margin: 0 0 1rem 0; color: #c4c7c5; }
+        #welcome-screen h1 { font-size: 2.5rem; font-weight: 500; margin: 0 0 1rem 0;
+            color: #c4c7c5; }
 
         #chat-display { display: flex; flex-direction: column; gap: 1.5rem; }
         .chat-message { display: flex; max-width: 100%; gap: 1rem; }
         .chat-message.user { align-self: flex-end; flex-direction: row-reverse; }
         .chat-message.ai, .chat-message.tool { align-self: flex-start; }
-        .avatar { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-weight: 500; overflow: hidden; }
+        .avatar { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; display: flex;
+            align-items: center; justify-content: center; font-weight: 500; overflow: hidden; }
         .avatar.user img { width: 100%; height: 100%; object-fit: cover; }
         .avatar.ai svg { width: 24px; height: 24px; }
         .message-content { padding-top: 0.5rem; width: 100%; }
@@ -164,13 +172,19 @@
             transition: opacity 0.2s ease;
         }
         .chat-message:hover .response-actions { opacity: 1; }
-        .response-actions button { background: none; border: none; color: var(--dim-text-color); padding: 0.5rem; border-radius: 50%; cursor: pointer; display: flex; }
-        .response-actions button:hover { background: var(--surface-hover); color: var(--text-color); }
+        .response-actions button { background: none; border: none; color: var(--dim-text-color); padding: 0.5rem;
+            border-radius: 50%; cursor: pointer; display: flex; }
+        .response-actions button:hover { background: var(--surface-hover);
+            color: var(--text-color); }
 
         /* Code Snippet Styling */
-        .message-bubble pre { margin: 1rem 0; background: var(--surface-color); border: 1px solid var(--border-color); border-radius: 8px; position: relative; }
+        .message-bubble pre { margin: 1rem 0;
+            background: var(--surface-color); border: 1px solid var(--border-color); border-radius: 8px; position: relative;
+        }
         .message-bubble pre code.hljs { padding: 1rem; border-radius: 8px; font-family: var(--font-mono); font-size: 0.9rem; }
-        .copy-code-btn { position: absolute; top: 0.5rem; right: 0.5rem; background: var(--surface-hover); border: 1px solid var(--border-color); color: var(--dim-text-color); padding: 0.25rem 0.5rem; border-radius: 6px; cursor: pointer; opacity: 0; transition: opacity 0.2s; font-size: 0.8rem; }
+        .copy-code-btn { position: absolute; top: 0.5rem; right: 0.5rem; background: var(--surface-hover);
+            border: 1px solid var(--border-color); color: var(--dim-text-color); padding: 0.25rem 0.5rem; border-radius: 6px; cursor: pointer; opacity: 0; transition: opacity 0.2s; font-size: 0.8rem;
+        }
         .message-bubble pre:hover .copy-code-btn { opacity: 1; }
         .copy-code-btn:hover { background: #3c4043; color: var(--text-color); }
 
@@ -183,7 +197,8 @@
             margin: 0 auto;
         }
         .input-wrapper {
-            display: flex; gap: 1rem; align-items: flex-end;
+            display: flex;
+            gap: 1rem; align-items: flex-end;
             background: var(--surface-color);
             border-radius: 28px;
             padding: 0.5rem 0.5rem 0.5rem 1.25rem;
@@ -263,18 +278,16 @@
             #history-toggle-btn { display: flex; }
             #chatbot-container { padding: 0; }
             #chat-wrapper, .chat-input-area { padding: 1rem; }
-            #cookie-banner { flex-direction: column; text-align: center; bottom: 0; left: 0; right: 0; transform: none; border-radius: 0; border-left: none; border-right: none; }
+            #cookie-banner { flex-direction: column; text-align: center; bottom: 0;
+            left: 0; right: 0; transform: none; border-radius: 0; border-left: none; border-right: none; }
         }
     </style>
 </head>
 <body>
-    <!-- Backgrounds -->
     <canvas id="aurora-canvas" class="background-canvas"></canvas>
     <canvas id="cursor-trail-canvas"></canvas>
 
-    <!-- Main App Container -->
     <div id="app-container">
-        <!-- History Side Panel -->
         <aside id="history-panel">
             <div class="history-header">
                 <a href="/" class="header-logo" aria-label="Judson Saji - Home">Judson AI</a>
@@ -283,7 +296,6 @@
             <div id="history-list"></div>
         </aside>
 
-        <!-- Main Chatbot Container -->
         <main id="chatbot-container">
             <header class="chat-header">
                 <button id="history-toggle-btn" aria-label="Toggle History"><i data-feather="menu"></i></button>
@@ -302,7 +314,7 @@
                                 </linearGradient>
                             </defs>
                             <path d="M12 2.75L14.25 9.25L21.25 9.75L15.75 14.75L17.75 21.5L12 17.5L6.25 21.5L8.25 14.75L2.75 9.75L9.75 9.25L12 2.75Z" stroke="url(#gemini-gradient)" stroke-width="1.5" stroke-linejoin="round"/>
-                        </svg>
+                         </svg>
                     </div>
                     <h1>How can I help you today?</h1>
                 </div>
@@ -325,13 +337,11 @@
     
     <div id="history-backdrop" class="hidden"></div>
 
-    <!-- Cookie Banner -->
     <div id="cookie-banner" class="hidden">
         <p>This site uses `localStorage` to save your chat history on your browser. This data is not shared. By continuing to use the site, you agree to this functionality.</p>
         <button id="cookie-accept-btn">Accept</button>
     </div>
 
-    <!-- Core Scripts -->
     <script src="https://unpkg.com/feather-icons"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
@@ -472,13 +482,12 @@
                     this.DOMElements.chatInterface?.classList.remove('hidden');
                     this.DOMElements.chatDisplay.innerHTML = '';
                     this.DOMElements.chatTitle.textContent = conversation.title;
-                    
                     if (conversation.messages.length === 0) {
                          this.DOMElements.welcomeScreen?.classList.remove('hidden');
                     } else {
                         this.DOMElements.welcomeScreen?.classList.add('hidden');
                         conversation.messages.forEach(msg => {
-                            this.addMessageToDOM(msg.role, msg.parts[0].text);
+                            this.addMessageToDOM(msg.role, msg.parts[0].text || `*Using tool: \`${msg.parts[0].functionResponse.name}\`...*`);
                         });
                     }
                     this.renderHistoryList();
@@ -527,7 +536,6 @@
                     const senderClass = sender === 'model' ? 'ai' : sender;
                     const messageContainer = document.createElement('div');
                     messageContainer.className = `chat-message ${senderClass}`;
-
                     const avatar = document.createElement('div');
                     avatar.className = `avatar ${senderClass}`;
                     if (senderClass === 'user') {
@@ -543,7 +551,6 @@
                     messageBubble.innerHTML = marked.parse(text);
                     
                     messageContent.appendChild(messageBubble);
-
                     if (senderClass === 'ai') {
                         const actions = document.createElement('div');
                         actions.className = 'response-actions';
@@ -591,7 +598,6 @@
                     this.showThinking(true);
                     
                     await this.getAIResponse();
-                    
                     const userMessages = conversation.messages.filter(m => m.role === 'user').length;
                     if (userMessages === 1) this.generateTitleForConversation(this.state.currentConversationId);
                 },
@@ -621,10 +627,27 @@
                     const conversation = this.state.conversations[this.state.currentConversationId];
                     this.addMessageToDOM('tool', `*Using tool: \`${functionCall.name}\`...*`);
                     try {
-                        const toolResponse = await fetch('/.netlify/functions/chatbot-tools', {
-                            method: 'POST', body: JSON.stringify({ toolName: functionCall.name, args: functionCall.args }),
-                        });
-                        if (!toolResponse.ok) throw new Error("Tool execution failed.");
+                        const functionUrl = `/.netlify/functions/${functionCall.name}`;
+                        
+                        // Determine request options based on whether arguments exist
+                        const hasArgs = functionCall.args && Object.keys(functionCall.args).length > 0;
+                        
+                        const fetchOptions = {
+                            method: hasArgs ? 'POST' : 'GET', // Use POST if there are args, GET otherwise
+                            headers: { 'Content-Type': 'application/json' }
+                        };
+                
+                        if (hasArgs) {
+                            fetchOptions.body = JSON.stringify(functionCall.args);
+                        }
+                
+                        const toolResponse = await fetch(functionUrl, fetchOptions);
+                
+                        if (!toolResponse.ok) {
+                            const errorText = await toolResponse.text();
+                            throw new Error(`Tool execution failed: ${errorText}`);
+                        }
+                        
                         const toolResult = await toolResponse.json();
                         conversation.messages.push({
                             role: "tool",
@@ -693,7 +716,6 @@
                     requestAnimationFrame(() => this.animateCursorTrail());
                 }
             };
-
             // --- PAGE INITIALIZATION ---
             chatbot.init();
             animation.init();
