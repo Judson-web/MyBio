@@ -16,7 +16,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
 
     <style>
-        /* --- THEME & FONT VARIABLES --- */
         :root {
           --bg-color: #131314;
           --text-color: #e3e3e3;
@@ -30,7 +29,6 @@
           --font-mono: "Fira Code", monospace;
         }
 
-        /* --- GENERAL & LAYOUT --- */
         *, *::before, *::after { box-sizing: border-box; }
 
         html, body {
@@ -50,7 +48,7 @@
             position: relative;
         }
 
-        .background-canvas, #cursor-trail-canvas {
+        .background-canvas {
           position: fixed;
           top: 0; left: 0;
           width: 100%; height: 100%;
@@ -59,22 +57,11 @@
 
         .hidden { display: none !important; }
         
-        /* --- IMPROVEMENT: Custom Scrollbar Styling --- */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: var(--surface-color);
-        }
-        ::-webkit-scrollbar-thumb {
-            background: var(--border-color);
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--surface-color); }
+        ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
 
-        /* --- HISTORY PANEL --- */
         #history-panel {
             width: 280px;
             height: 100%;
@@ -97,23 +84,12 @@
             align-items: center;
             flex-shrink: 0;
         }
-        .header-logo {
-          font-size: 1.3rem;
-          font-weight: 700;
-          color: var(--text-color);
-          text-decoration: none;
-        }
-        #new-chat-btn {
-            background: none;
-            border: none; color: var(--dim-text-color);
-            padding: 0.5rem; border-radius: 50%; cursor: pointer;
-            display: flex; transition: all 0.2s ease;
-        }
+        .header-logo { font-size: 1.3rem; font-weight: 700; color: var(--text-color); text-decoration: none; }
+        #new-chat-btn { background: none; border: none; color: var(--dim-text-color); padding: 0.5rem; border-radius: 50%; cursor: pointer; display: flex; transition: all 0.2s ease; }
         #new-chat-btn:hover { background: var(--surface-hover); color: var(--text-color); }
 
         #history-list { flex-grow: 1; overflow-y: auto; padding: 0 1rem 1rem 1rem; }
-        .history-item { padding: 0.75rem 1rem; margin-bottom: 0.5rem; border-radius: 8px; cursor: pointer;
-        white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: background 0.2s ease; display: flex; justify-content: space-between; align-items: center; }
+        .history-item { padding: 0.75rem 1rem; margin-bottom: 0.5rem; border-radius: 8px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: background 0.2s ease; display: flex; justify-content: space-between; align-items: center; }
         .history-item:hover { background: var(--surface-hover); }
         .history-item.active { background: var(--glow-color-1); color: #000; font-weight: 500; }
         .delete-history-btn { background: none; border: none; color: var(--dim-text-color); padding: 0.25rem; display: none; }
@@ -121,53 +97,19 @@
         .history-item.active .delete-history-btn { color: #000; opacity: 0.7; }
         .delete-history-btn:hover { color: var(--text-color); }
 
-        /* --- MAIN CHATBOT CONTAINER --- */
-        #chatbot-container {
-          display: flex;
-          flex-direction: column;
-          flex-grow: 1;
-          height: 100vh;
-          max-width: 100%;
-          overflow: hidden;
-        }
+        #chatbot-container { display: flex; flex-direction: column; flex-grow: 1; height: 100vh; max-width: 100%; overflow: hidden; }
 
-        /* Chat Header */
-        .chat-header {
-            display: flex;
-            justify-content: space-between; align-items: center;
-            padding: 0.75rem 1.5rem;
-            flex-shrink: 0;
-        }
+        .chat-header { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1.5rem; flex-shrink: 0; }
         #chat-title { font-size: 1.1rem; font-weight: 500; margin: 0; }
-        .chat-header button { background: none; border: none;
-            color: var(--dim-text-color); padding: 0.5rem; border-radius: 50%; cursor: pointer; display: flex; transition: all 0.2s ease;
-        }
+        .chat-header button { background: none; border: none; color: var(--dim-text-color); padding: 0.5rem; border-radius: 50%; cursor: pointer; display: flex; transition: all 0.2s ease; }
         .chat-header button:hover { background: var(--surface-hover); color: var(--text-color); }
         #history-toggle-btn { display: none; }
 
-        /* Chat Wrapper (for centering content and scrolling) */
-        #chat-wrapper {
-            flex-grow: 1;
-            width: 100%;
-            max-width: 900px;
-            margin: 0 auto;
-            overflow-y: auto;
-            padding: 1rem 2rem;
-            display: flex;
-            flex-direction: column;
-            scroll-behavior: smooth; /* --- IMPROVEMENT: Smooth scrolling --- */
-        }
+        #chat-wrapper { flex-grow: 1; width: 100%; max-width: 900px; margin: 0 auto; overflow-y: auto; padding: 1rem 2rem; display: flex; flex-direction: column; scroll-behavior: smooth; }
 
-        #welcome-screen {
-            display: flex;
-            flex-direction: column; align-items: center; text-align: center;
-            justify-content: center;
-            flex-grow: 1;
-            margin-bottom: 5rem;
-        }
+        #welcome-screen { display: flex; flex-direction: column; align-items: center; text-align: center; justify-content: center; flex-grow: 1; margin-bottom: 5rem; }
         .logo-container { margin-bottom: 1.5rem; }
-        #welcome-screen h1 { font-size: 2.5rem; font-weight: 500; margin: 0 0 1rem 0;
-            color: #c4c7c5; }
+        #welcome-screen h1 { font-size: 2.5rem; font-weight: 500; margin: 0 0 1rem 0; color: #c4c7c5; }
 
         #chat-display { display: flex; flex-direction: column; gap: 2rem; }
         .chat-message { display: flex; max-width: 100%; gap: 1rem; }
@@ -175,138 +117,51 @@
         .chat-message.user .message-content { align-items: flex-end; }
         .chat-message.ai, .chat-message.tool { justify-content: flex-start; }
 
-        .avatar { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; display: flex;
-            align-items: center; justify-content: center; font-weight: 500; overflow: hidden; margin-top: 4px;}
+        .avatar { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-weight: 500; overflow: hidden; margin-top: 4px;}
         .avatar.user img { width: 100%; height: 100%; object-fit: cover; }
         .avatar.ai svg { width: 24px; height: 24px; }
         
-        .message-content { 
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-            max-width: 80%; /* --- IMPROVEMENT: Better readability on wide screens --- */
-        }
-        .message-bubble { 
-            line-height: 1.7; 
-            width: fit-content;
-        }
+        .message-content { display: flex; flex-direction: column; width: 100%; max-width: 80%; }
+        .message-bubble { line-height: 1.7; width: fit-content; }
         .chat-message.user .message-bubble { align-self: flex-end; }
         .chat-message.ai .message-bubble { align-self: flex-start; }
         .chat-message.tool .message-bubble { font-style: italic; color: var(--dim-text-color); }
 
-        .response-actions {
-            display: flex;
-            justify-content: flex-end;
-            padding-top: 0.5rem;
-            opacity: 0;
-            transition: opacity 0.2s ease;
-        }
+        .response-actions { display: flex; justify-content: flex-end; padding-top: 0.5rem; opacity: 0; transition: opacity 0.2s ease; }
         .chat-message:hover .response-actions { opacity: 1; }
-        .response-actions button { background: none; border: none; color: var(--dim-text-color); padding: 0.5rem;
-            border-radius: 50%; cursor: pointer; display: flex; }
-        .response-actions button:hover { background: var(--surface-hover);
-            color: var(--text-color); }
+        .response-actions button { background: none; border: none; color: var(--dim-text-color); padding: 0.5rem; border-radius: 50%; cursor: pointer; display: flex; }
+        .response-actions button:hover { background: var(--surface-hover); color: var(--text-color); }
 
-        /* Code Snippet Styling */
-        .message-bubble pre { margin: 1rem 0;
-            background: var(--surface-color); border: 1px solid var(--border-color); border-radius: 8px; position: relative;
+        /* --- IMPROVEMENT: Code Snippet Overflow Fix --- */
+        .message-bubble pre { 
+            margin: 1rem 0;
+            background: var(--surface-color); 
+            border: 1px solid var(--border-color); 
+            border-radius: 8px; 
+            position: relative;
+            overflow-x: auto; /* Adds horizontal scroll on mobile for wide code blocks */
+            max-width: 100%;
         }
         .message-bubble pre code.hljs { padding: 1rem; border-radius: 8px; font-family: var(--font-mono); font-size: 0.9rem; }
-        .copy-code-btn { position: absolute; top: 0.5rem; right: 0.5rem; background: var(--surface-hover);
-            border: 1px solid var(--border-color); color: var(--dim-text-color); padding: 0.25rem 0.5rem; border-radius: 6px; cursor: pointer; opacity: 0; transition: opacity 0.2s; font-size: 0.8rem;
-        }
+        .copy-code-btn { position: absolute; top: 0.5rem; right: 0.5rem; background: var(--surface-hover); border: 1px solid var(--border-color); color: var(--dim-text-color); padding: 0.25rem 0.5rem; border-radius: 6px; cursor: pointer; opacity: 0; transition: opacity 0.2s; font-size: 0.8rem; }
         .message-bubble pre:hover .copy-code-btn { opacity: 1; }
         .copy-code-btn:hover { background: #3c4043; color: var(--text-color); }
 
-        /* Chat Input Area */
-        .chat-input-area {
-            padding: 1rem 2rem;
-            flex-shrink: 0;
-            width: 100%;
-            max-width: 900px;
-            margin: 0 auto;
-        }
-        /* --- IMPROVEMENT: Polished input area with focus state --- */
-        .input-wrapper {
-            display: flex;
-            gap: 1rem; align-items: flex-end;
-            background: var(--surface-color);
-            border-radius: 28px;
-            padding: 0.5rem 0.5rem 0.5rem 1.25rem;
-            border: 1px solid var(--border-color);
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
-        }
-        .input-wrapper:focus-within {
-            border-color: var(--glow-color-1);
-            box-shadow: 0 0 8px -2px var(--glow-color-1);
-        }
-        #chatbot-input {
-            flex-grow: 1;
-            background: transparent;
-            border: none;
-            color: var(--text-color);
-            font-size: 1rem;
-            outline: none;
-            resize: none;
-            font-family: var(--font-primary);
-            max-height: 200px;
-            line-height: 1.5;
-            padding-top: 0.5rem;
-        }
-        #chatbot-send-btn {
-            background: var(--surface-hover);
-            color: var(--text-color);
-            border: none;
-            width: 40px; height: 40px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            transition: background 0.2s ease;
-        }
+        .chat-input-area { padding: 1rem 2rem; flex-shrink: 0; width: 100%; max-width: 900px; margin: 0 auto; }
+        .input-wrapper { display: flex; gap: 1rem; align-items: flex-end; background: var(--surface-color); border-radius: 28px; padding: 0.5rem 0.5rem 0.5rem 1.25rem; border: 1px solid var(--border-color); transition: border-color 0.2s ease, box-shadow 0.2s ease; }
+        .input-wrapper:focus-within { border-color: var(--glow-color-1); box-shadow: 0 0 8px -2px var(--glow-color-1); }
+        #chatbot-input { flex-grow: 1; background: transparent; border: none; color: var(--text-color); font-size: 1rem; outline: none; resize: none; font-family: var(--font-primary); max-height: 200px; line-height: 1.5; padding-top: 0.5rem; }
+        #chatbot-send-btn { background: var(--surface-hover); color: var(--text-color); border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s ease; }
         #chatbot-send-btn:hover { background: #3c4043; }
         .disclaimer { font-size: 0.75rem; color: var(--dim-text-color); text-align: center; margin-top: 1rem; }
 
-        /* Mobile Drawer Backdrop */
-        #history-backdrop {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
-            opacity: 0;
-            transition: opacity 0.4s ease;
-        }
+        #history-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; opacity: 0; transition: opacity 0.4s ease; }
         #history-backdrop:not(.hidden) { opacity: 1; }
 
-        /* Cookie Banner */
-        #cookie-banner {
-            position: fixed;
-            bottom: 1rem;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--surface-color);
-            color: var(--text-color);
-            padding: 1rem 1.5rem;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            z-index: 2000;
-            animation: slideUp 0.5s ease-out;
-            max-width: 95%;
-        }
+        #cookie-banner { position: fixed; bottom: 1rem; left: 50%; transform: translateX(-50%); background: var(--surface-color); color: var(--text-color); padding: 1rem 1.5rem; border-radius: 8px; border: 1px solid var(--border-color); display: flex; align-items: center; gap: 1rem; z-index: 2000; animation: slideUp 0.5s ease-out; max-width: 95%; }
         @keyframes slideUp { from { transform: translate(-50%, 150%); } to { transform: translate(-50%, 0); } }
         #cookie-banner p { margin: 0; font-size: 0.9rem; }
-        #cookie-accept-btn {
-            background: var(--glow-color-1);
-            color: #000;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 500;
-        }
+        #cookie-accept-btn { background: var(--glow-color-1); color: #000; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-weight: 500; }
 
         @media (max-width: 768px) {
             #history-panel { position: absolute; border-right: none; }
@@ -314,24 +169,12 @@
             #history-toggle-btn { display: flex; }
             #chatbot-container { padding: 0; }
             #chat-wrapper, .chat-input-area { padding: 1rem; }
-            
-            /* --- IMPROVEMENT: Better mobile cookie banner --- */
-            #cookie-banner { 
-                flex-direction: column; 
-                text-align: center; 
-                bottom: 1rem;
-                left: 1rem;
-                right: 1rem;
-                transform: none;
-                width: auto;
-            }
+            #cookie-banner { flex-direction: column; text-align: center; bottom: 1rem; left: 1rem; right: 1rem; transform: none; width: auto; }
         }
     </style>
 </head>
 <body>
     <canvas id="aurora-canvas" class="background-canvas"></canvas>
-    <canvas id="cursor-trail-canvas"></canvas>
-
     <div id="app-container">
         <aside id="history-panel">
             <div class="history-header">
@@ -394,13 +237,12 @@
     <script>
         /**
          * Judson AI - Gemini UI Professional Chatbot
-         * @version 12.1.0
+         * @version 12.2.0
          * @author Judson Saji
          */
 
         document.addEventListener('DOMContentLoaded', () => {
             // --- GLOBAL SETUP ---
-            const mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
             const userProfileImageUrl = "https://firebasestorage.googleapis.com/v0/b/crnn-b7d8f.appspot.com/o/files%2FIMG_20250717_215454_617-modified.png?alt=media&token=bea1f0dd-abf1-4cfb-8a83-0d3b603d3fde";
             feather.replace();
 
@@ -492,8 +334,8 @@
                                 this.loadConversation(this.state.currentConversationId);
                             }
                         } catch (e) {
-                            console.error("Failed to parse conversations from localStorage:", e);
-                            localStorage.removeItem('judson_ai_conversations'); // Clear corrupted data
+                            console.error("Failed to parse conversations from localStorage, clearing data:", e);
+                            localStorage.removeItem('judson_ai_conversations');
                         }
                     }
                     if (window.innerWidth > 768) {
@@ -505,10 +347,7 @@
                 
                 startNewConversation() {
                     this.state.currentConversationId = `chat_${Date.now()}`;
-                    this.state.conversations[this.state.currentConversationId] = {
-                        title: "New Chat",
-                        messages: []
-                    };
+                    this.state.conversations[this.state.currentConversationId] = { title: "New Chat", messages: [] };
                     this.loadConversation(this.state.currentConversationId);
                     this.renderHistoryList();
                     this.saveConversations();
@@ -521,7 +360,6 @@
                     this.saveConversations();
                 },
 
-                /* --- BUG FIX: This function is now robust and handles all message types correctly on reload --- */
                 loadConversation(id) {
                     if (!this.state.conversations[id]) return;
                     this.state.currentConversationId = id;
@@ -535,7 +373,6 @@
                     } else {
                         this.DOMElements.welcomeScreen?.classList.add('hidden');
                         conversation.messages.forEach(msg => {
-                            // Guard against malformed messages
                             if (!msg || !msg.parts || !msg.parts[0]) return;
 
                             let textToShow = '';
@@ -546,10 +383,8 @@
                                 textToShow = part.text;
                             } else if (part.functionCall) {
                                 textToShow = `*Using tool: \`${part.functionCall.name}\`...*`;
-                                role = 'tool'; // Display the "using tool" message with the tool styling
+                                role = 'tool';
                             } else if (part.functionResponse) {
-                                // We typically don't display the raw tool response to the user,
-                                // as the AI's next message will summarize it. So we 'return' to skip.
                                 return;
                             }
                             
@@ -602,12 +437,11 @@
                 addMessageToDOM(sender, text) {
                     this.DOMElements.welcomeScreen?.classList.add('hidden');
                     const senderClass = sender === 'model' ? 'ai' : sender;
-                    
                     const messageContainer = document.createElement('div');
                     messageContainer.className = `chat-message ${senderClass}`;
-                    
                     const avatar = document.createElement('div');
                     avatar.className = `avatar ${senderClass}`;
+
                     if (senderClass === 'user') {
                         messageContainer.innerHTML = `<div class="message-content"><div class="message-bubble"></div></div>`;
                         avatar.innerHTML = `<img src="${userProfileImageUrl}" alt="User Avatar">`;
@@ -626,16 +460,13 @@
                         actions.className = 'response-actions';
                         const copyButton = document.createElement('button');
                         copyButton.innerHTML = `<i data-feather="copy"></i>`;
-                        copyButton.onclick = () => {
-                            navigator.clipboard.writeText(text);
-                        };
+                        copyButton.onclick = () => navigator.clipboard.writeText(text);
                         actions.appendChild(copyButton);
                         messageContainer.querySelector('.message-content').appendChild(actions);
                     }
                     
                     this.DOMElements.chatDisplay.appendChild(messageContainer);
                     this.DOMElements.chatDisplay.scrollTop = this.DOMElements.chatDisplay.scrollHeight;
-
                     feather.replace();
 
                     messageBubble.querySelectorAll('pre code').forEach((block) => {
@@ -727,66 +558,9 @@
                     }
                 },
                 
+                /* --- HARDENED: This function is now more defensive to prevent the reported error --- */
                 async generateTitleForConversation(id) {
                     const conversation = this.state.conversations[id];
                     if (!conversation || conversation.messages.length < 1) return;
-                    const titlePrompt = `Based on the following conversation, create a very short, concise title (3-5 words max).\n\nConversation:\n${conversation.messages.map(m => { const part = m.parts[0]; return `${m.role}: ${part.text || 'tool call'}`}).join('\n')}`;
-                    try {
-                         const response = await fetch('/.netlify/functions/ask-gemini', {
-                            method: 'POST', body: JSON.stringify({ prompt: titlePrompt }),
-                        });
-                        if (!response.ok) return;
-                        const data = await response.json();
-                        if(data.response && data.response.parts[0].text) {
-                            conversation.title = data.response.parts[0].text.replace(/"/g, '').replace(/\./g, '');
-                            this.saveConversations();
-                            this.renderHistoryList();
-                            this.DOMElements.chatTitle.textContent = conversation.title;
-                        }
-                    } catch (e) { console.error("Could not generate title:", e); }
-                }
-            };
-
-            // --- ANIMATION & VISUAL EFFECTS ---
-            const animation = {
-                cursorTrailCanvas: document.getElementById('cursor-trail-canvas'),
-                cursorTrailCtx: null,
-                trailParticles: [],
-                init() {
-                    if (this.cursorTrailCanvas) this.cursorTrailCtx = this.cursorTrailCanvas.getContext('2d');
-                    this.resizeCanvases();
-                    this.animateCursorTrail();
-                    window.addEventListener('resize', () => this.resizeCanvases());
-                    window.addEventListener('mousemove', (e) => { mouse.x = e.clientX; mouse.y = e.clientY; });
-                },
-                resizeCanvases() {
-                    document.querySelectorAll('.background-canvas, #cursor-trail-canvas').forEach(c => {
-                        if (c) { c.width = window.innerWidth; c.height = window.innerHeight; }
-                    });
-                },
-                animateCursorTrail() {
-                    if (!this.cursorTrailCtx) return;
-                    this.cursorTrailCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-                    this.trailParticles.push({ x: mouse.x, y: mouse.y, alpha: 1 });
-                    if (this.trailParticles.length > 50) this.trailParticles.shift();
-                    this.trailParticles.forEach((p, i) => {
-                        p.alpha -= 0.05;
-                        if (p.alpha <= 0) this.trailParticles.splice(i, 1);
-                        else {
-                            this.cursorTrailCtx.globalAlpha = p.alpha;
-                            this.cursorTrailCtx.fillStyle = 'rgba(137, 179, 249, 0.5)';
-                            this.cursorTrailCtx.beginPath();
-                            this.cursorTrailCtx.arc(p.x, p.y, 2, 0, Math.PI * 2);
-                            this.cursorTrailCtx.fill();
-                        }
-                    });
-                    requestAnimationFrame(() => this.animateCursorTrail());
-                }
-            };
-            // --- PAGE INITIALIZATION ---
-            chatbot.init();
-            animation.init();
-        });
-    </script>
-</body>
-</html>
+                    
+                    const title
