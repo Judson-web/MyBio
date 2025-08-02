@@ -60,7 +60,6 @@
         #welcome-screen { display: flex; flex-direction: column; align-items: center; text-align: center; justify-content: center; flex-grow: 1; margin-bottom: 5rem; }
         #welcome-screen h1 { font-size: 2.5rem; font-weight: 500; margin: 0 0 1rem 0; color: var(--dim-text-color); }
         
-        /* TWEAK: Example Prompts on Welcome Screen */
         .example-prompts { display: flex; gap: 1rem; margin-top: 1.5rem; flex-wrap: wrap; justify-content: center;}
         .prompt-btn { background: var(--surface-hover); color: var(--text-color); border: 1px solid var(--border-color); padding: 0.75rem 1rem; border-radius: 8px; cursor: pointer; transition: all 0.2s ease; }
         .prompt-btn:hover { background: var(--border-color); }
@@ -70,7 +69,6 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .chat-message.user { flex-direction: row-reverse; }
         .avatar { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; overflow: hidden; margin-top: 4px; }
-        .avatar.user img { width: 100%; height: 100%; object-fit: cover; }
         .message-content { display: flex; flex-direction: column; max-width: 85%; }
         .message-bubble { padding: 0.75rem 1rem; line-height: 1.7; border-radius: 18px; width: fit-content; background: var(--surface-hover); transition: background-color 0.3s ease; }
         .chat-message.ai .message-bubble { border-top-left-radius: 4px; }
@@ -99,11 +97,8 @@
         .modal-footer { padding: 1rem 1.5rem; display: flex; justify-content: flex-end; gap: 0.5rem; border-top: 1px solid var(--border-color); }
         .modal-footer button { padding: 0.5rem 1rem; border-radius: 6px; border: 1px solid var(--border-color); cursor: pointer; transition: background-color 0.2s ease; font-weight: 500;}
         .modal-footer .btn-confirm { background: var(--glow-color-1); color: #000; border-color: var(--glow-color-1); }
-        .modal-footer .btn-cancel { background: var(--surface-hover); color: var(--text-color); }
-        #history-list { flex-grow: 1; overflow-y: auto; padding: 1rem; }
         .history-item { padding: 0.75rem 1rem; margin-bottom: 0.5rem; border-radius: 8px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: background 0.2s ease; display: flex; justify-content: space-between; align-items: center; }
         
-        /* TWEAK: Blinking cursor style for streaming */
         .cursor-blink { animation: blink 1s step-end infinite; }
         @keyframes blink { 50% { opacity: 0; } }
 
@@ -291,11 +286,13 @@
                 },
 
                 saveConversations() { localStorage.setItem('judson_ai_conversations', JSON.stringify(this.state.conversations)); },
+                
                 toggleHistoryPopup(show) {
                     this.DOMElements.historyPopup.classList.toggle('show', show);
                     this.DOMElements.historyPopupBackdrop.classList.toggle('show', show);
                     if (show) this.renderHistoryList();
                 },
+                
                 toggleConfirmPopup(type, show) {
                     const popup = type === 'new' ? this.DOMElements.confirmNewChatPopup : this.DOMElements.confirmClearChatPopup;
                     const backdrop = type === 'new' ? this.DOMElements.confirmNewChatBackdrop : this.DOMElements.confirmClearChatBackdrop;
@@ -395,44 +392,151 @@
                     this.state.toastTimeout = setTimeout(() => { toast.classList.remove('show'); }, 3000);
                 },
 
-                addMessageToDOM(sender, text = '') { /* ... unchanged ... */ return messageContainer; },
-                async regenerateLastResponse() { /* ... unchanged ... */ },
+                addMessageToDOM(sender, text = '') {
+                    this.DOMElements.welcomeScreen?.classList.add('hidden');
+                    const senderClass = sender === 'model' ? 'ai' : sender;
+                    const messageContainer = document.createElement('div');
+                    messageContainer.className = `chat-message ${senderClass}`;
+                    
+                    const avatarHTML = senderClass === 'user' ? `<img src="${userProfileImageUrl}" alt="User Avatar">` : `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gemini-gradient-avatar" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#89b3f9;stop-opacity:1" /><stop offset="100%" style="stop-color:#d8b6ff;stop-opacity:1" /></linearGradient></defs><path d="M12 2.75L14.25 9.25L21.25 9.75L15.75 14.75L17.75 21.5L12 17.5L6.25 21.5L8.25 14.75L2.75 9.75L9.75 9.25L12 2.75Z" stroke="url(#gemini-gradient-avatar)" stroke-width="1.5" stroke-linejoin="round"/></svg>`;
+                    
+                    let actionsHTML = '';
+                    if (senderClass === 'ai') {
+                        actionsHTML = `<div class="response-actions">
+                            <button class="regenerate-btn" aria-label="Regenerate Response"><i data-feather="refresh-cw"></i></button>
+                            <button class.copy-btn" aria-label="Copy Response"><i data-feather="copy"></i></button>
+                        </div>`;
+                    }
+                    
+                    const messageHTML = `<div class="avatar ${senderClass}">${avatarHTML}</div>
+                        <div class="message-content">
+                            <div class="message-bubble">${marked.parse(text)}</div>
+                        </div>
+                        ${actionsHTML}`;
+
+                    messageContainer.innerHTML = messageHTML;
+                    if (senderClass === 'user') { messageContainer.style.flexDirection = 'row-reverse'; }
+
+                    this.DOMElements.chatDisplay.appendChild(messageContainer);
+                    this.DOMElements.chatDisplay.scrollTop = this.DOMElements.chatDisplay.scrollHeight;
+                    
+                    if (senderClass === 'ai') {
+                        messageContainer.querySelector('.copy-btn')?.addEventListener('click', () => {
+                            const messages = this.state.conversations[this.state.currentConversationId].messages;
+                            const fullText = messages[messages.length - 1].parts[0].text;
+                            navigator.clipboard.writeText(fullText);
+                            this.showToast('Copied to clipboard');
+                        });
+                        messageContainer.querySelector('.regenerate-btn')?.addEventListener('click', () => this.regenerateLastResponse());
+                    }
+                    feather.replace();
+                    return messageContainer;
+                },
                 
-                // BUG FIX: Completely rewritten logic for message handling
+                async regenerateLastResponse() {
+                    if (this.state.isThinking) return;
+                    const conversation = this.state.conversations[this.state.currentConversationId];
+                    if (conversation.messages.length < 1) return;
+                    let lastUserMessageIndex = -1;
+                    for (let i = conversation.messages.length - 1; i >= 0; i--) {
+                        if (conversation.messages[i].role === 'user') { lastUserMessageIndex = i; break; }
+                    }
+                    if (lastUserMessageIndex === -1) return;
+                    conversation.messages.splice(lastUserMessageIndex + 1);
+                    const messagesOnScreen = this.DOMElements.chatDisplay.querySelectorAll('.chat-message');
+                    for (let i = messagesOnScreen.length - 1; i > lastUserMessageIndex; i--) { messagesOnScreen[i].remove(); }
+                    this.showThinking(true);
+                    await this.getAIResponse();
+                },
+                
                 async processUserMessage() {
                     if (this.state.isThinking) return;
                     const userMessage = this.DOMElements.chatbotInput.value.trim();
                     if (!userMessage) return;
-
-                    if (!this.state.currentConversationId) {
-                        this.startNewConversation();
-                    }
+                    if (!this.state.currentConversationId) { this.startNewConversation(); }
                     const conversation = this.state.conversations[this.state.currentConversationId];
                     
                     this.addMessageToDOM('user', userMessage);
                     this.DOMElements.chatbotInput.value = '';
 
-                    // First, add the user message to the state. This is critical.
-                    conversation.messages.push({ role: "user", parts: [{ text: userMessage }] });
-
-                    // Now, check for special cases like the date request.
                     const dateRequestRegex = /(what is|what's|tell me|current)\s+(the\s+)?date/i;
                     if (dateRequestRegex.test(userMessage)) {
                         const cannedResponse = "I'm sorry, I don't have the functionality to provide the current date. I can only give the time.";
+                        conversation.messages.push({ role: "user", parts: [{ text: userMessage }] });
                         this.addMessageToDOM('model', cannedResponse);
                         conversation.messages.push({ role: "model", parts: [{ text: cannedResponse }] });
                         this.saveConversations();
-                        return; // Stop processing and do not call the AI
+                        return;
                     }
                     
-                    // If not a special case, proceed with the AI call
+                    conversation.messages.push({ role: "user", parts: [{ text: userMessage }] });
                     this.showThinking(true);
                     await this.getAIResponse();
                 },
                 
-                stopGenerating() { /* ... unchanged ... */ },
-                async getAIResponse() { /* ... unchanged ... */ },
-                async generateTitleForConversation(id) { /* ... unchanged ... */ }
+                stopGenerating() { if (this.state.abortController) { this.state.abortController.abort(); this.state.abortController = null; } },
+
+                async getAIResponse() {
+                    this.state.abortController = new AbortController();
+                    const conversation = this.state.conversations[this.state.currentConversationId];
+                    const aiMessageContainer = this.addMessageToDOM('model', '<span class="cursor-blink">|</span>');
+                    const messageBubble = aiMessageContainer.querySelector('.message-bubble');
+                    let fullResponse = "";
+
+                    this.DOMElements.stopGeneratingBtn.classList.remove('hidden');
+                    try {
+                        const response = await fetch('/.netlify/functions/ask-gemini', {
+                            method: 'POST',
+                            body: JSON.stringify({ history: conversation.messages }),
+                            signal: this.state.abortController.signal,
+                        });
+                        if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
+                        
+                        const reader = response.body.getReader();
+                        const decoder = new TextDecoder();
+
+                        while (true) {
+                            const { value, done } = await reader.read();
+                            if (done) break;
+                            const chunk = decoder.decode(value);
+                            fullResponse += chunk;
+                            messageBubble.innerHTML = marked.parse(fullResponse + '<span class="cursor-blink">|</span>');
+                            this.DOMElements.chatDisplay.scrollTop = this.DOMElements.chatDisplay.scrollHeight;
+                        }
+                        
+                        messageBubble.innerHTML = marked.parse(fullResponse);
+                        conversation.messages.push({ role: "model", parts: [{ text: fullResponse }] });
+                    } catch (error) {
+                        if (error.name === 'AbortError') {
+                            messageBubble.innerHTML += "<br><small>(Stopped by user)</small>";
+                            conversation.messages.push({ role: "model", parts: [{ text: fullResponse + "\n(Stopped by user)"}] });
+                        } else {
+                            messageBubble.innerHTML = `Oops! Something went wrong. Please try again.`;
+                        }
+                    } finally {
+                        this.showThinking(false);
+                        this.DOMElements.stopGeneratingBtn.classList.add('hidden');
+                        this.state.abortController = null;
+                        this.saveConversations();
+                        if (error?.name !== 'AbortError' && conversation.messages.filter(m => m.role === 'user').length === 1) {
+                            this.generateTitleForConversation(this.state.currentConversationId);
+                        }
+                        feather.replace();
+                    }
+                },
+                
+                async generateTitleForConversation(id) {
+                    const conversation = this.state.conversations[id];
+                    if(conversation && conversation.title === "New Chat" && conversation.messages.length > 0) {
+                        const firstUserMessage = conversation.messages.find(m => m.role === 'user')?.parts[0]?.text;
+                        if(firstUserMessage) {
+                            const newTitle = firstUserMessage.split(' ').slice(0, 4).join(' ');
+                            conversation.title = newTitle;
+                            document.title = `${newTitle} - Judson AI`;
+                            this.saveConversations();
+                        }
+                    }
+                }
             };
             
             chatbot.init();
