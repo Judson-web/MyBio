@@ -9,8 +9,6 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fira+Code:wght@400&display=swap" as="style">
-    
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fira+Code:wght@400&display=swap" rel="stylesheet">
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
@@ -24,8 +22,7 @@
           --surface-hover: #282a2c;
           --border-color: #3c4043;
           --glow-color-1: #89b3f9;
-          --glow-color-2: #d8b6ff;
-          --user-bubble-color: #2a2f4c; /* IMPROVEMENT: User bubble color variable */
+          --user-bubble-color: #2a2f4c;
           --font-primary: "DM Sans", "Google Sans", sans-serif;
           --font-mono: "Fira Code", monospace;
         }
@@ -38,7 +35,6 @@
         }
 
         #app-container { display: flex; height: 100vh; width: 100%; overflow: hidden; position: relative; }
-        .background-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; opacity: 0.1; }
         .hidden { display: none !important; }
         
         ::-webkit-scrollbar { width: 8px; }
@@ -76,34 +72,21 @@
 
         #chat-wrapper { flex-grow: 1; width: 100%; max-width: 900px; margin: 0 auto; overflow-y: auto; padding: 2rem; display: flex; flex-direction: column; scroll-behavior: smooth; }
         #welcome-screen { display: flex; flex-direction: column; align-items: center; text-align: center; justify-content: center; flex-grow: 1; margin-bottom: 5rem; }
-        .logo-container { margin-bottom: 1.5rem; }
         #welcome-screen h1 { font-size: 2.5rem; font-weight: 500; margin: 0 0 1rem 0; color: #c4c7c5; }
         #chat-display { display: flex; flex-direction: column; gap: 0.5rem; }
 
-        /* --- IMPROVEMENT: Redesigned Chat Bubbles & Actions --- */
         .chat-message { display: flex; max-width: 100%; gap: 1rem; align-items: flex-start; position: relative; padding: 0.5rem 0;}
         .chat-message.user { flex-direction: row-reverse; }
 
         .avatar { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; overflow: hidden; margin-top: 4px; }
         .avatar.user img { width: 100%; height: 100%; object-fit: cover; }
         .avatar.ai svg { width: 24px; height: 24px; margin: 4px; }
-
         .message-content { display: flex; flex-direction: column; max-width: 85%; }
-        .message-bubble { 
-            padding: 0.75rem 1rem;
-            line-height: 1.7; 
-            border-radius: 18px;
-            width: fit-content;
-        }
+        .message-bubble { padding: 0.75rem 1rem; line-height: 1.7; border-radius: 18px; width: fit-content; }
         .chat-message.ai .message-bubble { background: var(--surface-hover); border-top-left-radius: 4px; }
         .chat-message.user .message-bubble { background: var(--user-bubble-color); border-top-right-radius: 4px; align-self: flex-end; }
         .chat-message.tool .message-bubble { font-style: italic; color: var(--dim-text-color); background: none; }
-
-        .response-actions { 
-            opacity: 0; transition: opacity 0.2s ease;
-            position: absolute; right: -36px; top: 50%; transform: translateY(-50%);
-        }
-        .chat-message.user .response-actions { left: -36px; right: auto; }
+        .response-actions { opacity: 0; transition: opacity 0.2s ease; position: absolute; right: -36px; top: 50%; transform: translateY(-50%); }
         .chat-message.ai:hover .response-actions { opacity: 1; }
         .response-actions button { background: none; border: none; color: var(--dim-text-color); padding: 0.25rem; cursor: pointer; display: flex; border-radius: 50%; }
         .response-actions button:hover { background: var(--surface-hover); color: var(--text-color); }
@@ -129,6 +112,27 @@
         @keyframes slideUp { from { transform: translate(-50%, 150%); } to { transform: translate(-50%, 0); } }
         #cookie-banner p { margin: 0; font-size: 0.9rem; }
         #cookie-accept-btn { background: var(--glow-color-1); color: #000; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-weight: 500; }
+        
+        /* --- IMPROVEMENT: Custom Toast Notification --- */
+        #toast-notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--surface-hover);
+            color: var(--text-color);
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.3s ease, top 0.3s ease;
+            pointer-events: none;
+        }
+        #toast-notification.show {
+            opacity: 1;
+            top: 40px;
+        }
 
         @media (max-width: 768px) {
             #history-panel { position: absolute; border-right: none; }
@@ -193,6 +197,7 @@
         <p>This site uses `localStorage` to save your chat history. By continuing, you agree to this.</p>
         <button id="cookie-accept-btn">Accept</button>
     </div>
+    <div id="toast-notification"></div>
 
     <script src="https://unpkg.com/feather-icons"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -201,7 +206,7 @@
     <script>
         /**
          * Judson AI - Gemini UI Professional Chatbot
-         * @version 12.3.0
+         * @version 12.4.0
          * @author Judson Saji
          */
         document.addEventListener('DOMContentLoaded', () => {
@@ -210,7 +215,7 @@
 
             const chatbot = {
                 DOMElements: {},
-                state: { conversations: {}, currentConversationId: null, isThinking: false },
+                state: { conversations: {}, currentConversationId: null, isThinking: false, toastTimeout: null },
 
                 init() {
                     this.DOMElements = {
@@ -228,6 +233,7 @@
                         historyBackdrop: document.getElementById('history-backdrop'),
                         cookieBanner: document.getElementById('cookie-banner'),
                         cookieAcceptBtn: document.getElementById('cookie-accept-btn'),
+                        toast: document.getElementById('toast-notification'), // IMPROVEMENT: Toast element reference
                     };
                     this.loadConversations();
                     this.renderHistoryList();
@@ -236,10 +242,12 @@
                 },
 
                 bindEvents() {
+                    // Note: The history drawer is closed by clicking the backdrop, which is the standard, robust UX.
+                    this.DOMElements.historyBackdrop?.addEventListener('click', () => this.toggleHistoryPanel());
+                    
                     this.DOMElements.newChatBtn?.addEventListener('click', () => this.startNewConversation());
                     this.DOMElements.clearChatBtn?.addEventListener('click', () => this.clearCurrentConversation());
                     this.DOMElements.historyToggleBtn?.addEventListener('click', () => this.toggleHistoryPanel());
-                    this.DOMElements.historyBackdrop?.addEventListener('click', () => this.toggleHistoryPanel());
                     this.DOMElements.chatbotSendBtn?.addEventListener('click', () => this.processUserMessage());
                     this.DOMElements.chatbotInput?.addEventListener('keydown', (e) => {
                         if (e.key === 'Enter' && !e.shiftKey && !this.state.isThinking) { e.preventDefault(); this.processUserMessage(); }
@@ -278,10 +286,10 @@
                     if (!panel) return;
                     const isClosed = panel.classList.contains('closed');
                     panel.classList.toggle('closed');
-                    if (window.innerWidth <= 768) {
-                        this.DOMElements.historyBackdrop.classList.toggle('hidden', isClosed);
-                    }
+                    // The backdrop correctly handles closing the panel when the main content area is clicked.
+                    this.DOMElements.historyBackdrop.classList.toggle('hidden', isClosed);
                 },
+
                 saveConversations() { localStorage.setItem('judson_ai_conversations', JSON.stringify(this.state.conversations)); },
 
                 loadConversations() {
@@ -325,7 +333,6 @@
                     if (!this.state.conversations[id]) return;
                     this.state.currentConversationId = id;
                     const conversation = this.state.conversations[id];
-                    
                     this.DOMElements.chatDisplay.innerHTML = '';
                     this.DOMElements.chatTitle.textContent = conversation.title;
                     
@@ -338,16 +345,13 @@
                             let textToShow = '';
                             let role = msg.role;
                             const part = msg.parts[0];
-
                             if (part.text) { textToShow = part.text; } 
                             else if (part.functionCall) {
-                                // IMPROVEMENT: Conditionally hide "Using tool..." message
                                 if(part.functionCall.name !== 'get_current_time') {
                                     textToShow = `*Using tool: \`${part.functionCall.name}\`...*`;
                                     role = 'tool';
                                 }
                             } else if (part.functionResponse) { return; }
-                            
                             if (textToShow) { this.addMessageToDOM(role, textToShow); }
                         });
                     }
@@ -392,6 +396,17 @@
                     if (this.DOMElements.chatbotSendBtn) this.DOMElements.chatbotSendBtn.disabled = show;
                 },
 
+                // IMPROVEMENT: New function for custom toast notifications
+                showToast(message) {
+                    if (this.state.toastTimeout) clearTimeout(this.state.toastTimeout);
+                    const toast = this.DOMElements.toast;
+                    toast.textContent = message;
+                    toast.classList.add('show');
+                    this.state.toastTimeout = setTimeout(() => {
+                        toast.classList.remove('show');
+                    }, 3000);
+                },
+
                 addMessageToDOM(sender, text) {
                     this.DOMElements.welcomeScreen?.classList.add('hidden');
                     const senderClass = sender === 'model' ? 'ai' : sender;
@@ -415,7 +430,10 @@
                         actions.className = 'response-actions';
                         const copyButton = document.createElement('button');
                         copyButton.innerHTML = `<i data-feather="copy"></i>`;
-                        copyButton.onclick = () => navigator.clipboard.writeText(text);
+                        copyButton.onclick = () => {
+                            navigator.clipboard.writeText(text);
+                            this.showToast('Copied to clipboard');
+                        };
                         actions.appendChild(copyButton);
                         messageContainer.appendChild(actions);
                     }
@@ -440,8 +458,7 @@
                         copyCodeButton.innerHTML = 'Copy';
                         copyCodeButton.onclick = () => {
                             navigator.clipboard.writeText(block.textContent);
-                            copyCodeButton.innerHTML = 'Copied!';
-                            setTimeout(() => copyCodeButton.innerHTML = 'Copy', 2000);
+                            this.showToast('Code copied to clipboard');
                         };
                         pre.appendChild(copyCodeButton);
                     });
@@ -453,10 +470,22 @@
                     if (!userMessage || this.state.isThinking) return;
 
                     const conversation = this.state.conversations[this.state.currentConversationId];
-                    conversation.messages.push({ role: "user", parts: [{ text: userMessage }] });
                     this.addMessageToDOM('user', userMessage);
                     this.DOMElements.chatbotInput.value = '';
                     this.autoResizeTextarea({target: this.DOMElements.chatbotInput});
+
+                    // --- IMPROVEMENT: Frontend Interception for Date ---
+                    const dateRequestRegex = /(what is|what's|tell me|current)\s+(the\s+)?date/i;
+                    if (dateRequestRegex.test(userMessage)) {
+                        const cannedResponse = "I'm sorry, I don't have the functionality to provide the current date. I can only give the time.";
+                        conversation.messages.push({ role: "user", parts: [{ text: userMessage }] });
+                        this.addMessageToDOM('model', cannedResponse);
+                        conversation.messages.push({ role: "model", parts: [{ text: cannedResponse }] });
+                        this.saveConversations();
+                        return;
+                    }
+                    
+                    conversation.messages.push({ role: "user", parts: [{ text: userMessage }] });
                     this.showThinking(true);
                     
                     await this.getAIResponse();
@@ -493,7 +522,6 @@
                 
                 async handleFunctionCall(functionCall) {
                     const conversation = this.state.conversations[this.state.currentConversationId];
-                    // IMPROVEMENT: Conditionally show "Using tool..." message
                     if(functionCall.name !== 'get_current_time') {
                         this.addMessageToDOM('tool', `*Using tool: \`${functionCall.name}\`...*`);
                     }
