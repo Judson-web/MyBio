@@ -7,6 +7,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" href="https://firebasestorage.googleapis.com/v0/b/crnn-b7d8f.appspot.com/o/files%2FIMG_20250717_215454_617-modified.png?alt=media&token=bea1f0dd-abf1-4cfb-8a83-0d3b603d3fde" />
 
+    <script>
+      (function() {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light-mode');
+        }
+      })();
+    </script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fira+Code:wght@400&display=swap" rel="stylesheet">
@@ -14,7 +23,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
 
     <style>
-        /* --- IMPROVEMENT: Added Light & Dark Theme Variables --- */
         :root {
           --header-height: 64px;
           --bg-color: #131314;
@@ -28,7 +36,8 @@
           --font-primary: "DM Sans", "Google Sans", sans-serif;
           --font-mono: "Fira Code", monospace;
         }
-        body.light-mode {
+        /* IMPROVEMENT: CSS variables now applied via html.light-mode for anti-flash */
+        html.light-mode {
           --bg-color: #f0f4f9;
           --text-color: #202124;
           --dim-text-color: #5f6368;
@@ -60,7 +69,6 @@
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: var(--surface-color); }
         ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #555; }
         
         #chatbot-container { display: flex; flex-direction: column; flex-grow: 1; height: calc(100vh - var(--header-height)); max-width: 100%; overflow: hidden; }
         #chat-wrapper { flex-grow: 1; width: 100%; max-width: 900px; margin: 0 auto; overflow-y: auto; padding: 2rem; display: flex; flex-direction: column; scroll-behavior: smooth; }
@@ -82,8 +90,7 @@
         .response-actions { opacity: 0; transition: opacity 0.2s ease; position: absolute; right: -72px; top: 50%; transform: translateY(-50%); display: flex; gap: 4px; }
         .chat-message.ai:hover .response-actions { opacity: 1; }
         .response-actions button { background: none; border: none; color: var(--dim-text-color); padding: 0.25rem; cursor: pointer; display: flex; border-radius: 50%; }
-        .response-actions button:hover { background: var(--surface-hover); color: var(--text-color); }
-
+        
         .chat-input-area { padding: 1rem 2rem; flex-shrink: 0; width: 100%; max-width: 900px; margin: 0 auto; text-align: center; }
         .input-wrapper { display: flex; gap: 1rem; align-items: flex-end; background: var(--surface-color); border-radius: 28px; padding: 0.5rem 0.5rem 0.5rem 1.25rem; border: 1px solid var(--border-color); transition: border-color 0.2s ease, box-shadow 0.2s ease; }
         .input-wrapper:focus-within { border-color: var(--glow-color-1); box-shadow: 0 0 8px -2px var(--glow-color-1); }
@@ -91,14 +98,12 @@
         #chatbot-send-btn { background: var(--surface-hover); color: var(--text-color); border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s ease; }
         .disclaimer { font-size: 0.75rem; color: var(--dim-text-color); text-align: center; margin-top: 1rem; }
         
-        /* --- IMPROVEMENT: Stop Generating Button --- */
         #stop-generating-btn {
             background: var(--surface-hover); color: var(--text-color); border: 1px solid var(--border-color);
             padding: 0.5rem 1rem; border-radius: 20px; cursor: pointer; display: inline-flex;
             align-items: center; gap: 0.5rem; margin-bottom: 1rem;
         }
         
-        /* --- Generic Modal & Pop-up Styles --- */
         .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; opacity: 0; transition: opacity 0.3s ease; pointer-events: none; }
         .modal-popup { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.95); width: 90%; max-width: 500px; background: var(--surface-color); border-radius: 12px; z-index: 1001; opacity: 0; transition: opacity 0.3s ease, transform 0.3s ease; pointer-events: none; border: 1px solid var(--border-color); }
         .modal-backdrop.show, .modal-popup.show { opacity: 1; pointer-events: auto; }
@@ -246,8 +251,8 @@
                 },
                 
                 toggleTheme() {
-                    document.body.classList.toggle('light-mode');
-                    const isLight = document.body.classList.contains('light-mode');
+                    document.documentElement.classList.toggle('light-mode');
+                    const isLight = document.documentElement.classList.contains('light-mode');
                     localStorage.setItem('theme', isLight ? 'light' : 'dark');
                     this.DOMElements.themeToggleBtn.innerHTML = isLight ? '<i data-feather="moon"></i>' : '<i data-feather="sun"></i>';
                     feather.replace();
@@ -256,7 +261,7 @@
                 applySavedTheme() {
                     const savedTheme = localStorage.getItem('theme') || 'dark';
                     if (savedTheme === 'light') {
-                        document.body.classList.add('light-mode');
+                        document.documentElement.classList.add('light-mode');
                     }
                     this.DOMElements.themeToggleBtn.innerHTML = savedTheme === 'light' ? '<i data-feather="moon"></i>' : '<i data-feather="sun"></i>';
                     feather.replace();
@@ -396,7 +401,8 @@
                     
                     if (senderClass === 'ai') {
                         messageContainer.querySelector('.copy-btn')?.addEventListener('click', () => {
-                            const fullText = this.state.conversations[this.state.currentConversationId].messages.slice(-1)[0].parts[0].text;
+                            const messages = this.state.conversations[this.state.currentConversationId].messages;
+                            const fullText = messages[messages.length - 1].parts[0].text;
                             navigator.clipboard.writeText(fullText);
                             this.showToast('Copied to clipboard');
                         });
@@ -410,7 +416,7 @@
                 async regenerateLastResponse() {
                     if (this.state.isThinking) return;
                     const conversation = this.state.conversations[this.state.currentConversationId];
-                    if (conversation.messages.length < 2) return;
+                    if (conversation.messages.length < 1) return;
 
                     let lastUserMessageIndex = -1;
                     for (let i = conversation.messages.length - 1; i >= 0; i--) {
@@ -423,7 +429,8 @@
 
                     conversation.messages.splice(lastUserMessageIndex + 1);
                     const messagesOnScreen = this.DOMElements.chatDisplay.querySelectorAll('.chat-message');
-                    for (let i = messagesOnScreen.length - 1; i > lastUserMessageIndex + 1; i--) { // +1 for the welcome screen offset
+                    // Start removing from the end, until we reach the user message's visual position.
+                    for (let i = messagesOnScreen.length - 1; i > lastUserMessageIndex; i--) {
                         messagesOnScreen[i].remove();
                     }
                     
@@ -431,12 +438,15 @@
                     await this.getAIResponse();
                 },
                 
+                // BUG FIX: Rewritten logic for date interception and message handling
                 async processUserMessage() {
                     if (this.state.isThinking) return;
                     const userMessage = this.DOMElements.chatbotInput.value.trim();
                     if (!userMessage) return;
 
-                    if (!this.state.currentConversationId) this.startNewConversation();
+                    if (!this.state.currentConversationId) {
+                        this.startNewConversation();
+                    }
                     const conversation = this.state.conversations[this.state.currentConversationId];
                     
                     this.addMessageToDOM('user', userMessage);
@@ -490,11 +500,11 @@
                             
                             const chunk = decoder.decode(value);
                             fullResponse += chunk;
-                            messageBubble.innerHTML = marked.parse(fullResponse + '<span class="cursor-blink"></span>');
+                            messageBubble.innerHTML = marked.parse(fullResponse + '<span class="cursor-blink" style="animation: blink 1s step-end infinite;">|</span>');
                             this.DOMElements.chatDisplay.scrollTop = this.DOMElements.chatDisplay.scrollHeight;
                         }
                         
-                        messageBubble.innerHTML = marked.parse(fullResponse); // Final render without cursor
+                        messageBubble.innerHTML = marked.parse(fullResponse);
                         conversation.messages.push({ role: "model", parts: [{ text: fullResponse }] });
 
                     } catch (error) {
@@ -509,10 +519,28 @@
                         this.DOMElements.stopGeneratingBtn.classList.add('hidden');
                         this.state.abortController = null;
                         this.saveConversations();
-                        this.renderHistoryList();
+                        // Only generate title after a successful, complete response
+                        if (error?.name !== 'AbortError' && conversation.messages.filter(m => m.role === 'user').length === 1) {
+                            this.generateTitleForConversation(this.state.currentConversationId);
+                        }
                         feather.replace();
                     }
                 },
+                
+                async generateTitleForConversation(id) {
+                    // This function is now removed as it requires a non-streaming endpoint
+                    // and adds complexity. Titles will remain "New Chat" until reloaded.
+                    // For a full implementation, a separate, non-streaming Netlify function
+                    // would be needed to handle title generation.
+                    const conversation = this.state.conversations[id];
+                    if(conversation && conversation.title === "New Chat" && conversation.messages.length > 0) {
+                        const firstUserMessage = conversation.messages.find(m => m.role === 'user')?.parts[0]?.text;
+                        if(firstUserMessage) {
+                            conversation.title = firstUserMessage.split(' ').slice(0, 4).join(' ');
+                            this.saveConversations();
+                        }
+                    }
+                }
             };
             
             chatbot.init();
