@@ -445,7 +445,7 @@
                     conversation.messages.splice(lastUserMessageIndex + 1);
                     const messagesOnScreen = this.DOMElements.chatDisplay.querySelectorAll('.chat-message');
                     // BUG FIX: Corrected index calculation
-                    for (let i = messagesOnScreen.length - 1; i > lastUserMessageIndex + 1; i--) { messagesOnScreen[i].remove(); }
+                    for (let i = messagesOnScreen.length - 1; i > lastUserMessageIndex; i--) { messagesOnScreen[i].remove(); }
                     this.showThinking(true);
                     await this.getAIResponse();
                 },
@@ -507,7 +507,8 @@
                         }
                         
                         messageBubble.innerHTML = marked.parse(fullResponse);
-                        conversation.messages.push({ role: "model", parts: [{ text: fullResponse }] });
+                        // BUG FIX: Do not push a duplicate message to the history. The backend function will do this.
+                        // conversation.messages.push({ role: "model", parts: [{ text: fullResponse }] });
                     } catch (err) {
                         error = err;
                         if (error.name === 'AbortError') {
@@ -545,11 +546,8 @@
                 }
             };
             
-            // BUG FIX: Critical initialization order changed.
             chatbot.init();
         });
     </script>
 </body>
 </html>
-}
-Summarise the website and add any new features you want to add
