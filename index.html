@@ -44,7 +44,6 @@
         #main-header {
             height: var(--header-height); flex-shrink: 0; display: flex; align-items: center;
             justify-content: space-between; padding: 0 1.5rem; border-bottom: 1px solid var(--border-color);
-            /* TWEAK: Added subtle shadow for depth */
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         #main-header .header-logo { font-size: 1.3rem; font-weight: 700; color: var(--text-color); text-decoration: none; }
@@ -272,19 +271,127 @@
                     });
                 },
                 
-                toggleTheme() { /* ... unchanged ... */ },
-                applySavedTheme() { /* ... unchanged ... */ },
+                toggleTheme() {
+                    document.documentElement.classList.toggle('light-mode');
+                    const isLight = document.documentElement.classList.contains('light-mode');
+                    localStorage.setItem('theme', isLight ? 'light' : 'dark');
+                    this.DOMElements.themeToggleBtn.innerHTML = isLight ? '<i data-feather="moon"></i>' : '<i data-feather="sun"></i>';
+                    feather.replace();
+                },
+
+                applySavedTheme() {
+                    const savedTheme = localStorage.getItem('theme') || 'dark';
+                    if (savedTheme === 'light') { document.documentElement.classList.add('light-mode'); }
+                    this.DOMElements.themeToggleBtn.innerHTML = savedTheme === 'light' ? '<i data-feather="moon"></i>' : '<i data-feather="sun"></i>';
+                    feather.replace();
+                },
+
                 saveConversations() { localStorage.setItem('judson_ai_conversations', JSON.stringify(this.state.conversations)); },
-                toggleHistoryPopup(show) { /* ... unchanged ... */ },
-                toggleConfirmPopup(type, show) { /* ... unchanged ... */ },
-                loadConversations() { /* ... unchanged ... */ },
-                startNewConversation(save = true) { /* ... unchanged ... */ },
-                clearCurrentConversation() { /* ... unchanged ... */ },
-                loadConversation(id) { /* ... unchanged ... */ },
-                deleteConversation(id) { /* ... unchanged ... */ },
-                renderHistoryList() { /* ... unchanged ... */ },
-                showThinking(show) { /* ... unchanged ... */ },
-                showToast(message) { /* ... unchanged ... */ },
+                
+                toggleHistoryPopup(show) {
+                    this.DOMElements.historyPopup.classList.toggle('show', show);
+                    this.DOMElements.historyPopupBackdrop.classList.toggle('show', show);
+                    if (show) this.renderHistoryList();
+                },
+                
+                toggleConfirmPopup(type, show) {
+                    const popup = type === 'new' ? this.DOMElements.confirmNewChatPopup : this.DOMElements.confirmClearChatPopup;
+                    const backdrop = type === 'new' ? this.DOMElements.confirmNewChatBackdrop : this.DOMElements.confirmClearChatBackdrop;
+                    popup.classList.toggle('show', show);
+                    backdrop.classList.toggle('show', show);
+                },
+
+                loadConversations() {
+                    const saved = localStorage.getItem('judson_ai_conversations');
+                    if (saved) {
+                        try {
+                            this.state.conversations = JSON.parse(saved);
+                            const keys = Object.keys(this.state.conversations);
+                            if (keys.length > 0) { this.state.currentConversationId = keys[keys.length - 1]; this.loadConversation(this.state.currentConversationId);
+                            } else { this.startNewConversation(false); }
+                        } catch (e) { localStorage.removeItem('judson_ai_conversations'); }
+                    } else { this.startNewConversation(false); }
+                },
+                
+                startNewConversation(save = true) {
+                    this.state.currentConversationId = `chat_${Date.now()}`;
+                    this.state.conversations[this.state.currentConversationId] = { title: "New Chat", messages: [] };
+                    this.loadConversation(this.state.currentConversationId);
+                    if (save) { this.renderHistoryList(); this.saveConversations(); }
+                },
+                
+                clearCurrentConversation() {
+                    if (!this.state.currentConversationId) return;
+                    this.state.conversations[this.state.currentConversationId].messages = [];
+                    this.loadConversation(this.state.currentConversationId);
+                    this.saveConversations();
+                },
+                
+                loadConversation(id) {
+                    if (!this.state.conversations[id]) return;
+                    this.state.currentConversationId = id;
+                    const conversation = this.state.conversations[id];
+                    this.DOMElements.chatDisplay.innerHTML = '';
+                    
+                    if (conversation.messages.length === 0) { this.DOMElements.welcomeScreen?.classList.remove('hidden');
+                    } else {
+                        this.DOMElements.welcomeScreen?.classList.add('hidden');
+                        conversation.messages.forEach(msg => {
+                            if (!msg || !msg.parts || !msg.parts[0]) return;
+                            let textToShow = ''; let role = msg.role; const part = msg.parts[0];
+                            if (part.text) { textToShow = part.text; } 
+                            else if (part.functionCall) {
+                                if(part.functionCall.name !== 'get_current_time') {
+                                    textToShow = `*Using tool: \`${part.functionCall.name}\`...*`; role = 'tool';
+                                }
+                            } else if (part.functionResponse) { return; }
+                            if (textToShow) { this.addMessageToDOM(role, textToShow); }
+                        });
+                    }
+                },
+                
+                deleteConversation(id) {
+                    delete this.state.conversations[id];
+                    this.renderHistoryList();
+                    if (this.state.currentConversationId === id) {
+                        const keys = Object.keys(this.state.conversations);
+                        if (keys.length > 0) { this.loadConversation(keys[keys.length - 1]);
+                        } else { this.startNewConversation(); }
+                    }
+                    this.saveConversations();
+                },
+
+                renderHistoryList() {
+                    const listContainer = this.DOMElements.historyList;
+                    if (!listContainer) return;
+                    listContainer.innerHTML = '';
+                    const sortedKeys = Object.keys(this.state.conversations).reverse();
+                    if (sortedKeys.length === 0) {
+                        listContainer.innerHTML = '<p style="text-align:center; color:var(--dim-text-color);">No chat history.</p>'; return;
+                    }
+                    sortedKeys.forEach(id => {
+                        const conversation = this.state.conversations[id];
+                        const item = document.createElement('div');
+                        item.className = 'history-item'; item.dataset.id = id;
+                        item.innerHTML = `<span>${conversation.title || 'Untitled Chat'}</span><button class="delete-history-btn"><i data-feather="trash-2"></i></button>`;
+                        listContainer.appendChild(item);
+                    });
+                    feather.replace();
+                },
+
+                showThinking(show) {
+                    this.state.isThinking = show;
+                    this.DOMElements.chatbotInput.disabled = show;
+                    this.DOMElements.chatbotSendBtn.disabled = show;
+                },
+
+                showToast(message) {
+                    if (this.state.toastTimeout) clearTimeout(this.state.toastTimeout);
+                    const toast = this.DOMElements.toast;
+                    toast.textContent = message;
+                    toast.classList.add('show');
+                    this.state.toastTimeout = setTimeout(() => { toast.classList.remove('show'); }, 3000);
+                },
 
                 addMessageToDOM(sender, text = '') {
                     this.DOMElements.welcomeScreen?.classList.add('hidden');
@@ -296,6 +403,7 @@
                     
                     let actionsHTML = '';
                     if (senderClass === 'ai') {
+                        // BUG FIX: Corrected class name from class.copy-btn to class="copy-btn"
                         actionsHTML = `<div class="response-actions">
                             <button class="regenerate-btn" aria-label="Regenerate Response"><i data-feather="refresh-cw"></i></button>
                             <button class="copy-btn" aria-label="Copy Response"><i data-feather="copy"></i></button>
@@ -336,7 +444,7 @@
                     if (lastUserMessageIndex === -1) return;
                     conversation.messages.splice(lastUserMessageIndex + 1);
                     const messagesOnScreen = this.DOMElements.chatDisplay.querySelectorAll('.chat-message');
-                    for (let i = messagesOnScreen.length - 1; i > lastUserMessageIndex + 1; i--) { messagesOnScreen[i].remove(); } // BUG FIX: Corrected index
+                    for (let i = messagesOnScreen.length - 1; i > lastUserMessageIndex + 1; i--) { messagesOnScreen[i].remove(); } // Corrected index
                     this.showThinking(true);
                     await this.getAIResponse();
                 },
@@ -345,11 +453,13 @@
                     if (this.state.isThinking) return;
                     const userMessage = this.DOMElements.chatbotInput.value.trim();
                     if (!userMessage) return;
-                    if (!this.state.currentConversationId) { this.startNewConversation(); }
+                    if (!this.state.currentConversationId) { this.startNewConversation(false); } // BUG FIX: Don't save, just setup
                     const conversation = this.state.conversations[this.state.currentConversationId];
                     
                     this.addMessageToDOM('user', userMessage);
                     this.DOMElements.chatbotInput.value = '';
+                    
+                    // BUG FIX: Critical logic correction. Push user message to state BEFORE making API call.
                     conversation.messages.push({ role: "user", parts: [{ text: userMessage }] });
 
                     const dateRequestRegex = /(what is|what's|tell me|current)\s+(the\s+)?date/i;
@@ -373,6 +483,7 @@
                     const aiMessageContainer = this.addMessageToDOM('model', '<span class="cursor-blink">|</span>');
                     const messageBubble = aiMessageContainer.querySelector('.message-bubble');
                     let fullResponse = "";
+                    let error = null;
 
                     this.DOMElements.stopGeneratingBtn.classList.remove('hidden');
                     try {
@@ -397,7 +508,8 @@
                         
                         messageBubble.innerHTML = marked.parse(fullResponse);
                         conversation.messages.push({ role: "model", parts: [{ text: fullResponse }] });
-                    } catch (error) {
+                    } catch (err) {
+                        error = err; // Capture the error to use in finally block
                         if (error.name === 'AbortError') {
                             messageBubble.innerHTML += "<br><small>(Stopped by user)</small>";
                             conversation.messages.push({ role: "model", parts: [{ text: fullResponse + "\n(Stopped by user)"}] });
@@ -410,7 +522,7 @@
                         this.state.abortController = null;
                         this.saveConversations();
                         if (!error && conversation.messages.filter(m => m.role === 'user').length === 1) {
-                            this.generateTitleForConversation(this.state.currentConversationId);
+                            await this.generateTitleForConversation(this.state.currentConversationId);
                         }
                         feather.replace();
                     }
@@ -425,12 +537,15 @@
                             conversation.title = newTitle;
                             document.title = `${newTitle} - Judson AI`;
                             this.saveConversations();
+                            // TWEAK: Live update the title in the history pop-up if it's open
+                            if(this.DOMElements.historyPopup.classList.contains('show')) {
+                                this.renderHistoryList();
+                            }
                         }
                     }
                 }
             };
             
-            // BUG FIX: Critical initialization order changed.
             chatbot.init();
         });
     </script>
