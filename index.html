@@ -58,6 +58,21 @@
         }
 
         .hidden { display: none !important; }
+        
+        /* --- IMPROVEMENT: Custom Scrollbar Styling --- */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--surface-color);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
 
         /* --- HISTORY PANEL --- */
         #history-panel {
@@ -71,6 +86,7 @@
             transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
             position: relative;
             z-index: 1001;
+            border-right: 1px solid var(--border-color);
         }
         #history-panel.closed { transform: translateX(-100%); }
 
@@ -95,7 +111,7 @@
         }
         #new-chat-btn:hover { background: var(--surface-hover); color: var(--text-color); }
 
-        #history-list { flex-grow: 1; overflow-y: auto; padding: 1rem; }
+        #history-list { flex-grow: 1; overflow-y: auto; padding: 0 1rem 1rem 1rem; }
         .history-item { padding: 0.75rem 1rem; margin-bottom: 0.5rem; border-radius: 8px; cursor: pointer;
         white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: background 0.2s ease; display: flex; justify-content: space-between; align-items: center; }
         .history-item:hover { background: var(--surface-hover); }
@@ -136,9 +152,10 @@
             max-width: 900px;
             margin: 0 auto;
             overflow-y: auto;
-            padding: 1rem;
+            padding: 1rem 2rem;
             display: flex;
             flex-direction: column;
+            scroll-behavior: smooth; /* --- IMPROVEMENT: Smooth scrolling --- */
         }
 
         #welcome-screen {
@@ -152,16 +169,29 @@
         #welcome-screen h1 { font-size: 2.5rem; font-weight: 500; margin: 0 0 1rem 0;
             color: #c4c7c5; }
 
-        #chat-display { display: flex; flex-direction: column; gap: 1.5rem; }
+        #chat-display { display: flex; flex-direction: column; gap: 2rem; }
         .chat-message { display: flex; max-width: 100%; gap: 1rem; }
-        .chat-message.user { align-self: flex-end; flex-direction: row-reverse; }
-        .chat-message.ai, .chat-message.tool { align-self: flex-start; }
+        .chat-message.user { justify-content: flex-end; }
+        .chat-message.user .message-content { align-items: flex-end; }
+        .chat-message.ai, .chat-message.tool { justify-content: flex-start; }
+
         .avatar { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; display: flex;
-            align-items: center; justify-content: center; font-weight: 500; overflow: hidden; }
+            align-items: center; justify-content: center; font-weight: 500; overflow: hidden; margin-top: 4px;}
         .avatar.user img { width: 100%; height: 100%; object-fit: cover; }
         .avatar.ai svg { width: 24px; height: 24px; }
-        .message-content { padding-top: 0.5rem; width: 100%; }
-        .message-bubble { line-height: 1.7; }
+        
+        .message-content { 
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 80%; /* --- IMPROVEMENT: Better readability on wide screens --- */
+        }
+        .message-bubble { 
+            line-height: 1.7; 
+            width: fit-content;
+        }
+        .chat-message.user .message-bubble { align-self: flex-end; }
+        .chat-message.ai .message-bubble { align-self: flex-start; }
         .chat-message.tool .message-bubble { font-style: italic; color: var(--dim-text-color); }
 
         .response-actions {
@@ -190,18 +220,25 @@
 
         /* Chat Input Area */
         .chat-input-area {
-            padding: 1rem;
+            padding: 1rem 2rem;
             flex-shrink: 0;
             width: 100%;
             max-width: 900px;
             margin: 0 auto;
         }
+        /* --- IMPROVEMENT: Polished input area with focus state --- */
         .input-wrapper {
             display: flex;
             gap: 1rem; align-items: flex-end;
             background: var(--surface-color);
             border-radius: 28px;
             padding: 0.5rem 0.5rem 0.5rem 1.25rem;
+            border: 1px solid var(--border-color);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .input-wrapper:focus-within {
+            border-color: var(--glow-color-1);
+            box-shadow: 0 0 8px -2px var(--glow-color-1);
         }
         #chatbot-input {
             flex-grow: 1;
@@ -239,9 +276,7 @@
             opacity: 0;
             transition: opacity 0.4s ease;
         }
-        #history-backdrop:not(.hidden) {
-            opacity: 1;
-        }
+        #history-backdrop:not(.hidden) { opacity: 1; }
 
         /* Cookie Banner */
         #cookie-banner {
@@ -259,6 +294,7 @@
             gap: 1rem;
             z-index: 2000;
             animation: slideUp 0.5s ease-out;
+            max-width: 95%;
         }
         @keyframes slideUp { from { transform: translate(-50%, 150%); } to { transform: translate(-50%, 0); } }
         #cookie-banner p { margin: 0; font-size: 0.9rem; }
@@ -273,13 +309,22 @@
         }
 
         @media (max-width: 768px) {
-            #history-panel { position: absolute; }
+            #history-panel { position: absolute; border-right: none; }
             #history-panel.closed { transform: translateX(-100%); }
             #history-toggle-btn { display: flex; }
             #chatbot-container { padding: 0; }
             #chat-wrapper, .chat-input-area { padding: 1rem; }
-            #cookie-banner { flex-direction: column; text-align: center; bottom: 0;
-            left: 0; right: 0; transform: none; border-radius: 0; border-left: none; border-right: none; }
+            
+            /* --- IMPROVEMENT: Better mobile cookie banner --- */
+            #cookie-banner { 
+                flex-direction: column; 
+                text-align: center; 
+                bottom: 1rem;
+                left: 1rem;
+                right: 1rem;
+                transform: none;
+                width: auto;
+            }
         }
     </style>
 </head>
@@ -349,7 +394,7 @@
     <script>
         /**
          * Judson AI - Gemini UI Professional Chatbot
-         * @version 12.0.0
+         * @version 12.1.0
          * @author Judson Saji
          */
 
@@ -367,8 +412,6 @@
                 init() {
                     this.DOMElements = {
                         welcomeScreen: document.getElementById('welcome-screen'),
-                        chatInterface: document.getElementById('chat-interface'),
-                        startChatBtn: document.getElementById('start-chat-btn'),
                         chatDisplay: document.getElementById('chat-display'),
                         chatTitle: document.getElementById('chat-title'),
                         thinkingIndicator: document.getElementById('thinking-indicator'),
@@ -390,7 +433,6 @@
                 },
 
                 bindEvents() {
-                    this.DOMElements.startChatBtn?.addEventListener('click', () => this.startNewConversation());
                     this.DOMElements.newChatBtn?.addEventListener('click', () => this.startNewConversation());
                     this.DOMElements.clearChatBtn?.addEventListener('click', () => this.clearCurrentConversation());
                     this.DOMElements.historyToggleBtn?.addEventListener('click', () => this.toggleHistoryPanel());
@@ -434,7 +476,7 @@
                     const isClosed = panel.classList.contains('closed');
                     panel.classList.toggle('closed');
                     if (window.innerWidth <= 768) {
-                        this.DOMElements.historyBackdrop.classList.toggle('hidden', !isClosed);
+                        this.DOMElements.historyBackdrop.classList.toggle('hidden', isClosed);
                     }
                 },
                 saveConversations() { localStorage.setItem('judson_ai_conversations', JSON.stringify(this.state.conversations)); },
@@ -442,11 +484,16 @@
                 loadConversations() {
                     const saved = localStorage.getItem('judson_ai_conversations');
                     if (saved) {
-                        this.state.conversations = JSON.parse(saved);
-                        const keys = Object.keys(this.state.conversations);
-                        if (keys.length > 0) {
-                            this.state.currentConversationId = keys[keys.length - 1];
-                            this.loadConversation(this.state.currentConversationId);
+                        try {
+                            this.state.conversations = JSON.parse(saved);
+                            const keys = Object.keys(this.state.conversations);
+                            if (keys.length > 0) {
+                                this.state.currentConversationId = keys[keys.length - 1];
+                                this.loadConversation(this.state.currentConversationId);
+                            }
+                        } catch (e) {
+                            console.error("Failed to parse conversations from localStorage:", e);
+                            localStorage.removeItem('judson_ai_conversations'); // Clear corrupted data
                         }
                     }
                     if (window.innerWidth > 768) {
@@ -474,20 +521,41 @@
                     this.saveConversations();
                 },
 
+                /* --- BUG FIX: This function is now robust and handles all message types correctly on reload --- */
                 loadConversation(id) {
                     if (!this.state.conversations[id]) return;
                     this.state.currentConversationId = id;
                     const conversation = this.state.conversations[id];
                     
-                    this.DOMElements.chatInterface?.classList.remove('hidden');
                     this.DOMElements.chatDisplay.innerHTML = '';
                     this.DOMElements.chatTitle.textContent = conversation.title;
+                    
                     if (conversation.messages.length === 0) {
                          this.DOMElements.welcomeScreen?.classList.remove('hidden');
                     } else {
                         this.DOMElements.welcomeScreen?.classList.add('hidden');
                         conversation.messages.forEach(msg => {
-                            this.addMessageToDOM(msg.role, msg.parts[0].text || `*Using tool: \`${msg.parts[0].functionResponse.name}\`...*`);
+                            // Guard against malformed messages
+                            if (!msg || !msg.parts || !msg.parts[0]) return;
+
+                            let textToShow = '';
+                            let role = msg.role;
+                            const part = msg.parts[0];
+
+                            if (part.text) {
+                                textToShow = part.text;
+                            } else if (part.functionCall) {
+                                textToShow = `*Using tool: \`${part.functionCall.name}\`...*`;
+                                role = 'tool'; // Display the "using tool" message with the tool styling
+                            } else if (part.functionResponse) {
+                                // We typically don't display the raw tool response to the user,
+                                // as the AI's next message will summarize it. So we 'return' to skip.
+                                return;
+                            }
+                            
+                            if (textToShow) {
+                                this.addMessageToDOM(role, textToShow);
+                            }
                         });
                     }
                     this.renderHistoryList();
@@ -502,9 +570,9 @@
                         if (keys.length > 0) {
                             this.loadConversation(keys[keys.length - 1]);
                         } else {
-                            this.DOMElements.chatInterface?.classList.add('hidden');
                             this.DOMElements.welcomeScreen?.classList.remove('hidden');
                             this.state.currentConversationId = null;
+                             this.DOMElements.chatTitle.textContent = "New Chat";
                         }
                     }
                 },
@@ -534,23 +602,25 @@
                 addMessageToDOM(sender, text) {
                     this.DOMElements.welcomeScreen?.classList.add('hidden');
                     const senderClass = sender === 'model' ? 'ai' : sender;
+                    
                     const messageContainer = document.createElement('div');
                     messageContainer.className = `chat-message ${senderClass}`;
+                    
                     const avatar = document.createElement('div');
                     avatar.className = `avatar ${senderClass}`;
                     if (senderClass === 'user') {
+                        messageContainer.innerHTML = `<div class="message-content"><div class="message-bubble"></div></div>`;
                         avatar.innerHTML = `<img src="${userProfileImageUrl}" alt="User Avatar">`;
+                        messageContainer.appendChild(avatar);
                     } else {
                         avatar.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gemini-gradient-avatar" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#89b3f9;stop-opacity:1" /><stop offset="100%" style="stop-color:#d8b6ff;stop-opacity:1" /></linearGradient></defs><path d="M12 2.75L14.25 9.25L21.25 9.75L15.75 14.75L17.75 21.5L12 17.5L6.25 21.5L8.25 14.75L2.75 9.75L9.75 9.25L12 2.75Z" stroke="url(#gemini-gradient-avatar)" stroke-width="1.5" stroke-linejoin="round"/></svg>`;
+                        messageContainer.appendChild(avatar);
+                        messageContainer.innerHTML += `<div class="message-content"><div class="message-bubble"></div></div>`;
                     }
                     
-                    const messageContent = document.createElement('div');
-                    messageContent.className = 'message-content';
-                    const messageBubble = document.createElement('div');
-                    messageBubble.className = 'message-bubble';
+                    const messageBubble = messageContainer.querySelector('.message-bubble');
                     messageBubble.innerHTML = marked.parse(text);
-                    
-                    messageContent.appendChild(messageBubble);
+
                     if (senderClass === 'ai') {
                         const actions = document.createElement('div');
                         actions.className = 'response-actions';
@@ -560,17 +630,15 @@
                             navigator.clipboard.writeText(text);
                         };
                         actions.appendChild(copyButton);
-                        messageContent.appendChild(actions);
+                        messageContainer.querySelector('.message-content').appendChild(actions);
                     }
-
-                    messageContainer.appendChild(avatar);
-                    messageContainer.appendChild(messageContent);
+                    
                     this.DOMElements.chatDisplay.appendChild(messageContainer);
                     this.DOMElements.chatDisplay.scrollTop = this.DOMElements.chatDisplay.scrollHeight;
 
                     feather.replace();
 
-                    messageContent.querySelectorAll('pre code').forEach((block) => {
+                    messageBubble.querySelectorAll('pre code').forEach((block) => {
                         hljs.highlightElement(block);
                         const pre = block.parentElement;
                         const copyCodeButton = document.createElement('button');
@@ -598,8 +666,9 @@
                     this.showThinking(true);
                     
                     await this.getAIResponse();
-                    const userMessages = conversation.messages.filter(m => m.role === 'user').length;
-                    if (userMessages === 1) this.generateTitleForConversation(this.state.currentConversationId);
+                    if (conversation.messages.filter(m => m.role === 'user').length === 1) {
+                         this.generateTitleForConversation(this.state.currentConversationId);
+                    }
                 },
 
                 async getAIResponse() {
@@ -608,7 +677,7 @@
                         const response = await fetch('/.netlify/functions/ask-gemini', {
                             method: 'POST', body: JSON.stringify({ history: conversation.messages }),
                         });
-                        if (!response.ok) throw new Error((await response.json()).message);
+                        if (!response.ok) throw new Error(`API Error: ${(await response.json()).message}`);
                         const data = await response.json();
                         const aiResponseObject = data.response;
                         conversation.messages.push(aiResponseObject);
@@ -628,12 +697,10 @@
                     this.addMessageToDOM('tool', `*Using tool: \`${functionCall.name}\`...*`);
                     try {
                         const functionUrl = `/.netlify/functions/${functionCall.name}`;
-                        
-                        // Determine request options based on whether arguments exist
                         const hasArgs = functionCall.args && Object.keys(functionCall.args).length > 0;
                         
                         const fetchOptions = {
-                            method: hasArgs ? 'POST' : 'GET', // Use POST if there are args, GET otherwise
+                            method: hasArgs ? 'POST' : 'GET',
                             headers: { 'Content-Type': 'application/json' }
                         };
                 
@@ -662,8 +729,8 @@
                 
                 async generateTitleForConversation(id) {
                     const conversation = this.state.conversations[id];
-                    if (!conversation) return;
-                    const titlePrompt = `Based on the following conversation, create a very short, concise title (3-5 words max).\n\nConversation:\n${conversation.messages.map(m => `${m.role}: ${m.parts[0].text}`).join('\n')}`;
+                    if (!conversation || conversation.messages.length < 1) return;
+                    const titlePrompt = `Based on the following conversation, create a very short, concise title (3-5 words max).\n\nConversation:\n${conversation.messages.map(m => { const part = m.parts[0]; return `${m.role}: ${part.text || 'tool call'}`}).join('\n')}`;
                     try {
                          const response = await fetch('/.netlify/functions/ask-gemini', {
                             method: 'POST', body: JSON.stringify({ prompt: titlePrompt }),
